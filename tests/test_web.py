@@ -59,7 +59,10 @@ class WebTests(unittest.TestCase):
         self.assertEqual(data["cases"][0]["failed_commits"], 1)
         self.assertEqual(json.loads(self.fetch("/api/cases?suite=medium")[2])["total"], 0)
         self.assertEqual(
-            json.loads(self.fetch("/api/cases?suite=medium&failed_only=false")[2])["total"], 1
+            json.loads(self.fetch("/api/cases?suite=medium&failed_only=false&q=ShArEd")[2])[
+                "total"
+            ],
+            1,
         )
 
     def test_http_history_matches_cli_query_policy(self):

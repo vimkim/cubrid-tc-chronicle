@@ -432,6 +432,25 @@ class IndexTests(unittest.TestCase):
         self.assertEqual(report["history_result"], "UNKNOWN_HISTORY")
         self.assertEqual(report["coverage"]["stale_runs"], [1])
 
+    def test_newer_completed_run_is_not_stale_against_earlier_live_discovery(self):
+        self.ingest()
+        discovered = {
+            **run_metadata(1),
+            "status": "in_progress",
+            "updated_at": "2026-10-15T10:00:00Z",
+        }
+        self.index.record_discovery(
+            "CUBRID/cubrid", "2026-10-15T00:00:00Z", "2026-10-15T23:59:59Z", [discovered], True
+        )
+        self.index.record_run(
+            {**run_metadata(1), "updated_at": "2026-10-15T12:00:00Z"},
+            "2026-10-17T00:00:00Z",
+        )
+        report = self.query.history(HistoryQuery(CASE))
+        self.assertEqual(report["coverage"]["stale_runs"], [])
+        self.assertNotIn("metadata_stale", report["coverage"]["reasons"])
+        self.assertEqual(report["history_result"], "FIRST_OBSERVED_IN_WINDOW")
+
     def test_unknown_creation_date_does_not_match_an_explicit_window(self):
         self.ingest()
         report = self.query.history(HistoryQuery(CASE, since="2026-10-15", until="2026-10-15"))

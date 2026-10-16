@@ -26,7 +26,12 @@ def check(url, screenshots):
             expect(page.locator(".stat")).to_have_count(4)
             page.get_by_role("searchbox").fill("cbrd_27461")
             expect(page.locator("#case-count")).to_have_text("1 testcase")
-            page.locator(".case-button").first.click()
+            with page.expect_response(
+                lambda response: "/api/overview?suite=sql" in response.url
+            ) as stats:
+                page.locator(".case-button").first.click()
+            observations = stats.value.json()["counts"]["observations"]
+            expect(page.locator(".stat").first).to_contain_text(f"{observations:,}")
             expect(page.get_by_text("This testcase has failed before.", exact=True)).to_be_visible()
             expect(page.locator("#detail")).to_be_visible()
             page.screenshot(path=str(screenshots / "desktop.png"))
@@ -73,6 +78,8 @@ def check(url, screenshots):
             page.keyboard.press("Escape")
             expect(page.get_by_role("dialog", name="Evidence coverage")).not_to_be_visible()
             page.get_by_role("button", name="All testcases").click()
+            page.locator("#failed-only").uncheck()
+            expect(page.locator("#case-count")).to_have_text("1 testcase")
             page.get_by_role("searchbox").fill("no-such-testcase-chronicle")
             expect(page.get_by_text("No retained testcase matches", exact=True)).to_be_visible()
             assert not errors, errors

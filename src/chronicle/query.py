@@ -72,12 +72,20 @@ class Queries:
         parameters = (self.repository, term, suite, suite)
         where = """e.active=1 AND e.repository=? AND instr(lower(t.path),lower(?))>0
                    AND (? IS NULL OR t.suite=?)"""
+        source = """testcase t JOIN observation o ON o.testcase_id=t.id
+                    JOIN execution e ON e.id=o.execution_id"""
         if failed_only:
             where += " AND o.outcome IN ('FAIL','ERROR')"
+            # Keep rare verdicts first. Otherwise SQLite can scan every outcome
+            # in each active execution before applying the failure filter.
+            source = """observation o CROSS JOIN execution e ON e.id=o.execution_id
+                        CROSS JOIN testcase t ON t.id=o.testcase_id"""
+        elif term:
+            # A path search checks identities once before reading their outcomes.
+            source = """testcase t CROSS JOIN observation o ON o.testcase_id=t.id
+                        CROSS JOIN execution e ON e.id=o.execution_id"""
         total = self.db.execute(
-            f"""SELECT count(DISTINCT t.id) FROM testcase t
-            JOIN observation o ON o.testcase_id=t.id JOIN execution e ON e.id=o.execution_id
-            WHERE {where}""",
+            f"SELECT count(DISTINCT t.id) FROM {source} WHERE {where}",
             parameters,
         ).fetchone()[0]
         rows = self.db.execute(
@@ -85,8 +93,7 @@ class Queries:
             sum(o.outcome IN ('FAIL','ERROR')) failures,
             count(DISTINCT CASE WHEN o.outcome IN ('FAIL','ERROR') THEN e.engine_sha END)
                 failed_commits,max(e.completed_at) last_completed_at
-            FROM testcase t JOIN observation o ON o.testcase_id=t.id
-            JOIN execution e ON e.id=o.execution_id WHERE {where}
+            FROM {source} WHERE {where}
             GROUP BY t.id ORDER BY max(e.completed_at) DESC,t.path,t.variant LIMIT ? OFFSET ?""",
             (*parameters, limit, offset),
         )
@@ -207,7 +214,10 @@ class Queries:
             and (
                 discovered.get("run_attempt", 1) > runs[run_id].get("run_attempt", 1)
                 or discovered.get("updated_at", "") > runs[run_id].get("updated_at", "")
-                or discovered.get("status") != runs[run_id].get("status")
+                or (
+                    discovered.get("status") != runs[run_id].get("status")
+                    and discovered.get("updated_at", "") >= runs[run_id].get("updated_at", "")
+                )
             )
         ]
         if missing:
