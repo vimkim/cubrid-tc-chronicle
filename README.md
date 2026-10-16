@@ -28,4 +28,4 @@ The proposed implementation uses Python, SQLite, and a retained local evidence a
 - [CUBRID evidence](docs/cubrid-evidence.md): verified workflow layout and a real failed-test sample.
 - [GitHub evidence](docs/github-evidence.md): discovery, attempts, retention, permissions, and request limits.
 
-Design date: **2026-10-16**. CUBRID TC Chronicle is a working name. The existing directory name remains unchanged.
+Design date: **2026-10-16**. Accepted project name: **CUBRID TC Chronicle**. Repository directory: `cubrid-tc-chronicle`.
