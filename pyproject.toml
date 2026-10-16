@@ -1,0 +1,27 @@
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "cubrid-tc-chronicle"
+version = "0.1.0"
+description = "Local evidence and testcase failure history for CUBRID gha-ci"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = []
+
+[project.scripts]
+tcc = "chronicle.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/chronicle"]
+
+[dependency-groups]
+dev = ["ruff>=0.14,<0.15"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]

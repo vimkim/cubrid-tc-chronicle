@@ -1,0 +1,462 @@
+total:349
+success:349
+fail:0
+totalTime:30080ms
+SiteRunTimes:1times
+sql/:349    349    0
+total:349
+success:349
+fail:0
+totalTime:30080ms
+SiteRunTimes:1times
+sql/_08_javasp/:97    97    0
+sql/_10_connect_by/:84    84    0
+sql/_09_64bit/:168    168    0
+total:84
+success:84
+fail:0
+totalTime:8883ms
+SiteRunTimes:1times
+sql/_10_connect_by/_03_index_queryes/:2    2    0
+sql/_10_connect_by/_05_order_by/:3    3    0
+sql/_10_connect_by/_07_cycle_detection/:3    3    0
+sql/_10_connect_by/_02_syntax_checking/:1    1    0
+sql/_10_connect_by/_01_simple_queries/:8    8    0
+sql/_10_connect_by/_09_hq_range_partition/:16    16    0
+sql/_10_connect_by/_08_complex/:3    3    0
+sql/_10_connect_by/_04_pseudo_columns/:10    10    0
+sql/_10_connect_by/_10_hq_list_partition/:16    16    0
+sql/_10_connect_by/_11_hq_hash_partition/:16    16    0
+sql/_10_connect_by/_12_oid_subclass/:5    5    0
+sql/_10_connect_by/_06_endurance/:1    1    0
+total:5
+success:5
+fail:0
+totalTime:507ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_10_connect_by/_12_oid_subclass/cases/obejct_releated.sql:ok    88ms
+/home/cubrid-testcases/sql/_10_connect_by/_12_oid_subclass/cases/oo_cycle_nocycle.sql:ok    147ms
+/home/cubrid-testcases/sql/_10_connect_by/_12_oid_subclass/cases/operator_with_connectby.sql:ok    107ms
+/home/cubrid-testcases/sql/_10_connect_by/_12_oid_subclass/cases/subclass.sql:ok    74ms
+/home/cubrid-testcases/sql/_10_connect_by/_12_oid_subclass/cases/subclass2.sql:ok    91ms
+total:16
+success:16
+fail:0
+totalTime:1813ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_10_connect_by/_11_hq_hash_partition/cases/_001_simple_queries_partition.sql:ok    53ms
+/home/cubrid-testcases/sql/_10_connect_by/_11_hq_hash_partition/cases/_002_performance_partition.sql:ok    290ms
+/home/cubrid-testcases/sql/_10_connect_by/_11_hq_hash_partition/cases/_003_simple_joins_partition.sql:ok    108ms
+/home/cubrid-testcases/sql/_10_connect_by/_11_hq_hash_partition/cases/_004_prior_partition.sql:ok    64ms
+/home/cubrid-testcases/sql/_10_connect_by/_11_hq_hash_partition/cases/_005_prior_partition2.sql:ok    455ms
+/home/cubrid-testcases/sql/_10_connect_by/_11_hq_hash_partition/cases/_006_odd_partition.sql:ok    94ms
+/home/cubrid-testcases/sql/_10_connect_by/_11_hq_hash_partition/cases/_007_syntax_errors.sql:ok    71ms
+/home/cubrid-testcases/sql/_10_connect_by/_11_hq_hash_partition/cases/_008_simple_queries.sql:ok    86ms
+/home/cubrid-testcases/sql/_10_connect_by/_11_hq_hash_partition/cases/_009_level.sql:ok    61ms
+/home/cubrid-testcases/sql/_10_connect_by/_11_hq_hash_partition/cases/_010_connect_by_isleaf.sql:ok    51ms
+/home/cubrid-testcases/sql/_10_connect_by/_11_hq_hash_partition/cases/_011_connect_by_iscycle.sql:ok    66ms
+/home/cubrid-testcases/sql/_10_connect_by/_11_hq_hash_partition/cases/_012_connect_by_root.sql:ok    49ms
+/home/cubrid-testcases/sql/_10_connect_by/_11_hq_hash_partition/cases/_013_connect_by_path.sql:ok    132ms
+/home/cubrid-testcases/sql/_10_connect_by/_11_hq_hash_partition/cases/_014_having_clause.sql:ok    82ms
+/home/cubrid-testcases/sql/_10_connect_by/_11_hq_hash_partition/cases/_015_combination.sql:ok    81ms
+/home/cubrid-testcases/sql/_10_connect_by/_11_hq_hash_partition/cases/_016_siblings.sql:ok    70ms
+total:16
+success:16
+fail:0
+totalTime:1869ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_10_connect_by/_10_hq_list_partition/cases/_001_simple_queries_partition.sql:ok    84ms
+/home/cubrid-testcases/sql/_10_connect_by/_10_hq_list_partition/cases/_002_performance_partition.sql:ok    381ms
+/home/cubrid-testcases/sql/_10_connect_by/_10_hq_list_partition/cases/_003_simple_joins_partition.sql:ok    139ms
+/home/cubrid-testcases/sql/_10_connect_by/_10_hq_list_partition/cases/_004_prior_partition.sql:ok    80ms
+/home/cubrid-testcases/sql/_10_connect_by/_10_hq_list_partition/cases/_005_prior_partition2.sql:ok    445ms
+/home/cubrid-testcases/sql/_10_connect_by/_10_hq_list_partition/cases/_006_odd_partition.sql:ok    84ms
+/home/cubrid-testcases/sql/_10_connect_by/_10_hq_list_partition/cases/_007_syntax_errors.sql:ok    92ms
+/home/cubrid-testcases/sql/_10_connect_by/_10_hq_list_partition/cases/_008_simple_queries.sql:ok    97ms
+/home/cubrid-testcases/sql/_10_connect_by/_10_hq_list_partition/cases/_009_level.sql:ok    67ms
+/home/cubrid-testcases/sql/_10_connect_by/_10_hq_list_partition/cases/_010_connect_by_isleaf.sql:ok    56ms
+/home/cubrid-testcases/sql/_10_connect_by/_10_hq_list_partition/cases/_011_connect_by_iscycle.sql:ok    60ms
+/home/cubrid-testcases/sql/_10_connect_by/_10_hq_list_partition/cases/_012_connect_by_root.sql:ok    53ms
+/home/cubrid-testcases/sql/_10_connect_by/_10_hq_list_partition/cases/_013_connect_by_path.sql:ok    70ms
+/home/cubrid-testcases/sql/_10_connect_by/_10_hq_list_partition/cases/_014_having_clause.sql:ok    62ms
+/home/cubrid-testcases/sql/_10_connect_by/_10_hq_list_partition/cases/_015_combination.sql:ok    54ms
+/home/cubrid-testcases/sql/_10_connect_by/_10_hq_list_partition/cases/_016_siblings.sql:ok    45ms
+total:16
+success:16
+fail:0
+totalTime:2857ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_10_connect_by/_09_hq_range_partition/cases/_001_simple_queries_partition.sql:ok    68ms
+/home/cubrid-testcases/sql/_10_connect_by/_09_hq_range_partition/cases/_002_performance_partition.sql:ok    1331ms
+/home/cubrid-testcases/sql/_10_connect_by/_09_hq_range_partition/cases/_003_simple_joins_partition.sql:ok    134ms
+/home/cubrid-testcases/sql/_10_connect_by/_09_hq_range_partition/cases/_004_prior_partition.sql:ok    104ms
+/home/cubrid-testcases/sql/_10_connect_by/_09_hq_range_partition/cases/_005_prior_partition2.sql:ok    430ms
+/home/cubrid-testcases/sql/_10_connect_by/_09_hq_range_partition/cases/_006_odd_partition.sql:ok    76ms
+/home/cubrid-testcases/sql/_10_connect_by/_09_hq_range_partition/cases/_007_syntax_errors.sql:ok    54ms
+/home/cubrid-testcases/sql/_10_connect_by/_09_hq_range_partition/cases/_008_simple_queries.sql:ok    106ms
+/home/cubrid-testcases/sql/_10_connect_by/_09_hq_range_partition/cases/_009_level.sql:ok    71ms
+/home/cubrid-testcases/sql/_10_connect_by/_09_hq_range_partition/cases/_010_connect_by_isleaf.sql:ok    59ms
+/home/cubrid-testcases/sql/_10_connect_by/_09_hq_range_partition/cases/_011_connect_by_iscycle.sql:ok    86ms
+/home/cubrid-testcases/sql/_10_connect_by/_09_hq_range_partition/cases/_012_connect_by_root.sql:ok    68ms
+/home/cubrid-testcases/sql/_10_connect_by/_09_hq_range_partition/cases/_013_connect_by_path.sql:ok    59ms
+/home/cubrid-testcases/sql/_10_connect_by/_09_hq_range_partition/cases/_014_having_clause.sql:ok    53ms
+/home/cubrid-testcases/sql/_10_connect_by/_09_hq_range_partition/cases/_015_combination.sql:ok    97ms
+/home/cubrid-testcases/sql/_10_connect_by/_09_hq_range_partition/cases/_016_siblings.sql:ok    61ms
+total:3
+success:3
+fail:0
+totalTime:107ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_10_connect_by/_08_complex/cases/_001_simple_queries.sql:ok    22ms
+/home/cubrid-testcases/sql/_10_connect_by/_08_complex/cases/_002_simple_joins.sql:ok    40ms
+/home/cubrid-testcases/sql/_10_connect_by/_08_complex/cases/_003_more_joins.sql:ok    45ms
+total:3
+success:3
+fail:0
+totalTime:63ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_10_connect_by/_07_cycle_detection/cases/_001_simple_cycle.sql:ok    25ms
+/home/cubrid-testcases/sql/_10_connect_by/_07_cycle_detection/cases/_002_cycle_onebranch.sql:ok    20ms
+/home/cubrid-testcases/sql/_10_connect_by/_07_cycle_detection/cases/_003_two_cycles.sql:ok    18ms
+total:1
+success:1
+fail:0
+totalTime:120ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_10_connect_by/_06_endurance/cases/_001_simple_connectby.sql:ok    120ms
+total:3
+success:3
+fail:0
+totalTime:137ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_10_connect_by/_05_order_by/cases/_001_simple_queries.sql:ok    31ms
+/home/cubrid-testcases/sql/_10_connect_by/_05_order_by/cases/_002_simple_siblings.sql:ok    28ms
+/home/cubrid-testcases/sql/_10_connect_by/_05_order_by/cases/_003_simple_joins.sql:ok    78ms
+total:10
+success:10
+fail:0
+totalTime:291ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_10_connect_by/_04_pseudo_columns/cases/_001_level.sql:ok    54ms
+/home/cubrid-testcases/sql/_10_connect_by/_04_pseudo_columns/cases/_002_connect_by_isleaf.sql:ok    44ms
+/home/cubrid-testcases/sql/_10_connect_by/_04_pseudo_columns/cases/_003_connect_by_iscycle.sql:ok    31ms
+/home/cubrid-testcases/sql/_10_connect_by/_04_pseudo_columns/cases/_004_connect_by_root.sql:ok    19ms
+/home/cubrid-testcases/sql/_10_connect_by/_04_pseudo_columns/cases/_005_connect_by_path.sql:ok    24ms
+/home/cubrid-testcases/sql/_10_connect_by/_04_pseudo_columns/cases/_006_string_functions.sql:ok    31ms
+/home/cubrid-testcases/sql/_10_connect_by/_04_pseudo_columns/cases/_007_string_numerics.sql:ok    22ms
+/home/cubrid-testcases/sql/_10_connect_by/_04_pseudo_columns/cases/_008_recursive_call.sql:ok    14ms
+/home/cubrid-testcases/sql/_10_connect_by/_04_pseudo_columns/cases/_998_having_clause.sql:ok    22ms
+/home/cubrid-testcases/sql/_10_connect_by/_04_pseudo_columns/cases/_999_combination.sql:ok    30ms
+total:2
+success:2
+fail:0
+totalTime:286ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_10_connect_by/_03_index_queryes/cases/_001_simple_queries.sql:ok    43ms
+/home/cubrid-testcases/sql/_10_connect_by/_03_index_queryes/cases/_002_performance.sql:ok    243ms
+total:1
+success:1
+fail:0
+totalTime:31ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_10_connect_by/_02_syntax_checking/cases/_001_syntax_errors.sql:ok    31ms
+total:8
+success:8
+fail:0
+totalTime:802ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_10_connect_by/_01_simple_queries/cases/_001_simple_queries.sql:ok    32ms
+/home/cubrid-testcases/sql/_10_connect_by/_01_simple_queries/cases/_002_performance.sql:ok    546ms
+/home/cubrid-testcases/sql/_10_connect_by/_01_simple_queries/cases/_003_simple_joins.sql:ok    45ms
+/home/cubrid-testcases/sql/_10_connect_by/_01_simple_queries/cases/_004_prior_cases.sql:ok    29ms
+/home/cubrid-testcases/sql/_10_connect_by/_01_simple_queries/cases/_005_prior_cases2.sql:ok    64ms
+/home/cubrid-testcases/sql/_10_connect_by/_01_simple_queries/cases/_006_odd_cases.sql:ok    36ms
+/home/cubrid-testcases/sql/_10_connect_by/_01_simple_queries/cases/cubridsus-2443.sql:ok    15ms
+/home/cubrid-testcases/sql/_10_connect_by/_01_simple_queries/cases/cubridsus-2554.sql:ok    35ms
+total:168
+success:168
+fail:0
+totalTime:6672ms
+SiteRunTimes:1times
+sql/_09_64bit/_01_datetime/:81    81    0
+sql/_09_64bit/_02_bigint/:87    87    0
+total:87
+success:87
+fail:0
+totalTime:2164ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1001.sql:ok    17ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1002.sql:ok    15ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1003.sql:ok    17ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1004.sql:ok    23ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1005.sql:ok    19ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1006.sql:ok    33ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1007.sql:ok    44ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1008.sql:ok    28ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1009.sql:ok    27ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1010.sql:ok    25ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1011.sql:ok    21ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1012.sql:ok    32ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1013.sql:ok    19ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1014.sql:ok    32ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1015.sql:ok    20ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1016.sql:ok    23ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1017.sql:ok    22ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1018.sql:ok    36ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1019.sql:ok    24ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1020.sql:ok    24ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1021.sql:ok    58ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1022.sql:ok    28ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1023.sql:ok    16ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1024.sql:ok    14ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1025.sql:ok    19ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1026.sql:ok    20ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1027.sql:ok    17ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1028.sql:ok    33ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1029.sql:ok    18ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1030.sql:ok    24ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1031.sql:ok    24ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1032.sql:ok    22ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1033.sql:ok    26ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1034.sql:ok    17ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1035.sql:ok    23ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1036.sql:ok    18ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1037.sql:ok    20ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1038.sql:ok    27ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1039.sql:ok    14ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1040.sql:ok    13ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1041.sql:ok    18ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1042.sql:ok    25ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1043.sql:ok    24ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1044.sql:ok    18ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1045.sql:ok    10ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1046.sql:ok    23ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1047.sql:ok    39ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1048.sql:ok    35ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1049.sql:ok    28ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1050.sql:ok    21ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1051.sql:ok    18ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1052.sql:ok    22ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1053.sql:ok    44ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1054.sql:ok    26ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1055.sql:ok    24ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1056.sql:ok    30ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1057.sql:ok    58ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1058.sql:ok    43ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1059.sql:ok    44ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1060.sql:ok    42ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1061.sql:ok    45ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1062.sql:ok    44ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1063.sql:ok    10ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1064.sql:ok    9ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1065.sql:ok    11ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1066.sql:ok    11ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1067.sql:ok    12ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1068.sql:ok    18ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1069.sql:ok    18ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1070.sql:ok    14ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1071.sql:ok    49ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1072.sql:ok    38ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1073.sql:ok    21ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1074.sql:ok    20ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1075.sql:ok    16ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1076.sql:ok    18ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1077.sql:ok    16ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1078.sql:ok    15ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1079.sql:ok    24ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1080.sql:ok    23ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1081.sql:ok    24ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1082.sql:ok    22ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1083.sql:ok    30ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1084.sql:ok    35ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1085.sql:ok    35ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1086.sql:ok    28ms
+/home/cubrid-testcases/sql/_09_64bit/_02_bigint/cases/1087.sql:ok    14ms
+total:81
+success:81
+fail:0
+totalTime:4508ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1001.sql:ok    20ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1002.sql:ok    19ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1003.sql:ok    29ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1004.sql:ok    31ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1005.sql:ok    45ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1006.sql:ok    27ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1007.sql:ok    62ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1008.sql:ok    29ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1009.sql:ok    29ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1010.sql:ok    27ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1011.sql:ok    30ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1012.sql:ok    20ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1013.sql:ok    11ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1014.sql:ok    10ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1015.sql:ok    10ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1016.sql:ok    10ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1017.sql:ok    15ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1018.sql:ok    15ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1019.sql:ok    17ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1020.sql:ok    14ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1021.sql:ok    16ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1022.sql:ok    58ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1023.sql:ok    24ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1024.sql:ok    42ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1025.sql:ok    43ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1026.sql:ok    43ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1027.sql:ok    24ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1028.sql:ok    38ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1029.sql:ok    29ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1030.sql:ok    26ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1031.sql:ok    28ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1032.sql:ok    17ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1033.sql:ok    21ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1034.sql:ok    21ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1035.sql:ok    16ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1036.sql:ok    16ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1037.sql:ok    15ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1038.sql:ok    22ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1039.sql:ok    25ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1040.sql:ok    27ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1041.sql:ok    40ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1042.sql:ok    42ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1045.sql:ok    17ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1046.sql:ok    30ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1047.sql:ok    26ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1048.sql:ok    30ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1049.sql:ok    54ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1050.sql:ok    29ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1051.sql:ok    33ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1052.sql:ok    41ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1053.sql:ok    74ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1054.sql:ok    66ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1055.sql:ok    70ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1056.sql:ok    2193ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1057.sql:ok    16ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1058.sql:ok    26ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1059.sql:ok    17ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1060.sql:ok    14ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1061.sql:ok    13ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1062.sql:ok    20ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1063.sql:ok    16ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1064.sql:ok    52ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1065.sql:ok    5ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1066.sql:ok    38ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1067.sql:ok    18ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1068.sql:ok    19ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1069.sql:ok    36ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1070.sql:ok    36ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1071.sql:ok    54ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1072.sql:ok    33ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1073.sql:ok    33ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1074.sql:ok    27ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1075.sql:ok    41ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1076.sql:ok    38ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1077.sql:ok    35ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/1078.sql:ok    30ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/bug_556.sql:ok    16ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/bug_561_d.sql:ok    27ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/bug_561_dt.sql:ok    25ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/bug_561_t.sql:ok    31ms
+/home/cubrid-testcases/sql/_09_64bit/_01_datetime/cases/bug_561_ts.sql:ok    26ms
+total:97
+success:97
+fail:0
+totalTime:14525ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_08_javasp/cases/411-1.sql:ok    124ms
+/home/cubrid-testcases/sql/_08_javasp/cases/411-10.sql:ok    225ms
+/home/cubrid-testcases/sql/_08_javasp/cases/411-11.sql:ok    194ms
+/home/cubrid-testcases/sql/_08_javasp/cases/411-12.sql:ok    104ms
+/home/cubrid-testcases/sql/_08_javasp/cases/411-13.sql:ok    194ms
+/home/cubrid-testcases/sql/_08_javasp/cases/411-14.sql:ok    122ms
+/home/cubrid-testcases/sql/_08_javasp/cases/411-2.sql:ok    179ms
+/home/cubrid-testcases/sql/_08_javasp/cases/411-3.sql:ok    67ms
+/home/cubrid-testcases/sql/_08_javasp/cases/411-5.sql:ok    2349ms
+/home/cubrid-testcases/sql/_08_javasp/cases/411-6.sql:ok    13ms
+/home/cubrid-testcases/sql/_08_javasp/cases/411-7.sql:ok    1195ms
+/home/cubrid-testcases/sql/_08_javasp/cases/4110-1.sql:ok    58ms
+/home/cubrid-testcases/sql/_08_javasp/cases/4110-2.sql:ok    30ms
+/home/cubrid-testcases/sql/_08_javasp/cases/4110-3.sql:ok    34ms
+/home/cubrid-testcases/sql/_08_javasp/cases/4110-4.sql:ok    119ms
+/home/cubrid-testcases/sql/_08_javasp/cases/412-1.sql:ok    23ms
+/home/cubrid-testcases/sql/_08_javasp/cases/413-1.sql:ok    66ms
+/home/cubrid-testcases/sql/_08_javasp/cases/413-2.sql:ok    1261ms
+/home/cubrid-testcases/sql/_08_javasp/cases/414-1.sql:ok    24ms
+/home/cubrid-testcases/sql/_08_javasp/cases/414-2.sql:ok    21ms
+/home/cubrid-testcases/sql/_08_javasp/cases/414-3.sql:ok    11ms
+/home/cubrid-testcases/sql/_08_javasp/cases/415-1.sql:ok    9ms
+/home/cubrid-testcases/sql/_08_javasp/cases/415-10.sql:ok    42ms
+/home/cubrid-testcases/sql/_08_javasp/cases/415-11.sql:ok    77ms
+/home/cubrid-testcases/sql/_08_javasp/cases/415-2.sql:ok    20ms
+/home/cubrid-testcases/sql/_08_javasp/cases/415-3.sql:ok    8ms
+/home/cubrid-testcases/sql/_08_javasp/cases/415-4.sql:ok    8ms
+/home/cubrid-testcases/sql/_08_javasp/cases/415-5.sql:ok    23ms
+/home/cubrid-testcases/sql/_08_javasp/cases/415-6.sql:ok    8ms
+/home/cubrid-testcases/sql/_08_javasp/cases/415-7.sql:ok    20ms
+/home/cubrid-testcases/sql/_08_javasp/cases/415-8.sql:ok    7ms
+/home/cubrid-testcases/sql/_08_javasp/cases/415-9.sql:ok    75ms
+/home/cubrid-testcases/sql/_08_javasp/cases/416.sql:ok    68ms
+/home/cubrid-testcases/sql/_08_javasp/cases/416_1.sql:ok    124ms
+/home/cubrid-testcases/sql/_08_javasp/cases/417-1.sql:ok    36ms
+/home/cubrid-testcases/sql/_08_javasp/cases/417-2.sql:ok    19ms
+/home/cubrid-testcases/sql/_08_javasp/cases/418-1.sql:ok    8ms
+/home/cubrid-testcases/sql/_08_javasp/cases/418-3.sql:ok    126ms
+/home/cubrid-testcases/sql/_08_javasp/cases/418-4.sql:ok    89ms
+/home/cubrid-testcases/sql/_08_javasp/cases/5-1.sql:ok    40ms
+/home/cubrid-testcases/sql/_08_javasp/cases/bit64_bigint.sql:ok    36ms
+/home/cubrid-testcases/sql/_08_javasp/cases/bit64_dt.sql:ok    23ms
+/home/cubrid-testcases/sql/_08_javasp/cases/case_1.sql:ok    11ms
+/home/cubrid-testcases/sql/_08_javasp/cases/case_10.sql:ok    9ms
+/home/cubrid-testcases/sql/_08_javasp/cases/case_11.sql:ok    1ms
+/home/cubrid-testcases/sql/_08_javasp/cases/case_12.sql:ok    7ms
+/home/cubrid-testcases/sql/_08_javasp/cases/case_13.sql:ok    6ms
+/home/cubrid-testcases/sql/_08_javasp/cases/case_14.sql:ok    1ms
+/home/cubrid-testcases/sql/_08_javasp/cases/case_15.sql:ok    10ms
+/home/cubrid-testcases/sql/_08_javasp/cases/case_16.sql:ok    5ms
+/home/cubrid-testcases/sql/_08_javasp/cases/case_17.sql:ok    12ms
+/home/cubrid-testcases/sql/_08_javasp/cases/case_18.sql:ok    16ms
+/home/cubrid-testcases/sql/_08_javasp/cases/case_19.sql:ok    23ms
+/home/cubrid-testcases/sql/_08_javasp/cases/case_2.sql:ok    8ms
+/home/cubrid-testcases/sql/_08_javasp/cases/case_20.sql:ok    8ms
+/home/cubrid-testcases/sql/_08_javasp/cases/case_21.sql:ok    3ms
+/home/cubrid-testcases/sql/_08_javasp/cases/case_22.sql:ok    10ms
+/home/cubrid-testcases/sql/_08_javasp/cases/case_23.sql:ok    3ms
+/home/cubrid-testcases/sql/_08_javasp/cases/case_24.sql:ok    14ms
+/home/cubrid-testcases/sql/_08_javasp/cases/case_25.sql:ok    8ms
+/home/cubrid-testcases/sql/_08_javasp/cases/case_26.sql:ok    7ms
+/home/cubrid-testcases/sql/_08_javasp/cases/case_27.sql:ok    5ms
+/home/cubrid-testcases/sql/_08_javasp/cases/case_29.sql:ok    9ms
+/home/cubrid-testcases/sql/_08_javasp/cases/case_3.sql:ok    1ms
+/home/cubrid-testcases/sql/_08_javasp/cases/case_30.sql:ok    3ms
+/home/cubrid-testcases/sql/_08_javasp/cases/case_4.sql:ok    5ms
+/home/cubrid-testcases/sql/_08_javasp/cases/case_5.sql:ok    6ms
+/home/cubrid-testcases/sql/_08_javasp/cases/case_6.sql:ok    1ms
+/home/cubrid-testcases/sql/_08_javasp/cases/case_7.sql:ok    19ms
+/home/cubrid-testcases/sql/_08_javasp/cases/case_8.sql:ok    27ms
+/home/cubrid-testcases/sql/_08_javasp/cases/case_9.sql:ok    0ms
+/home/cubrid-testcases/sql/_08_javasp/cases/case_aggregate_function_01.sql:ok    46ms
+/home/cubrid-testcases/sql/_08_javasp/cases/case_caution_02.sql:ok    40ms
+/home/cubrid-testcases/sql/_08_javasp/cases/case_caution_03.sql:ok    42ms
+/home/cubrid-testcases/sql/_08_javasp/cases/case_caution_05.sql:ok    65ms
+/home/cubrid-testcases/sql/_08_javasp/cases/case_caution_06.sql:ok    26ms
+/home/cubrid-testcases/sql/_08_javasp/cases/case_caution_08.sql:ok    37ms
+/home/cubrid-testcases/sql/_08_javasp/cases/case_caution_09.sql:ok    7ms
+/home/cubrid-testcases/sql/_08_javasp/cases/case_comparison_function_01.sql:ok    86ms
+/home/cubrid-testcases/sql/_08_javasp/cases/case_connect_by_01.sql:ok    98ms
+/home/cubrid-testcases/sql/_08_javasp/cases/case_cte_01.sql:ok    68ms
+/home/cubrid-testcases/sql/_08_javasp/cases/case_ddl_01.sql:ok    21ms
+/home/cubrid-testcases/sql/_08_javasp/cases/case_dml_01.sql:ok    50ms
+/home/cubrid-testcases/sql/_08_javasp/cases/case_dml_02.sql:ok    55ms
+/home/cubrid-testcases/sql/_08_javasp/cases/case_group_by_01.sql:ok    40ms
+/home/cubrid-testcases/sql/_08_javasp/cases/case_group_function_01.sql:ok    115ms
+/home/cubrid-testcases/sql/_08_javasp/cases/case_index_scan_01.sql:ok    62ms
+/home/cubrid-testcases/sql/_08_javasp/cases/case_join_01.sql:ok    4483ms
+/home/cubrid-testcases/sql/_08_javasp/cases/case_limit_01.sql:ok    1ms
+/home/cubrid-testcases/sql/_08_javasp/cases/case_statement_set_01.sql:ok    99ms
+/home/cubrid-testcases/sql/_08_javasp/cases/case_statement_set_02.sql:ok    62ms
+/home/cubrid-testcases/sql/_08_javasp/cases/case_where_01.sql:ok    736ms
+/home/cubrid-testcases/sql/_08_javasp/cases/case_where_02.sql:ok    631ms
+/home/cubrid-testcases/sql/_08_javasp/cases/case_where_03.sql:ok    32ms
+/home/cubrid-testcases/sql/_08_javasp/cases/cbrd_24063.sql:ok    26ms
+/home/cubrid-testcases/sql/_08_javasp/cases/cbrd_24693.sql:ok    15ms
+/home/cubrid-testcases/sql/_08_javasp/cases/itrack_1002572.sql:ok    65ms

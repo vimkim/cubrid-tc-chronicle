@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "corpus": "synthetic; shared recorded evidence",
+  "observations": 10000000,
+  "executions": 1000,
+  "history_occurrences": 1000,
+  "build_seconds": 81.061,
+  "history_seconds": [
+    0.073742,
+    0.077014,
+    0.074072,
+    0.077889,
+    0.069584
+  ],
+  "subsecond": true,
+  "database_bytes": 1046851584
+}

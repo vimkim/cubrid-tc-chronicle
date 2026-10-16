@@ -1,0 +1,15 @@
+{
+  "run_id": 37747856853,
+  "suite": "medium",
+  "shard": "00",
+  "files": {
+    "summary_info": "summary_info",
+    "failed.list": "failed.list",
+    "build.read": "build.read",
+    "tc.read": "tc.read",
+    "shard.done": "shard.done",
+    "plan/split.meta": "split.meta",
+    "plan/plan.tsv": "plan.tsv",
+    "plan/expected": "expected"
+  }
+}

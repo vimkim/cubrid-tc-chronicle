@@ -2,6 +2,8 @@
 
 Status: proposed design. Date: **2026-10-16**. Delivery target: **CLI first, with a web UI later**, as selected by the user. The working CLI name is `tcc`.
 
+Implementation update: **0.1.0** now provides manual GHA collection, retained imports, offline queries, and a bounded pilot. See the [CLI guide](cli.md) and [pilot evidence](pilot.md). Unimplemented proposals remain future work, including verified attempt reconstruction, rename aliases, and symptom fingerprints.
+
 ## 1. Product decision
 
 Build a local evidence index of CUBRID testcase outcomes across CI runs and engine commits. Query that index by testcase path, filename, ticket fragment, run, or commit.
@@ -103,7 +105,7 @@ Renames require an explicit alias with repository, revision interval, and eviden
 
 ## 5. CLI experience
 
-These commands are proposed. They are not implemented.
+This section describes the proposed interface. See the [CLI guide](cli.md) for implemented commands and current limitations.
 
 ```sh
 # Import a bounded recent window. Repository and store come from local config.

@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testsuites>
+  <testsuite name="shell" tests="2" skipped="1">
+    <testcase classname="https://github.com/CUBRID/cubrid-testcases-private-ex/blob/develop/shell/_fixture/case_0/cases/case_0.sh" name="shell/_fixture/case_0/cases/case_0.sh" file="cubrid-testcases-private-ex/shell/_fixture/case_0/cases/case_0.sh" time="299.657">
+      <failure>SANITIZED failure body</failure>
+    </testcase>
+    <testcase classname="https://github.com/CUBRID/cubrid-testcases-private-ex/blob/develop/shell/_fixture/case_1/cases/case_1.sh" name="shell/_fixture/case_1/cases/case_1.sh" file="cubrid-testcases-private-ex/shell/_fixture/case_1/cases/case_1.sh" time="0.0">
+      <skipped message="Skipped by macro" />
+    </testcase>
+    <testcase classname="https://github.com/CUBRID/cubrid-testcases-private-ex/blob/develop/shell/_fixture/case_2/cases/case_2.sh" name="shell/_fixture/case_2/cases/case_2.sh" file="cubrid-testcases-private-ex/shell/_fixture/case_2/cases/case_2.sh" time="4.908" />
+  </testsuite>
+</testsuites>

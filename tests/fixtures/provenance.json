@@ -1,0 +1,101 @@
+{
+  "recorded_at": "2026-10-16",
+  "records": [
+    {
+      "directory": "sql-recorded",
+      "kind": "unaltered public shard bytes",
+      "run_id": 38868725373,
+      "shard": "09",
+      "sha256": {
+        "build.read": "48daee81ace2e7ceefeaddda3f4c17aff508ee9e264745f555cd3bfc31c39112",
+        "expected": "e6f47e008cc58b38596e6fdf2f50a0fea93fd10543e652522aeab3aa71355719",
+        "shard.done": "b96d1438d1c72cd7652733b74bddb82d5c8547c4bc29f2f230b193bdf81ddcba",
+        "split.meta": "4c49c3eebcb33812ec4c24f0166d5522877090129d5829586c5fc43913f6e935",
+        "summary_info": "0fc230172a04022fa482eca4146874ec9407cc8b4bb495b86b26f6a2fb171d2a",
+        "tc.read": "d8369f891992ad645ca43b38a579990c018c7c0893a7638603400a0a09e44a43"
+      }
+    },
+    {
+      "directory": "medium-recorded",
+      "kind": "unaltered public shard bytes",
+      "run_id": 38868725373,
+      "shard": "00",
+      "sha256": {
+        "build.read": "48daee81ace2e7ceefeaddda3f4c17aff508ee9e264745f555cd3bfc31c39112",
+        "expected": "0aa598c735f77296910c9b61658e9411d38061dc817b9e35b5ea4867d83f7603",
+        "shard.done": "bcbf804059ad06537c8d2a6f04cda8c794dd3fcd3dedfc113e321c61ce4b0efd",
+        "split.meta": "4d849ad6c8001a1a19e565c45c3b1b1d13925f982fc564cb591a407a2201dbea",
+        "summary_info": "2b30406651f0be1a8c1fba259d70462f8d2c68eb52b4d526622fd5ef48c0e58a",
+        "tc.read": "d8369f891992ad645ca43b38a579990c018c7c0893a7638603400a0a09e44a43"
+      }
+    },
+    {
+      "directory": "medium-failure-recorded",
+      "kind": "retained public verdict and provenance bytes; plan checked live",
+      "run_id": 37747856853,
+      "shard": "00",
+      "sha256": {
+        "summary_info": "d0ebe24efc67cde874672bf25e3cfd2e8ed2bb9e94792e061761ded4eced77de",
+        "failed.list": "23dce6cd47a7705bdb35d44cecc551d61ecad4f93c1509362326a57748b437db",
+        "build.read": "41f5074c3e873a3ab2332b4f288506609f7c651ebcaef2a61f66e578219d7a73",
+        "tc.read": "c04995d31ed5a71012bc4fc2510eaea3312e0eb4ad0e5b21087756c3f0cee6ab",
+        "shard.done": "bcbf804059ad06537c8d2a6f04cda8c794dd3fcd3dedfc113e321c61ce4b0efd",
+        "split.meta": "a5f404a9d2d1050ed406628fc1121ecd0f3d238a8bb586e598a1ac1f1ffcb037",
+        "plan.tsv": "d39bbb00f517b5d5dd5c67b738c703d8b9f7f33118f29c77ab35e52138b14584",
+        "expected": "0aa598c735f77296910c9b61658e9411d38061dc817b9e35b5ea4867d83f7603"
+      }
+    },
+    {
+      "directory": "shell-success-sanitized",
+      "kind": "sanitized structural extract; counts recomputed, provenance synthetic",
+      "source_run": 38868725373,
+      "source_shard": "00",
+      "original_counts": {
+        "total": 52,
+        "fail": 0,
+        "skip": 1
+      },
+      "sha256": {
+        "build.read": "4837e128b0d5120811128627a7c60e3a6371c999e3c07ec7a8c8e517fb0569ed",
+        "expected": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+        "shard.done": "b4378b114e95cd1ebeb3b18f0cebd6e399ff360f6ce423f064789eedff8c1d79",
+        "tc.read": "4f315609a95ee711e833b0d7c2f76398045d87da04226da557d393c9d6c8bc23",
+        "test-shell.xml": "9e0317f119b4c7ee0a8f1812fdf0fdc12b5c5d290dfa7d4214878c2581543163",
+        "test_status.data": "3da8c97591f7c37383bc390ba642417bc42467a95004342e745bb76a9c0faf8e"
+      }
+    },
+    {
+      "directory": "shell-failure-sanitized",
+      "kind": "sanitized structural extract; counts recomputed, provenance synthetic",
+      "source_run": 34207150213,
+      "source_shard": "34",
+      "original_counts": {
+        "total": 66,
+        "fail": 1,
+        "skip": 1
+      },
+      "sha256": {
+        "build.read": "4837e128b0d5120811128627a7c60e3a6371c999e3c07ec7a8c8e517fb0569ed",
+        "expected": "4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce",
+        "shard.done": "164d37794c42607f156556421a8a8ebb571274c0ebbace430f1849fa3ba6ff64",
+        "tc.read": "4f315609a95ee711e833b0d7c2f76398045d87da04226da557d393c9d6c8bc23",
+        "test-shell.xml": "24a03d78be79d0f777b2a746730532f61413bbdc0ab559b27f56babce9fdfff3",
+        "test_status.data": "f4b60df8596bb9ec9ad34fa77d36c664478632d991b15169320ec8477ca2ab5a"
+      }
+    },
+    {
+      "directory": "sql-success-recorded",
+      "kind": "unaltered public shard bytes",
+      "run_id": 38868725373,
+      "shard": "02",
+      "sha256": {
+        "build.read": "48daee81ace2e7ceefeaddda3f4c17aff508ee9e264745f555cd3bfc31c39112",
+        "tc.read": "d8369f891992ad645ca43b38a579990c018c7c0893a7638603400a0a09e44a43",
+        "shard.done": "421c03975c307ea59519761116139607e87ef121d43db7de09a9d55522c1e592",
+        "summary_info": "bbeb530ef310992bf8206d0a9bf1c15e6292194fd0ee9e0406763362d598994e",
+        "plan-split.meta": "4c49c3eebcb33812ec4c24f0166d5522877090129d5829586c5fc43913f6e935",
+        "plan-expected": "72ba187b05e705de2dced5824d716a71872dedccf21f0c179bd2d5f2c7c974b1"
+      }
+    }
+  ]
+}

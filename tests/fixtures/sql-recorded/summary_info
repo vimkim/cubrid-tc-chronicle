@@ -1,0 +1,1067 @@
+total:408
+success:407
+fail:1
+totalTime:722858ms
+SiteRunTimes:1times
+sql/:408    407    1
+total:408
+success:407
+fail:1
+totalTime:722858ms
+SiteRunTimes:1times
+sql/_36_guava/:155    154    1
+sql/_35_fig_cake/:57    57    0
+sql/_33_elderberry/:131    131    0
+sql/_34_fig/:65    65    0
+total:155
+success:154
+fail:1
+totalTime:680875ms
+SiteRunTimes:1times
+sql/_36_guava/cbrd_26719/:17    17    0
+sql/_36_guava/cbrd_27568/:1    1    0
+sql/_36_guava/cbrd_25471/:1    1    0
+sql/_36_guava/cbrd_26104/:1    1    0
+sql/_36_guava/cbrd_26711/:1    1    0
+sql/_36_guava/cbrd_27274/:1    1    0
+sql/_36_guava/cbrd_27561/:1    1    0
+sql/_36_guava/cbrd_26486/:13    13    0
+sql/_36_guava/cbrd_27177/:1    1    0
+sql/_36_guava/cbrd_27465/:1    1    0
+sql/_36_guava/partition_table/:6    6    0
+sql/_36_guava/cbrd_25855/:2    2    0
+sql/_36_guava/cbrd_27461/:1    0    1
+sql/_36_guava/cbrd_27492/:1    1    0
+sql/_36_guava/cbrd_27306/:1    1    0
+sql/_36_guava/cbrd_26258/:3    3    0
+sql/_36_guava/cbrd_26864/:1    1    0
+sql/_36_guava/cbrd_26707/:1    1    0
+sql/_36_guava/cbrd_26571/:1    1    0
+sql/_36_guava/cbrd_27299/:6    6    0
+sql/_36_guava/cbrd_27520/:1    1    0
+sql/_36_guava/cbrd_26473/:1    1    0
+sql/_36_guava/cbrd_26959_bind_peek/:1    1    0
+sql/_36_guava/cbrd_27169/:1    1    0
+sql/_36_guava/cbrd_26959_enum_histogram/:1    1    0
+sql/_36_guava/cbrd_27487/:1    1    0
+sql/_36_guava/cbrd_27485/:1    1    0
+sql/_36_guava/cbrd_26345/:1    1    0
+sql/_36_guava/cbrd_27039/:1    1    0
+sql/_36_guava/cbrd_27192/:1    1    0
+sql/_36_guava/cbrd_27326/:1    1    0
+sql/_36_guava/cbrd_27036/:1    1    0
+sql/_36_guava/cbrd_25717/:14    14    0
+sql/_36_guava/cbrd_26599/:1    1    0
+sql/_36_guava/cbrd_25776/:1    1    0
+sql/_36_guava/cbrd_27516/:9    9    0
+sql/_36_guava/cbrd_27257/:1    1    0
+sql/_36_guava/cbrd_27543/:1    1    0
+sql/_36_guava/cbrd_27510/:29    29    0
+sql/_36_guava/cbrd_26401/:12    12    0
+sql/_36_guava/cbrd_26431/:1    1    0
+sql/_36_guava/cbrd_27158/:1    1    0
+sql/_36_guava/cbrd_27181/:3    3    0
+sql/_36_guava/cbrd_27379/:5    5    0
+sql/_36_guava/cbrd_27509/:1    1    0
+sql/_36_guava/cbrd_26266/:1    1    0
+sql/_36_guava/cbrd_26522/:1    1    0
+sql/_36_guava/cbrd_25447/:1    1    0
+total:6
+success:6
+fail:0
+totalTime:4333ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_36_guava/partition_table/cases/cbrd_25519.sql:ok    982ms
+/home/cubrid-testcases/sql/_36_guava/partition_table/cases/cbrd_25542.sql:ok    222ms
+/home/cubrid-testcases/sql/_36_guava/partition_table/cases/cbrd_25708_add.sql:ok    118ms
+/home/cubrid-testcases/sql/_36_guava/partition_table/cases/cbrd_25708_eq_in.sql:ok    1387ms
+/home/cubrid-testcases/sql/_36_guava/partition_table/cases/cbrd_25708_lt_le_ge_gt.sql:ok    472ms
+/home/cubrid-testcases/sql/_36_guava/partition_table/cases/cbrd_25708_ne_not_in.sql:ok    1152ms
+total:1
+success:1
+fail:0
+totalTime:850ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_36_guava/cbrd_27568/cases/cbrd_27568.sql:ok    850ms
+total:1
+success:1
+fail:0
+totalTime:3151ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_36_guava/cbrd_27561/cases/cbrd_27561.sql:ok    3151ms
+total:1
+success:1
+fail:0
+totalTime:30293ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_36_guava/cbrd_27543/cases/cbrd_27543.sql:ok    30293ms
+total:1
+success:1
+fail:0
+totalTime:237ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_36_guava/cbrd_27520/cases/cbrd_27520.sql:ok    237ms
+total:9
+success:9
+fail:0
+totalTime:24291ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_36_guava/cbrd_27516/cases/01_desc_first_col_parent.sql:ok    371ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_27516/cases/02_desc_later_col_parent.sql:ok    84ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_27516/cases/03_two_fk_parent.sql:ok    83ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_27516/cases/04_fk_col_precision.sql:ok    253ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_27516/cases/05_partition_key_update.sql:ok    185ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_27516/cases/06_alter_add_fk.sql:ok    510ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_27516/cases/07_dedup_fk.sql:ok    188ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_27516/cases/08_multi_level_index.sql:ok    4501ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_27516/cases/09_alter_add_fk_backward_walk.sql:ok    18116ms
+total:29
+success:29
+fail:0
+totalTime:6062ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_36_guava/cbrd_27510/cases/01_fetch_gate_probes.sql:ok    135ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_27510/cases/02_fetch_gate_bind_reads.sql:ok    92ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_27510/cases/03_session_variable_types.sql:ok    111ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_27510/cases/04_constant_errors.sql:ok    197ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_27510/cases/05_common_value_constants.sql:ok    914ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_27510/cases/06_precast_plan.sql:ok    443ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_27510/cases/07_scope_once_conversion.sql:ok    140ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_27510/cases/08_to_number_domain.sql:ok    27ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_27510/cases/09_alter_filter_index_recompile.sql:ok    118ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_27510/cases/10_list_aggregate_probes.sql:ok    280ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_27510/cases/11_analytic_interpolation_keys.sql:ok    148ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_27510/cases/12_compare_element_probes.sql:ok    88ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_27510/cases/13_compare_outside_terms.sql:ok    277ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_27510/cases/14_index_key_probes.sql:ok    683ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_27510/cases/15_index_key_domains.sql:ok    227ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_27510/cases/16_hash_scan_build_keys.sql:ok    530ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_27510/cases/17_branch_collations.sql:ok    40ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_27510/cases/18_collation_gate_probes.sql:ok    34ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_27510/cases/19_plcsql_slot_gate.sql:ok    875ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_27510/cases/20_conversion_contract.sql:ok    224ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_27510/cases/21_common_value_char_types.sql:ok    44ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_27510/cases/22_hash_list_scan_key_conversion.sql:ok    111ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_27510/cases/23_unresolved_domain_axes.sql:ok    77ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_27510/cases/24_sum_avg_date_argument.sql:ok    32ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_27510/cases/25_string_constant_over_bind_sum.sql:ok    33ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_27510/cases/26_sum_null_argument.sql:ok    71ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_27510/cases/27_insert_values_strict_cast.sql:ok    52ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_27510/cases/28_pad_substring_index_collation.sql:ok    21ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_27510/cases/29_analytic_string_first_value.sql:ok    38ms
+total:1
+success:1
+fail:0
+totalTime:4743ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_36_guava/cbrd_27509/cases/cbrd_27509.sql:ok    4743ms
+total:1
+success:1
+fail:0
+totalTime:5251ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_36_guava/cbrd_27492/cases/cbrd_27492.sql:ok    5251ms
+total:1
+success:1
+fail:0
+totalTime:18601ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_36_guava/cbrd_27487/cases/cbrd_27487.sql:ok    18601ms
+total:1
+success:1
+fail:0
+totalTime:3656ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_36_guava/cbrd_27485/cases/cbrd_27485.sql:ok    3656ms
+total:1
+success:1
+fail:0
+totalTime:7758ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_36_guava/cbrd_27465/cases/cbrd_27465.sql:ok    7758ms
+total:1
+success:0
+fail:1
+totalTime:163ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_36_guava/cbrd_27461/cases/cbrd_27461.sql:nok    163ms
+total:5
+success:5
+fail:0
+totalTime:69131ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_36_guava/cbrd_27379/cases/01_hash_join_result.sql:ok    1796ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_27379/cases/02_hash_join_mode.sql:ok    57918ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_27379/cases/03_plan_selection.sql:ok    6262ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_27379/cases/04_cardinality_estimation.sql:ok    2169ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_27379/cases/05_on_clause_join_order.sql:ok    986ms
+total:1
+success:1
+fail:0
+totalTime:881ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_36_guava/cbrd_27326/cases/cbrd_27326.sql:ok    881ms
+total:1
+success:1
+fail:0
+totalTime:1407ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_36_guava/cbrd_27306/cases/cbrd_27306.sql:ok    1407ms
+total:6
+success:6
+fail:0
+totalTime:246207ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_36_guava/cbrd_27299/cases/cbrd_27299.sql:ok    828ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_27299/cases/cbrd_27299_hash_join.sql:ok    18253ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_27299/cases/cbrd_27299_java.sql:ok    16606ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_27299/cases/cbrd_27299_plcsql.sql:ok    525ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_27299/cases/cbrd_27299_scan.sql:ok    203196ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_27299/cases/cbrd_27299_subquery.sql:ok    6799ms
+total:1
+success:1
+fail:0
+totalTime:890ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_36_guava/cbrd_27274/cases/cbrd_27274.sql:ok    890ms
+total:1
+success:1
+fail:0
+totalTime:309ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_36_guava/cbrd_27257/cases/cbrd_27257.sql:ok    309ms
+total:1
+success:1
+fail:0
+totalTime:745ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_36_guava/cbrd_27192/cases/cbrd_27192.sql:ok    745ms
+total:3
+success:3
+fail:0
+totalTime:486ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_36_guava/cbrd_27181/cases/cbrd_27181.sql:ok    184ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_27181/cases/cbrd_27181_boundary.sql:ok    168ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_27181/cases/cbrd_27181_spec_change.sql:ok    134ms
+total:1
+success:1
+fail:0
+totalTime:1734ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_36_guava/cbrd_27177/cases/cbrd_27177.sql:ok    1734ms
+total:1
+success:1
+fail:0
+totalTime:390ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_36_guava/cbrd_27169/cases/cbrd_27169.sql:ok    390ms
+total:1
+success:1
+fail:0
+totalTime:208ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_36_guava/cbrd_27158/cases/cbrd_27158.sql:ok    208ms
+total:1
+success:1
+fail:0
+totalTime:1352ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_36_guava/cbrd_27039/cases/cbrd_27039.sql:ok    1352ms
+total:1
+success:1
+fail:0
+totalTime:311ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_36_guava/cbrd_27036/cases/cbrd_27036.sql:ok    311ms
+total:1
+success:1
+fail:0
+totalTime:482ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_36_guava/cbrd_26959_enum_histogram/cases/cbrd_26959_enum_histogram.sql:ok    482ms
+total:1
+success:1
+fail:0
+totalTime:175ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_36_guava/cbrd_26959_bind_peek/cases/cbrd_26959_bind_peek.sql:ok    175ms
+total:1
+success:1
+fail:0
+totalTime:153ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_36_guava/cbrd_26864/cases/cbrd_26864.sql:ok    153ms
+total:17
+success:17
+fail:0
+totalTime:19102ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_36_guava/cbrd_26719/cases/cbrd_26719_01_inner_baseline.sql:ok    983ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_26719/cases/cbrd_26719_02_left_outer_baseline.sql:ok    805ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_26719/cases/cbrd_26719_03_probe_overflow_tuple.sql:ok    552ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_26719/cases/cbrd_26719_04_outer_during_pred.sql:ok    605ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_26719/cases/cbrd_26719_05_bind_user_var_pred.sql:ok    716ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_26719/cases/cbrd_26719_06_fallback_serial.sql:ok    376ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_26719/cases/cbrd_26719_07_partition_reentry_guard.sql:ok    1603ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_26719/cases/cbrd_26719_08_empty_input_outer.sql:ok    351ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_26719/cases/cbrd_26719_09_nested_parallel_probe.sql:ok    927ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_26719/cases/cbrd_26719_10_probe_key_coerce.sql:ok    905ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_26719/cases/cbrd_26719_11_right_outer.sql:ok    1213ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_26719/cases/cbrd_26719_12_degree_gate.sql:ok    729ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_26719/cases/cbrd_26719_13_probe_distribution.sql:ok    2323ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_26719/cases/cbrd_26719_14_key_type_and_composite.sql:ok    2794ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_26719/cases/cbrd_26719_15_probe_dependent_list.sql:ok    1625ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_26719/cases/cbrd_26719_16_null_probe_key_outer.sql:ok    2083ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_26719/cases/cbrd_26719_17_worker_error.sql:ok    512ms
+total:1
+success:1
+fail:0
+totalTime:1169ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_36_guava/cbrd_26711/cases/cbrd_26711.sql:ok    1169ms
+total:1
+success:1
+fail:0
+totalTime:59845ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_36_guava/cbrd_26707/cases/cbrd_26707.sql:ok    59845ms
+total:1
+success:1
+fail:0
+totalTime:1716ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_36_guava/cbrd_26599/cases/cbrd_26599.sql:ok    1716ms
+total:1
+success:1
+fail:0
+totalTime:265ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_36_guava/cbrd_26571/cases/cbrd_26571.sql:ok    265ms
+total:1
+success:1
+fail:0
+totalTime:790ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_36_guava/cbrd_26522/cases/cbrd_26522.sql:ok    790ms
+total:13
+success:13
+fail:0
+totalTime:11126ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_36_guava/cbrd_26486/cases/01_uuid_basic.sql:ok    1196ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_26486/cases/02_uuid_format.sql:ok    81ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_26486/cases/03_uuid_default.sql:ok    519ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_26486/cases/04_uuid_dml.sql:ok    211ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_26486/cases/05_uuid_plcsql.sql:ok    747ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_26486/cases/06_uuid_bulk.sql:ok    6502ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_26486/cases/07_uuid_merge_trigger.sql:ok    463ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_26486/cases/08_uuid_invisible.sql:ok    142ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_26486/cases/09_uuid_error_with_null_param.sql:ok    35ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_26486/cases/10_uuid_index.sql:ok    64ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_26486/cases/11_uuid_view.sql:ok    50ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_26486/cases/12_uuid_replace.sql:ok    47ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_26486/cases/13_uuid_truncate.sql:ok    1069ms
+total:1
+success:1
+fail:0
+totalTime:1492ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_36_guava/cbrd_26473/cases/cbrd_26473.sql:ok    1492ms
+total:1
+success:1
+fail:0
+totalTime:307ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_36_guava/cbrd_26431/cases/cbrd_26431.sql:ok    307ms
+total:12
+success:12
+fail:0
+totalTime:5747ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_36_guava/cbrd_26401/cases/01_ddl.sql:ok    732ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_26401/cases/02_dml.sql:ok    557ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_26401/cases/03_select.sql:ok    92ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_26401/cases/04_join.sql:ok    81ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_26401/cases/05_subquery_cte.sql:ok    91ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_26401/cases/06_aggregation.sql:ok    101ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_26401/cases/07_constraint.sql:ok    246ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_26401/cases/08_schema_metadata.sql:ok    280ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_26401/cases/09_invisible_extended.sql:ok    358ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_26401/cases/invisible_ddl_dml_test.sql:ok    676ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_26401/cases/invisible_only.sql:ok    127ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_26401/cases/invisible_plcsql.sql:ok    2406ms
+total:1
+success:1
+fail:0
+totalTime:24353ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_36_guava/cbrd_26345/cases/cbrd_26345.sql:ok    24353ms
+total:1
+success:1
+fail:0
+totalTime:307ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_36_guava/cbrd_26266/cases/cbrd_26266.sql:ok    307ms
+total:3
+success:3
+fail:0
+totalTime:11865ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_36_guava/cbrd_26258/cases/inst_num_orderby_skip.sql:ok    106ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_26258/cases/join_orderby_skip.sql:ok    11011ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_26258/cases/single_orderby_skip.sql:ok    748ms
+total:1
+success:1
+fail:0
+totalTime:13143ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_36_guava/cbrd_26104/cases/cbrd_26104.sql:ok    13143ms
+total:2
+success:2
+fail:0
+totalTime:831ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_36_guava/cbrd_25855/cases/01_positive.sql:ok    613ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_25855/cases/02_negative.sql:ok    218ms
+total:1
+success:1
+fail:0
+totalTime:686ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_36_guava/cbrd_25776/cases/cbrd_25776.sql:ok    686ms
+total:14
+success:14
+fail:0
+totalTime:81656ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_36_guava/cbrd_25717/cases/cbrd_25717_agg_inline_view_parallel.sql:ok    716ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_25717/cases/cbrd_25717_click_count.sql:ok    216ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_25717/cases/cbrd_25717_during_join_predicates.sql:ok    13701ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_25717/cases/cbrd_25717_empty_input.sql:ok    2243ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_25717/cases/cbrd_25717_multi_hashjoin.sql:ok    2660ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_25717/cases/cbrd_25717_nl_baseline.sql:ok    1979ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_25717/cases/cbrd_25717_nm_skew_join.sql:ok    2222ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_25717/cases/cbrd_25717_null_join_key.sql:ok    11188ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_25717/cases/cbrd_25717_overflow_dependent_list.sql:ok    16361ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_25717/cases/cbrd_25717_overflow_record.sql:ok    22204ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_25717/cases/cbrd_25717_parallel_hint.sql:ok    1344ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_25717/cases/cbrd_25717_sector_dependent_list.sql:ok    2447ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_25717/cases/cbrd_25717_trace_json.sql:ok    777ms
+/home/cubrid-testcases/sql/_36_guava/cbrd_25717/cases/cbrd_25717_varchar_join_key.sql:ok    3598ms
+total:1
+success:1
+fail:0
+totalTime:523ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_36_guava/cbrd_25471/cases/cbrd_25471.sql:ok    523ms
+total:1
+success:1
+fail:0
+totalTime:11702ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_36_guava/cbrd_25447/cases/cbrd_25447.sql:ok    11702ms
+total:57
+success:57
+fail:0
+totalTime:17102ms
+SiteRunTimes:1times
+sql/_35_fig_cake/plcsql/:8    8    0
+sql/_35_fig_cake/cbrd_25393/:1    1    0
+sql/_35_fig_cake/cbrd_25574/:4    4    0
+sql/_35_fig_cake/cbrd_25147/:3    3    0
+sql/_35_fig_cake/grant_revoke_redefine/:17    17    0
+sql/_35_fig_cake/cbrd_24044/:7    7    0
+sql/_35_fig_cake/cbrd_25748/:1    1    0
+sql/_35_fig_cake/cbrd_25246/:1    1    0
+sql/_35_fig_cake/cbrd_25382/:8    8    0
+sql/_35_fig_cake/cbrd_25352/:6    6    0
+sql/_35_fig_cake/cbrd_25372/:1    1    0
+total:8
+success:8
+fail:0
+totalTime:1034ms
+SiteRunTimes:1times
+sql/_35_fig_cake/plcsql/basic/:8    8    0
+total:8
+success:8
+fail:0
+totalTime:1034ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_35_fig_cake/plcsql/basic/cases/dynamic_sql_loop.sql:ok    48ms
+/home/cubrid-testcases/sql/_35_fig_cake/plcsql/basic/cases/server-output.sql:ok    36ms
+/home/cubrid-testcases/sql/_35_fig_cake/plcsql/basic/cases/test_ddl.sql:ok    40ms
+/home/cubrid-testcases/sql/_35_fig_cake/plcsql/basic/cases/test_serial.sql:ok    41ms
+/home/cubrid-testcases/sql/_35_fig_cake/plcsql/basic/cases/test_static_sql_dml.sql:ok    269ms
+/home/cubrid-testcases/sql/_35_fig_cake/plcsql/basic/cases/test_static_sql_query.sql:ok    415ms
+/home/cubrid-testcases/sql/_35_fig_cake/plcsql/basic/cases/test_tcl.sql:ok    116ms
+/home/cubrid-testcases/sql/_35_fig_cake/plcsql/basic/cases/test_user_defined.sql:ok    69ms
+total:17
+success:17
+fail:0
+totalTime:2338ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_35_fig_cake/grant_revoke_redefine/cases/cbrd_25486_01.sql:ok    84ms
+/home/cubrid-testcases/sql/_35_fig_cake/grant_revoke_redefine/cases/cbrd_25486_02.sql:ok    78ms
+/home/cubrid-testcases/sql/_35_fig_cake/grant_revoke_redefine/cases/cbrd_25486_03.sql:ok    63ms
+/home/cubrid-testcases/sql/_35_fig_cake/grant_revoke_redefine/cases/cbrd_25486_04.sql:ok    95ms
+/home/cubrid-testcases/sql/_35_fig_cake/grant_revoke_redefine/cases/cbrd_25486_05.sql:ok    213ms
+/home/cubrid-testcases/sql/_35_fig_cake/grant_revoke_redefine/cases/cbrd_25582.sql:ok    340ms
+/home/cubrid-testcases/sql/_35_fig_cake/grant_revoke_redefine/cases/cbrd_25585.sql:ok    149ms
+/home/cubrid-testcases/sql/_35_fig_cake/grant_revoke_redefine/cases/cbrd_25596.sql:ok    99ms
+/home/cubrid-testcases/sql/_35_fig_cake/grant_revoke_redefine/cases/cbrd_25607_01.sql:ok    160ms
+/home/cubrid-testcases/sql/_35_fig_cake/grant_revoke_redefine/cases/cbrd_25607_02.sql:ok    163ms
+/home/cubrid-testcases/sql/_35_fig_cake/grant_revoke_redefine/cases/cbrd_25607_03.sql:ok    125ms
+/home/cubrid-testcases/sql/_35_fig_cake/grant_revoke_redefine/cases/cbrd_25607_04.sql:ok    183ms
+/home/cubrid-testcases/sql/_35_fig_cake/grant_revoke_redefine/cases/cbrd_25627_01.sql:ok    68ms
+/home/cubrid-testcases/sql/_35_fig_cake/grant_revoke_redefine/cases/cbrd_25627_02.sql:ok    81ms
+/home/cubrid-testcases/sql/_35_fig_cake/grant_revoke_redefine/cases/cbrd_25627_03.sql:ok    83ms
+/home/cubrid-testcases/sql/_35_fig_cake/grant_revoke_redefine/cases/cbrd_25627_04.sql:ok    121ms
+/home/cubrid-testcases/sql/_35_fig_cake/grant_revoke_redefine/cases/cbrd_25627_05.sql:ok    233ms
+total:1
+success:1
+fail:0
+totalTime:129ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_35_fig_cake/cbrd_25748/cases/cbrd_25748.sql:ok    129ms
+total:4
+success:4
+fail:0
+totalTime:417ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_35_fig_cake/cbrd_25574/cases/01_not_grant.sql:ok    63ms
+/home/cubrid-testcases/sql/_35_fig_cake/cbrd_25574/cases/02_drop_last_granted_user.sql:ok    79ms
+/home/cubrid-testcases/sql/_35_fig_cake/cbrd_25574/cases/03_drop_mid_granted_user.sql:ok    167ms
+/home/cubrid-testcases/sql/_35_fig_cake/cbrd_25574/cases/04_drop_user_granted_partition_table.sql:ok    108ms
+total:1
+success:1
+fail:0
+totalTime:27ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_35_fig_cake/cbrd_25393/cases/cbrd_25393.sql:ok    27ms
+total:8
+success:8
+fail:0
+totalTime:2267ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_35_fig_cake/cbrd_25382/cases/cbrd_25382_1.sql:ok    878ms
+/home/cubrid-testcases/sql/_35_fig_cake/cbrd_25382/cases/cbrd_25382_2.sql:ok    184ms
+/home/cubrid-testcases/sql/_35_fig_cake/cbrd_25382/cases/cbrd_25382_3.sql:ok    97ms
+/home/cubrid-testcases/sql/_35_fig_cake/cbrd_25382/cases/cbrd_25382_4.sql:ok    101ms
+/home/cubrid-testcases/sql/_35_fig_cake/cbrd_25382/cases/cbrd_25382_5.sql:ok    619ms
+/home/cubrid-testcases/sql/_35_fig_cake/cbrd_25382/cases/cbrd_25382_6.sql:ok    140ms
+/home/cubrid-testcases/sql/_35_fig_cake/cbrd_25382/cases/cbrd_25382_7.sql:ok    98ms
+/home/cubrid-testcases/sql/_35_fig_cake/cbrd_25382/cases/cbrd_25382_8.sql:ok    150ms
+total:1
+success:1
+fail:0
+totalTime:647ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_35_fig_cake/cbrd_25372/cases/cbrd_25372.sql:ok    647ms
+total:6
+success:6
+fail:0
+totalTime:865ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_35_fig_cake/cbrd_25352/cases/02_system_method.sql:ok    24ms
+/home/cubrid-testcases/sql/_35_fig_cake/cbrd_25352/cases/04_complicate_javasp.sql:ok    50ms
+/home/cubrid-testcases/sql/_35_fig_cake/cbrd_25352/cases/05_same_name_method_and_javasp.sql:ok    33ms
+/home/cubrid-testcases/sql/_35_fig_cake/cbrd_25352/cases/06_javasp_with_trigger.sql:ok    75ms
+/home/cubrid-testcases/sql/_35_fig_cake/cbrd_25352/cases/07_javasp_with_view.sql:ok    77ms
+/home/cubrid-testcases/sql/_35_fig_cake/cbrd_25352/cases/09_complicate_plcsql.sql:ok    606ms
+total:1
+success:1
+fail:0
+totalTime:47ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_35_fig_cake/cbrd_25246/cases/cbrd_25246.sql:ok    47ms
+total:3
+success:3
+fail:0
+totalTime:151ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_35_fig_cake/cbrd_25147/cases/cbrd_25147_1.sql:ok    55ms
+/home/cubrid-testcases/sql/_35_fig_cake/cbrd_25147/cases/cbrd_25147_2.sql:ok    36ms
+/home/cubrid-testcases/sql/_35_fig_cake/cbrd_25147/cases/cbrd_25147_3.sql:ok    60ms
+total:7
+success:7
+fail:0
+totalTime:9180ms
+SiteRunTimes:1times
+sql/_35_fig_cake/cbrd_24044/cbrd_25089/:1    1    0
+sql/_35_fig_cake/cbrd_24044/cbrd_26419/:1    1    0
+sql/_35_fig_cake/cbrd_24044/cbrd_25060/:3    3    0
+sql/_35_fig_cake/cbrd_24044/cbrd_25214/:1    1    0
+sql/_35_fig_cake/cbrd_24044/cbrd_24874/:1    1    0
+total:1
+success:1
+fail:0
+totalTime:188ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_35_fig_cake/cbrd_24044/cbrd_26419/cases/cbrd_26419.sql:ok    188ms
+total:1
+success:1
+fail:0
+totalTime:217ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_35_fig_cake/cbrd_24044/cbrd_25214/cases/cbrd_25214.sql:ok    217ms
+total:1
+success:1
+fail:0
+totalTime:257ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_35_fig_cake/cbrd_24044/cbrd_25089/cases/cbrd_25089.sql:ok    257ms
+total:3
+success:3
+fail:0
+totalTime:2557ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_35_fig_cake/cbrd_24044/cbrd_25060/cases/cbrd_25060.sql:ok    936ms
+/home/cubrid-testcases/sql/_35_fig_cake/cbrd_24044/cbrd_25060/cases/cbrd_25060_1.sql:ok    695ms
+/home/cubrid-testcases/sql/_35_fig_cake/cbrd_24044/cbrd_25060/cases/cbrd_25060_2.sql:ok    926ms
+total:1
+success:1
+fail:0
+totalTime:5961ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_35_fig_cake/cbrd_24044/cbrd_24874/cases/cbrd_24874.sql:ok    5961ms
+total:65
+success:65
+fail:0
+totalTime:11085ms
+SiteRunTimes:1times
+sql/_34_fig/cbrd_24510/:1    1    0
+sql/_34_fig/cbrd_24537/:1    1    0
+sql/_34_fig/cbrd_24400/:1    1    0
+sql/_34_fig/cbrd_24563/:21    21    0
+sql/_34_fig/cbrd_24502/:1    1    0
+sql/_34_fig/cbrd_24422/:1    1    0
+sql/_34_fig/cbrd_24796/:1    1    0
+sql/_34_fig/cbrd_24371/:1    1    0
+sql/_34_fig/cbrd_24516/:1    1    0
+sql/_34_fig/cbrd_24042/:1    1    0
+sql/_34_fig/cbrd_24252/:34    34    0
+sql/_34_fig/cbrd_24435/:1    1    0
+total:1
+success:1
+fail:0
+totalTime:75ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_34_fig/cbrd_24796/cases/cbrd_24796.sql:ok    75ms
+total:21
+success:21
+fail:0
+totalTime:784ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_34_fig/cbrd_24563/cases/REGEXP_COUNT.sql:ok    84ms
+/home/cubrid-testcases/sql/_34_fig/cbrd_24563/cases/REGEXP_COUNT_unicode.sql:ok    17ms
+/home/cubrid-testcases/sql/_34_fig/cbrd_24563/cases/REGEXP_INSTR.sql:ok    112ms
+/home/cubrid-testcases/sql/_34_fig/cbrd_24563/cases/REGEXP_INSTR_unicode.sql:ok    10ms
+/home/cubrid-testcases/sql/_34_fig/cbrd_24563/cases/REGEXP_LIKE.sql:ok    58ms
+/home/cubrid-testcases/sql/_34_fig/cbrd_24563/cases/REGEXP_LIKE_unicode.sql:ok    6ms
+/home/cubrid-testcases/sql/_34_fig/cbrd_24563/cases/REGEXP_REPLACE.sql:ok    83ms
+/home/cubrid-testcases/sql/_34_fig/cbrd_24563/cases/REGEXP_REPLACE_unicode.sql:ok    12ms
+/home/cubrid-testcases/sql/_34_fig/cbrd_24563/cases/REGEXP_SUBSTR.sql:ok    80ms
+/home/cubrid-testcases/sql/_34_fig/cbrd_24563/cases/REGEXP_SUBSTR_unicode.sql:ok    8ms
+/home/cubrid-testcases/sql/_34_fig/cbrd_24563/cases/_01_basic_test_01.sql:ok    11ms
+/home/cubrid-testcases/sql/_34_fig/cbrd_24563/cases/_01_basic_test_05.sql:ok    14ms
+/home/cubrid-testcases/sql/_34_fig/cbrd_24563/cases/_02_scenario_01.sql:ok    103ms
+/home/cubrid-testcases/sql/_34_fig/cbrd_24563/cases/_02_scenario_03.sql:ok    67ms
+/home/cubrid-testcases/sql/_34_fig/cbrd_24563/cases/_dev_01_operator_syntax.sql:ok    5ms
+/home/cubrid-testcases/sql/_34_fig/cbrd_24563/cases/_dev_02_regex_test_cf.sql:ok    15ms
+/home/cubrid-testcases/sql/_34_fig/cbrd_24563/cases/_dev_06_operator_not.sql:ok    18ms
+/home/cubrid-testcases/sql/_34_fig/cbrd_24563/cases/_dev_07_regex_syntax_prep_st.sql:ok    50ms
+/home/cubrid-testcases/sql/_34_fig/cbrd_24563/cases/_dev_08_regex_syntax_errors_cf.sql:ok    2ms
+/home/cubrid-testcases/sql/_34_fig/cbrd_24563/cases/_dev_09_new_regex_syntax.sql:ok    10ms
+/home/cubrid-testcases/sql/_34_fig/cbrd_24563/cases/cbrd_24563.sql:ok    19ms
+total:1
+success:1
+fail:0
+totalTime:24ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_34_fig/cbrd_24537/cases/cbrd_24537.sql:ok    24ms
+total:1
+success:1
+fail:0
+totalTime:56ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_34_fig/cbrd_24516/cases/cbrd_24516.sql:ok    56ms
+total:1
+success:1
+fail:0
+totalTime:16ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_34_fig/cbrd_24510/cases/cbrd_24510.sql:ok    16ms
+total:1
+success:1
+fail:0
+totalTime:122ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_34_fig/cbrd_24502/cases/cbrd_24502.sql:ok    122ms
+total:1
+success:1
+fail:0
+totalTime:29ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_34_fig/cbrd_24435/cases/cbrd_24435.sql:ok    29ms
+total:1
+success:1
+fail:0
+totalTime:90ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_34_fig/cbrd_24422/cases/cbrd_24422.sql:ok    90ms
+total:1
+success:1
+fail:0
+totalTime:498ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_34_fig/cbrd_24400/cases/cbrd_24400.sql:ok    498ms
+total:1
+success:1
+fail:0
+totalTime:89ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_34_fig/cbrd_24371/cases/cbrd_24371.sql:ok    89ms
+total:34
+success:34
+fail:0
+totalTime:9117ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_34_fig/cbrd_24252/cases/cbrd_24252_1.sql:ok    192ms
+/home/cubrid-testcases/sql/_34_fig/cbrd_24252/cases/cbrd_24252_10.sql:ok    346ms
+/home/cubrid-testcases/sql/_34_fig/cbrd_24252/cases/cbrd_24252_11.sql:ok    417ms
+/home/cubrid-testcases/sql/_34_fig/cbrd_24252/cases/cbrd_24252_12.sql:ok    378ms
+/home/cubrid-testcases/sql/_34_fig/cbrd_24252/cases/cbrd_24252_13.sql:ok    312ms
+/home/cubrid-testcases/sql/_34_fig/cbrd_24252/cases/cbrd_24252_14.sql:ok    292ms
+/home/cubrid-testcases/sql/_34_fig/cbrd_24252/cases/cbrd_24252_15.sql:ok    302ms
+/home/cubrid-testcases/sql/_34_fig/cbrd_24252/cases/cbrd_24252_16.sql:ok    204ms
+/home/cubrid-testcases/sql/_34_fig/cbrd_24252/cases/cbrd_24252_17.sql:ok    240ms
+/home/cubrid-testcases/sql/_34_fig/cbrd_24252/cases/cbrd_24252_18.sql:ok    261ms
+/home/cubrid-testcases/sql/_34_fig/cbrd_24252/cases/cbrd_24252_19.sql:ok    223ms
+/home/cubrid-testcases/sql/_34_fig/cbrd_24252/cases/cbrd_24252_2.sql:ok    199ms
+/home/cubrid-testcases/sql/_34_fig/cbrd_24252/cases/cbrd_24252_20.sql:ok    237ms
+/home/cubrid-testcases/sql/_34_fig/cbrd_24252/cases/cbrd_24252_21.sql:ok    278ms
+/home/cubrid-testcases/sql/_34_fig/cbrd_24252/cases/cbrd_24252_22.sql:ok    254ms
+/home/cubrid-testcases/sql/_34_fig/cbrd_24252/cases/cbrd_24252_23.sql:ok    281ms
+/home/cubrid-testcases/sql/_34_fig/cbrd_24252/cases/cbrd_24252_24.sql:ok    273ms
+/home/cubrid-testcases/sql/_34_fig/cbrd_24252/cases/cbrd_24252_25.sql:ok    358ms
+/home/cubrid-testcases/sql/_34_fig/cbrd_24252/cases/cbrd_24252_26.sql:ok    305ms
+/home/cubrid-testcases/sql/_34_fig/cbrd_24252/cases/cbrd_24252_27.sql:ok    176ms
+/home/cubrid-testcases/sql/_34_fig/cbrd_24252/cases/cbrd_24252_28.sql:ok    240ms
+/home/cubrid-testcases/sql/_34_fig/cbrd_24252/cases/cbrd_24252_29.sql:ok    198ms
+/home/cubrid-testcases/sql/_34_fig/cbrd_24252/cases/cbrd_24252_3.sql:ok    189ms
+/home/cubrid-testcases/sql/_34_fig/cbrd_24252/cases/cbrd_24252_30.sql:ok    186ms
+/home/cubrid-testcases/sql/_34_fig/cbrd_24252/cases/cbrd_24252_31.sql:ok    178ms
+/home/cubrid-testcases/sql/_34_fig/cbrd_24252/cases/cbrd_24252_32.sql:ok    221ms
+/home/cubrid-testcases/sql/_34_fig/cbrd_24252/cases/cbrd_24252_33.sql:ok    236ms
+/home/cubrid-testcases/sql/_34_fig/cbrd_24252/cases/cbrd_24252_34.sql:ok    277ms
+/home/cubrid-testcases/sql/_34_fig/cbrd_24252/cases/cbrd_24252_4.sql:ok    179ms
+/home/cubrid-testcases/sql/_34_fig/cbrd_24252/cases/cbrd_24252_5.sql:ok    266ms
+/home/cubrid-testcases/sql/_34_fig/cbrd_24252/cases/cbrd_24252_6.sql:ok    373ms
+/home/cubrid-testcases/sql/_34_fig/cbrd_24252/cases/cbrd_24252_7.sql:ok    349ms
+/home/cubrid-testcases/sql/_34_fig/cbrd_24252/cases/cbrd_24252_8.sql:ok    347ms
+/home/cubrid-testcases/sql/_34_fig/cbrd_24252/cases/cbrd_24252_9.sql:ok    350ms
+total:1
+success:1
+fail:0
+totalTime:185ms
+SiteRunTimes:1times
+sql/_34_fig/cbrd_24042/cbrd_24258/:1    1    0
+total:1
+success:1
+fail:0
+totalTime:185ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_34_fig/cbrd_24042/cbrd_24258/cases/cbrd_24258.sql:ok    185ms
+total:131
+success:131
+fail:0
+totalTime:13796ms
+SiteRunTimes:1times
+sql/_33_elderberry/cbrd_24042/:55    55    0
+sql/_33_elderberry/cbrd_23845/:14    14    0
+sql/_33_elderberry/cbrd_23916/:11    11    0
+sql/_33_elderberry/cbrd_23844/:22    22    0
+sql/_33_elderberry/cbrd_24011/:17    17    0
+sql/_33_elderberry/cbrd_24141/:12    12    0
+total:12
+success:12
+fail:0
+totalTime:2878ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24141/cases/column_name_serial_01.sql:ok    43ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24141/cases/column_name_serial_02.sql:ok    71ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24141/cases/column_name_serial_03.sql:ok    146ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24141/cases/column_name_serial_04.sql:ok    37ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24141/cases/column_name_table_01.sql:ok    373ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24141/cases/column_name_table_02.sql:ok    624ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24141/cases/column_name_table_03.sql:ok    574ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24141/cases/column_name_table_04.sql:ok    38ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24141/cases/column_name_view_01.sql:ok    197ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24141/cases/column_name_view_02.sql:ok    334ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24141/cases/column_name_view_03.sql:ok    395ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24141/cases/column_name_view_04.sql:ok    46ms
+total:55
+success:55
+fail:0
+totalTime:3599ms
+SiteRunTimes:1times
+sql/_33_elderberry/cbrd_24042/cbrd_25785/:1    1    0
+sql/_33_elderberry/cbrd_24042/cbrd_24182/:11    11    0
+sql/_33_elderberry/cbrd_24042/cbrd_24181/:1    1    0
+sql/_33_elderberry/cbrd_24042/cbrd_26318/:1    1    0
+sql/_33_elderberry/cbrd_24042/cbrd_26375/:1    1    0
+sql/_33_elderberry/cbrd_24042/cbrd_24041/:1    1    0
+sql/_33_elderberry/cbrd_24042/cbrd_26263/:1    1    0
+sql/_33_elderberry/cbrd_24042/cbrd_26415/:1    1    0
+sql/_33_elderberry/cbrd_24042/cbrd_26260/:1    1    0
+sql/_33_elderberry/cbrd_24042/cbrd_26257/:1    1    0
+sql/_33_elderberry/cbrd_24042/cbrd_24084/:1    1    0
+sql/_33_elderberry/cbrd_24042/cbrd_24082/:10    10    0
+sql/_33_elderberry/cbrd_24042/cbrd_24101/:13    13    0
+sql/_33_elderberry/cbrd_24042/add/:10    10    0
+sql/_33_elderberry/cbrd_24042/cbrd_24100/:1    1    0
+total:1
+success:1
+fail:0
+totalTime:554ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24042/cbrd_26415/cases/cbrd_26415.sql:ok    554ms
+total:1
+success:1
+fail:0
+totalTime:476ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24042/cbrd_26375/cases/cbrd_26375.sql:ok    476ms
+total:1
+success:1
+fail:0
+totalTime:61ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24042/cbrd_26318/cases/cbrd_26318.sql:ok    61ms
+total:1
+success:1
+fail:0
+totalTime:130ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24042/cbrd_26263/cases/cbrd_26263.sql:ok    130ms
+total:1
+success:1
+fail:0
+totalTime:152ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24042/cbrd_26260/cases/cbrd_26260.sql:ok    152ms
+total:1
+success:1
+fail:0
+totalTime:147ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24042/cbrd_26257/cases/cbrd_26257.sql:ok    147ms
+total:1
+success:1
+fail:0
+totalTime:69ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24042/cbrd_25785/cases/cbrd_25785.sql:ok    69ms
+total:11
+success:11
+fail:0
+totalTime:374ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24042/cbrd_24182/cases/complex_join.sql:ok    32ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24042/cbrd_24182/cases/complex_predicate.sql:ok    27ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24042/cbrd_24182/cases/const_predicate.sql:ok    15ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24042/cbrd_24182/cases/dnf.sql:ok    23ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24042/cbrd_24182/cases/inheritance.sql:ok    98ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24042/cbrd_24182/cases/n_outer_join.sql:ok    43ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24042/cbrd_24182/cases/n_unique.sql:ok    36ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24042/cbrd_24182/cases/no_merge.sql:ok    22ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24042/cbrd_24182/cases/normal.sql:ok    20ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24042/cbrd_24182/cases/r_outer_join.sql:ok    31ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24042/cbrd_24182/cases/select_list.sql:ok    27ms
+total:1
+success:1
+fail:0
+totalTime:271ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24042/cbrd_24181/cases/remove_list.sql:ok    271ms
+total:13
+success:13
+fail:0
+totalTime:302ms
+SiteRunTimes:1times
+sql/_33_elderberry/cbrd_24042/cbrd_24101/possibility/:6    6    0
+sql/_33_elderberry/cbrd_24042/cbrd_24101/impossibility/:7    7    0
+total:6
+success:6
+fail:0
+totalTime:156ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24042/cbrd_24101/possibility/cases/multi_join.sql:ok    27ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24042/cbrd_24101/possibility/cases/nested_inline_view.sql:ok    20ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24042/cbrd_24101/possibility/cases/no_merge.sql:ok    34ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24042/cbrd_24101/possibility/cases/normal.sql:ok    25ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24042/cbrd_24101/possibility/cases/select_list.sql:ok    24ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24042/cbrd_24101/possibility/cases/where.sql:ok    26ms
+total:7
+success:7
+fail:0
+totalTime:146ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24042/cbrd_24101/impossibility/cases/analytic.sql:ok    18ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24042/cbrd_24101/impossibility/cases/correlated.sql:ok    18ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24042/cbrd_24101/impossibility/cases/cte.sql:ok    22ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24042/cbrd_24101/impossibility/cases/inst_num.sql:ok    19ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24042/cbrd_24101/impossibility/cases/notfrom.sql:ok    17ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24042/cbrd_24101/impossibility/cases/order_sensitive.sql:ok    37ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24042/cbrd_24101/impossibility/cases/update.sql:ok    15ms
+total:1
+success:1
+fail:0
+totalTime:37ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24042/cbrd_24100/cases/orderby_copy.sql:ok    37ms
+total:1
+success:1
+fail:0
+totalTime:36ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24042/cbrd_24084/cases/rownum.sql:ok    36ms
+total:10
+success:10
+fail:0
+totalTime:421ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24042/cbrd_24082/cases/aggregate.sql:ok    28ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24042/cbrd_24082/cases/analytic.sql:ok    32ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24042/cbrd_24082/cases/connectby.sql:ok    74ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24042/cbrd_24082/cases/distinct.sql:ok    48ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24042/cbrd_24082/cases/distinct_orderby.sql:ok    39ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24042/cbrd_24082/cases/instnum.sql:ok    31ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24042/cbrd_24082/cases/join.sql:ok    31ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24042/cbrd_24082/cases/method.sql:ok    41ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24042/cbrd_24082/cases/outer_join.sql:ok    68ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24042/cbrd_24082/cases/value.sql:ok    29ms
+total:1
+success:1
+fail:0
+totalTime:36ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24042/cbrd_24041/cases/analytic_functions.sql:ok    36ms
+total:10
+success:10
+fail:0
+totalTime:533ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24042/add/cases/case.sql:ok    24ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24042/add/cases/multiple_view.sql:ok    27ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24042/add/cases/nested_subquery.sql:ok    73ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24042/add/cases/no_push_predicate.sql:ok    94ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24042/add/cases/non_deterministic.sql:ok    60ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24042/add/cases/not_exists.sql:ok    34ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24042/add/cases/ordered_hint.sql:ok    106ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24042/add/cases/pattern.sql:ok    23ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24042/add/cases/prepare.sql:ok    31ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24042/add/cases/using_index.sql:ok    61ms
+total:17
+success:17
+fail:0
+totalTime:1587ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24011/cases/aggregate.sql:ok    84ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24011/cases/analytic_functions.sql:ok    61ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24011/cases/correlated_column.sql:ok    109ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24011/cases/correlated_const_value.sql:ok    11ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24011/cases/hierarchical.sql:ok    279ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24011/cases/indirect_predicate_push.sql:ok    65ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24011/cases/inst_num.sql:ok    97ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24011/cases/merge.sql:ok    77ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24011/cases/method_predicate.sql:ok    104ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24011/cases/method_subquery_select.sql:ok    80ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24011/cases/nested_subquery.sql:ok    84ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24011/cases/no_push_predicate_hint.sql:ok    59ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24011/cases/nullable_outer_join.sql:ok    183ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24011/cases/on_cond.sql:ok    80ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24011/cases/order_by_num.sql:ok    76ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24011/cases/query_predicate.sql:ok    68ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_24011/cases/subquery_select.sql:ok    70ms
+total:11
+success:11
+fail:0
+totalTime:3753ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_23916/cases/cascade_01.sql:ok    202ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_23916/cases/cascade_02.sql:ok    125ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_23916/cases/cascade_03.sql:ok    95ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_23916/cases/cascade_04.sql:ok    243ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_23916/cases/partition_cascade_01.sql:ok    1161ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_23916/cases/partition_cascade_02.sql:ok    540ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_23916/cases/partition_cascade_03.sql:ok    520ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_23916/cases/spec_01.sql:ok    62ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_23916/cases/spec_02.sql:ok    82ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_23916/cases/spec_03.sql:ok    346ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_23916/cases/spec_04.sql:ok    377ms
+total:14
+success:14
+fail:0
+totalTime:1031ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_23845/cases/_01_system_class.sql:ok    34ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_23845/cases/_02_permission_check.sql:ok    133ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_23845/cases/_03_create_synonym_1.sql:ok    96ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_23845/cases/_03_create_synonym_2.sql:ok    27ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_23845/cases/_03_create_synonym_3.sql:ok    55ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_23845/cases/_03_create_synonym_4.sql:ok    37ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_23845/cases/_04_alter_synonym_1.sql:ok    113ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_23845/cases/_04_alter_synonym_2.sql:ok    47ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_23845/cases/_04_alter_synonym_3.sql:ok    59ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_23845/cases/_05_rename_synonym.sql:ok    89ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_23845/cases/_06_drop_synonym.sql:ok    31ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_23845/cases/_07_dml.sql:ok    68ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_23845/cases/_08_multi_user_1.sql:ok    151ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_23845/cases/_08_multi_user_2.sql:ok    91ms
+total:22
+success:22
+fail:0
+totalTime:948ms
+SiteRunTimes:1times
+sql/_33_elderberry/cbrd_23844/cbrd_24195/:14    14    0
+sql/_33_elderberry/cbrd_23844/cbrd_24337/:1    1    0
+sql/_33_elderberry/cbrd_23844/cbrd_24033/:7    7    0
+total:1
+success:1
+fail:0
+totalTime:33ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_23844/cbrd_24337/cases/cbrd_24337.sql:ok    33ms
+total:14
+success:14
+fail:0
+totalTime:677ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_23844/cbrd_24195/cases/alias.sql:ok    66ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_23844/cbrd_24195/cases/change_owner1.sql:ok    37ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_23844/cbrd_24195/cases/change_owner2.sql:ok    35ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_23844/cbrd_24195/cases/change_owner3.sql:ok    83ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_23844/cbrd_24195/cases/change_owner4.sql:ok    65ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_23844/cbrd_24195/cases/create1.sql:ok    35ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_23844/cbrd_24195/cases/create2.sql:ok    52ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_23844/cbrd_24195/cases/create3.sql:ok    32ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_23844/cbrd_24195/cases/create4.sql:ok    31ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_23844/cbrd_24195/cases/create5.sql:ok    21ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_23844/cbrd_24195/cases/rename1.sql:ok    125ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_23844/cbrd_24195/cases/rename2.sql:ok    28ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_23844/cbrd_24195/cases/rename3.sql:ok    29ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_23844/cbrd_24195/cases/rename4.sql:ok    38ms
+total:7
+success:7
+fail:0
+totalTime:238ms
+SiteRunTimes:0times
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_23844/cbrd_24033/cases/serial.sql:ok    72ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_23844/cbrd_24033/cases/table.sql:ok    28ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_23844/cbrd_24033/cases/tablelike1.sql:ok    44ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_23844/cbrd_24033/cases/tablelike2.sql:ok    34ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_23844/cbrd_24033/cases/trigger.sql:ok    29ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_23844/cbrd_24033/cases/user.sql:ok    8ms
+/home/cubrid-testcases/sql/_33_elderberry/cbrd_23844/cbrd_24033/cases/view.sql:ok    23ms

@@ -1,0 +1,21 @@
+{
+  "run_id": 38868725373,
+  "suite": "sql",
+  "shard": "02",
+  "files": {
+    "build.read": "build.read",
+    "tc.read": "tc.read",
+    "shard.done": "shard.done",
+    "summary_info": "summary_info",
+    "plan/split.meta": "plan-split.meta",
+    "plan/expected": "plan-expected"
+  },
+  "sources": {
+    "build.read": "http://192.168.1.48:30080/runs/38868725373/sql/shard/02/build.read",
+    "tc.read": "http://192.168.1.48:30080/runs/38868725373/sql/shard/02/tc.read",
+    "shard.done": "http://192.168.1.48:30080/runs/38868725373/sql/shard/02/shard.done",
+    "summary_info": "http://192.168.1.48:30080/runs/38868725373/sql/shard/02/summary_info",
+    "plan/split.meta": "http://192.168.1.48:30080/runs/38868725373/sql/plan/split.meta",
+    "plan/expected": "http://192.168.1.48:30080/runs/38868725373/sql/plan/plan.tsv"
+  }
+}

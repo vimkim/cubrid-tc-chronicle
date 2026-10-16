@@ -1,0 +1,13 @@
+{
+  "run_id": 1,
+  "suite": "shell",
+  "shard": "00",
+  "files": {
+    "test_status.data": "test_status.data",
+    "build.read": "build.read",
+    "tc.read": "tc.read",
+    "shard.done": "shard.done",
+    "test-results/test-shell.xml": "test-shell.xml",
+    "plan/expected": "expected"
+  }
+}
