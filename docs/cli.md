@@ -1,6 +1,8 @@
 # Chronicle CLI guide
 
-Version: **0.1.0**. Supported host: Linux with Python 3.12 or later.
+Version: **0.2.0**. Supported host: Linux with Python 3.12 or later.
+
+The [web UI](web.md) uses these same queries. Start it with `uv run tcc serve` and open its printed access URL.
 
 ## Collection
 
@@ -33,7 +35,7 @@ uv run tcc explain --run 38868725373 --suite sql \
 
 `find` lists candidate identities. `history` accepts a full path, basename, suffix, or ticket fragment. Ambiguous identities require a full path, suite, or variant. Case spelling remains significant for identity. Fragment search ignores case.
 
-`history` anchors its summary to the latest ordered indexed failure. `explain` selects a failure in a particular run. If several failure snapshots match that run, select `--execution ID` instead. `--ordinal N` resolves repeated case records inside a snapshot. A passing retry remains a separate observation and does not remove an earlier failure.
+`history` anchors its summary to the latest ordered indexed failure. `explain` selects a failure in a particular run. If several failure snapshots match that run, select `--execution ID` instead. `--ordinal N` resolves repeated case records inside a snapshot. A passing retry remains a separate observation and does not remove an earlier failure. A plan without case-level execution evidence cannot establish `NOT_RUN`.
 
 History filters include `--suite`, `--since`, `--until`, `--engine SHA_PREFIX`, `--branch`, `--pr`, `--outcome`, and `--variant`. Use `--variant unknown` for records without a known variant. Recorded engine references determine branch and PR matching. A workflow branch or testcase branch cannot substitute for an unknown historical engine reference. Current `issue_comment` evidence commonly lacks those engine references.
 

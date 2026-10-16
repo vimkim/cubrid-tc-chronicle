@@ -76,6 +76,9 @@ def parse(bundle: Bundle) -> ParsedExecution:
             return {}
 
     def integer(value, source):
+        if value is None:
+            problem("counts_unavailable", f"{source}: count is missing")
+            return None
         try:
             n = int(value)
             if n < 0:
@@ -294,7 +297,8 @@ def parse(bundle: Bundle) -> ParsedExecution:
         problem("count_mismatch", "assigned count disagrees with individual outcomes")
     if not observations:
         problem("no_observations", "no case-level verdicts were parsed")
-    # A shell plan explicitly lists cases. Directory plans never create NOT_RUN.
+    # Selection alone does not prove nonexecution. A missing verdict can also
+    # mean lost, unavailable, or unpublished results from an executed testcase.
     if bundle.suite == "shell" and "plan/shard.list" in bundle.files:
         try:
             inventory = {
@@ -303,13 +307,15 @@ def parse(bundle: Bundle) -> ParsedExecution:
                 if line
             }
             observed = {o.path for o in observations}
-            for missing in sorted(inventory - observed):
-                observations.append(
-                    Observation(
-                        missing, missing, "NOT_RUN", "planned_only", "plan/shard.list", "inventory"
-                    )
+            missing = len(inventory - observed)
+            if missing:
+                problem(
+                    "incomplete_shard",
+                    f"{missing} planned shell testcases have no retained "
+                    "verdict; execution is unknown",
                 )
-                problem("incomplete_shard", "planned shell testcase has no verdict")
+            if assigned is not None and len(inventory) != assigned:
+                problem("count_mismatch", "shell inventory disagrees with assigned count")
             if observed - inventory:
                 problem("count_mismatch", "shell JUnit contains unplanned testcases")
         except (UnicodeError, ValueError) as e:

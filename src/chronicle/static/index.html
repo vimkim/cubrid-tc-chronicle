@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CUBRID TC Chronicle</title>
+    <link rel="stylesheet" href="/app.css" />
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to results</a>
+    <aside class="sidebar" aria-label="Testcase search">
+      <a class="brand" href="/" aria-label="Chronicle home">
+        <svg width="32" height="35" viewBox="0 0 32 35" aria-hidden="true">
+          <path d="M7 3v29M7 8h19M7 17h14M7 26h19" />
+          <circle cx="7" cy="8" r="3" />
+          <circle cx="7" cy="17" r="3" />
+          <circle cx="7" cy="26" r="3" />
+        </svg>
+        <span>Chronicle<small>CUBRID TESTCASE HISTORY</small></span>
+      </a>
+      <div class="sidebar-caption">INVESTIGATE A TESTCASE</div>
+      <form id="search-form" role="search">
+        <label class="sr-only" for="search"
+          >Search testcase paths or tickets</label
+        >
+        <div class="search-box">
+          <span aria-hidden="true">⌕</span
+          ><input
+            id="search"
+            type="search"
+            placeholder="Path, filename, or CBRD ticket…"
+            autocomplete="off"
+            spellcheck="false"
+          />
+        </div>
+      </form>
+      <fieldset class="suite-tabs">
+        <legend class="sr-only">Test suite</legend>
+        <label
+          ><input type="radio" name="suite" value="" checked /><span
+            >All</span
+          ></label
+        >
+        <label
+          ><input type="radio" name="suite" value="sql" /><span
+            >SQL</span
+          ></label
+        >
+        <label
+          ><input type="radio" name="suite" value="medium" /><span
+            >Medium</span
+          ></label
+        >
+        <label
+          ><input type="radio" name="suite" value="shell" /><span
+            >Shell</span
+          ></label
+        >
+      </fieldset>
+      <label class="check-label"
+        ><input id="failed-only" type="checkbox" checked /> Show cases with
+        failures</label
+      >
+      <div class="list-heading">
+        <span id="case-count" role="status">Loading testcases…</span
+        ><span>RETAINED</span>
+      </div>
+      <div
+        id="case-list"
+        class="case-list"
+        aria-label="Matching testcases"
+      ></div>
+      <button id="more-cases" class="sidebar-more" hidden>
+        Load more testcases
+      </button>
+      <div class="sidebar-footer">
+        <span class="status-dot"></span>Local evidence index<small
+          >Read-only · GitHub Actions gha-ci</small
+        >
+      </div>
+    </aside>
+    <div class="workspace">
+      <header class="topbar">
+        <div>
+          <span class="eyebrow">CUBRID / ENGINEERING</span
+          ><span class="topbar-title">Testcase failure history</span>
+        </div>
+        <div class="topbar-actions">
+          <button id="coverage-button" class="quiet-button">Coverage</button
+          ><button
+            id="refresh"
+            class="quiet-button"
+            aria-label="Refresh local index"
+          >
+            ↻ <span>Refresh</span>
+          </button>
+        </div>
+      </header>
+      <main id="main" tabindex="-1">
+        <div id="error" class="error-banner" role="alert" hidden></div>
+        <section class="page-heading">
+          <div>
+            <p class="eyebrow">THE EVIDENCE, OVER TIME</p>
+            <h1 id="page-title">Find the history behind a failure.</h1>
+            <p id="page-description">
+              Search a testcase to trace observed failures across tested engine
+              commits.
+            </p>
+          </div>
+          <span id="sync-status" class="sync-status">Reading local index…</span>
+        </section>
+        <section
+          id="stats"
+          class="stats"
+          aria-label="Indexed evidence totals"
+        ></section>
+        <div id="coverage-strip" class="coverage-strip" role="status"></div>
+        <section id="home" class="panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">START AN INVESTIGATION</p>
+              <h2 id="catalog-title">Recent testcase failures</h2>
+            </div>
+            <span class="muted">Case-level evidence</span>
+          </div>
+          <div id="home-cases"></div>
+        </section>
+        <section id="detail" hidden>
+          <div class="detail-heading">
+            <div>
+              <span id="case-suite" class="suite-badge"></span>
+              <h2 id="case-name"></h2>
+            </div>
+            <button id="clear-selection" class="quiet-button">
+              ← All testcases
+            </button>
+          </div>
+          <p id="case-path" class="case-path"></p>
+          <form id="filters" class="filter-bar" aria-label="History filters">
+            <label
+              >Outcome<select id="outcome">
+                <option value="">All outcomes</option>
+                <option value="FAIL">FAIL</option>
+                <option value="ERROR">ERROR</option>
+                <option value="PASS">PASS</option>
+                <option value="SKIP">SKIP</option>
+                <option value="NOT_RUN">NOT RUN</option>
+              </select></label
+            >
+            <label
+              >Engine SHA<input
+                id="engine"
+                placeholder="Any commit"
+                spellcheck="false"
+            /></label>
+            <label>Run created from<input id="since" type="date" /></label>
+            <label>Through UTC<input id="until" type="date" /></label>
+            <button type="submit" class="primary-button">Apply</button
+            ><button id="reset-filters" type="button" class="quiet-button">
+              Reset
+            </button>
+          </form>
+          <div id="history-content" aria-live="polite"></div>
+        </section>
+        <footer class="page-footer">
+          <span>Only observed outcomes establish a pass or failure.</span
+          ><span
+            >All times UTC ·
+            <span id="generation">Index generation —</span></span
+          >
+        </footer>
+      </main>
+    </div>
+    <dialog id="coverage-dialog" aria-labelledby="coverage-title">
+      <div class="dialog-heading">
+        <div>
+          <p class="eyebrow">KNOW THE LIMITS</p>
+          <h2 id="coverage-title">Evidence coverage</h2>
+        </div>
+        <button class="close-dialog quiet-button" aria-label="Close coverage">
+          ✕
+        </button>
+      </div>
+      <div id="coverage-content"></div>
+    </dialog>
+    <dialog id="evidence-dialog" aria-labelledby="evidence-title">
+      <div class="dialog-heading">
+        <div>
+          <p class="eyebrow">RETAINED SOURCE FILES</p>
+          <h2 id="evidence-title">Snapshot evidence</h2>
+        </div>
+        <button class="close-dialog quiet-button" aria-label="Close evidence">
+          ✕
+        </button>
+      </div>
+      <div id="evidence-content"></div>
+    </dialog>
+  </body>
+</html>

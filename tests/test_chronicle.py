@@ -13,7 +13,7 @@ from unittest.mock import patch
 
 from chronicle.cli import main, read_bundle
 from chronicle.collection import CollectionError, Collector, GitHub, RequestLimitError, timestamp
-from chronicle.models import Bundle
+from chronicle.models import PARSER_VERSION, Bundle, Observation
 from chronicle.parsing import canonical_path, parse
 from chronicle.query import AmbiguousIdentity, HistoryQuery, Queries
 from chronicle.storage import Index
@@ -191,14 +191,30 @@ class ParsingTests(unittest.TestCase):
         self.assertEqual([o.outcome for o in result.observations], ["PASS", "FAIL"])
         self.assertFalse(result.complete)
 
-    def test_shell_inventory_proves_not_run(self):
+    def test_shell_selection_without_a_verdict_keeps_execution_unknown(self):
         bundle = read_bundle(FIXTURES / "shell-success-sanitized/bundle.json")
         paths = [o.path for o in parse(bundle).observations]
         extra = "shell/_fixture/missing/cases/missing.sh"
         bundle.files["plan/shard.list"] = ("\n".join(paths + [extra]) + "\n").encode()
         result = parse(bundle)
-        self.assertIn((extra, "NOT_RUN"), [(o.path, o.outcome) for o in result.observations])
+        self.assertNotIn(extra, [o.path for o in result.observations])
         self.assertFalse(result.complete)
+
+    def test_lost_shell_xml_does_not_label_executed_cases_not_run(self):
+        bundle = read_bundle(FIXTURES / "shell-success-sanitized/bundle.json")
+        paths = [o.path for o in parse(bundle).observations]
+        bundle.files["plan/shard.list"] = ("\n".join(paths) + "\n").encode()
+        del bundle.files["test-results/test-shell.xml"]
+        result = parse(bundle)
+        self.assertEqual(result.observations, [])
+        self.assertIn("incomplete_shard", {d.reason for d in result.diagnostics})
+
+    def test_missing_shard_counters_are_missing_evidence_not_unsupported_grammar(self):
+        bundle = sample()
+        del bundle.files["shard.done"]
+        result = parse(bundle)
+        self.assertIn("counts_unavailable", {d.reason for d in result.diagnostics})
+        self.assertNotIn("parse_unsupported", {d.reason for d in result.diagnostics})
 
     def test_malformed_junit_does_not_infer_pass(self):
         bundle = read_bundle(FIXTURES / "shell-success-sanitized/bundle.json")
@@ -259,6 +275,46 @@ class IndexTests(unittest.TestCase):
         self.assertEqual(self.index.db.execute("SELECT count(*) FROM observation").fetchone()[0], 1)
         self.assertEqual(self.index.bundle(receipt["execution_id"]).files, sample().files)
 
+    def test_reparse_retires_legacy_selection_only_not_run_rows(self):
+        bundle = read_bundle(FIXTURES / "shell-success-sanitized/bundle.json")
+        parsed = parse(bundle)
+        missing = "shell/_fixture/missing/cases/missing.sh"
+        bundle.files["plan/shard.list"] = (
+            "\n".join([o.path for o in parsed.observations] + [missing]) + "\n"
+        ).encode()
+        parsed.parser_version = 1
+        parsed.observations.append(
+            Observation(missing, missing, "NOT_RUN", "planned_only", "plan/shard.list", "inventory")
+        )
+        legacy = self.index.ingest(parsed)["execution_id"]
+        self.assertEqual(self.index.reparse()["inserted"], 1)
+        rows = self.index.db.execute(
+            "SELECT o.outcome FROM observation o JOIN execution e "
+            "ON e.id=o.execution_id WHERE e.active=1"
+        ).fetchall()
+        self.assertEqual({r[0] for r in rows}, {"PASS", "SKIP"})
+        self.assertEqual(len(rows), 2)
+        self.assertIn("plan/shard.list", self.index.bundle(legacy).files)
+
+    def test_completed_unique_job_enriches_ordering_without_duplicating_a_snapshot(self):
+        bundle = sample()
+        bundle.metadata = {"run_attempts": 1, "ordering": "unknown"}
+        receipt = self.index.ingest(parse(bundle))
+        first_manifest = self.index.db.execute(
+            "SELECT manifest_digest FROM execution WHERE id=?", (receipt["execution_id"],)
+        ).fetchone()[0]
+        bundle.metadata.update(completed_at="2026-10-15T12:00:00Z", ordering="unique_job")
+        later = self.index.ingest(parse(bundle))
+        self.assertFalse(later["inserted"])
+        self.assertEqual(later["execution_id"], receipt["execution_id"])
+        target = self.query.history(HistoryQuery(CASE))["target"]
+        self.assertEqual(target["completed_at"], bundle.metadata["completed_at"])
+        self.assertIsNone(target["attempt"])
+        self.assertEqual(target["metadata"]["previous_manifest_digest"], first_manifest)
+        self.assertEqual(
+            json.loads(self.index.archive.read(first_manifest))["metadata"]["ordering"], "unknown"
+        )
+
     def test_transaction_failure_publishes_nothing(self):
         parsed = parse(sample())
         parsed.observations.append(parsed.observations[0])  # Violates the observation primary key.
@@ -291,7 +347,7 @@ class IndexTests(unittest.TestCase):
             self.index.db.execute(
                 "SELECT DISTINCT parser_version FROM execution WHERE active=1"
             ).fetchall()[0][0],
-            1,
+            PARSER_VERSION,
         )
         self.assertEqual(self.index.db.execute("SELECT count(*) FROM execution").fetchone()[0], 2)
 

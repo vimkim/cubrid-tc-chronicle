@@ -3,7 +3,7 @@
 from dataclasses import dataclass, field
 from typing import Literal
 
-PARSER_VERSION = 1
+PARSER_VERSION = 2
 SUITES = ("sql", "medium", "shell")
 Outcome = Literal["PASS", "FAIL", "SKIP", "ERROR", "NOT_RUN"]
 

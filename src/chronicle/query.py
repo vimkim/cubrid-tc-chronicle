@@ -40,6 +40,67 @@ class Queries:
         self.db = index.db
         self.repository = repository
 
+    def overview(self, suite=None):
+        """Summarize the same retained observations available to history queries."""
+        counts = self.db.execute(
+            """SELECT count(*) observations,count(DISTINCT o.testcase_id) testcases,
+            count(DISTINCT CASE WHEN o.outcome IN ('FAIL','ERROR') THEN o.testcase_id END)
+                failed_testcases,
+            count(DISTINCT CASE WHEN o.outcome IN ('FAIL','ERROR') THEN e.engine_sha END)
+                failed_commits
+            FROM observation o JOIN execution e ON e.id=o.execution_id
+            WHERE e.active=1 AND e.repository=? AND (? IS NULL OR e.suite=?)""",
+            (self.repository, suite, suite),
+        ).fetchone()
+        coverage = self.coverage(suite=suite)
+        return {
+            "schema_version": 1,
+            "counts": {
+                **dict(counts),
+                "runs": self.db.execute(
+                    "SELECT count(*) FROM run WHERE repository=?", (self.repository,)
+                ).fetchone()[0],
+                "snapshots": coverage["executions"],
+            },
+            "coverage": coverage,
+        }
+
+    def catalog(self, term="", suite=None, *, failed_only=True, limit=40, offset=0):
+        """Page testcase identities with observed failure counts, without merging variants."""
+        if not 1 <= limit <= 100 or offset < 0:
+            raise ValueError("catalog limit must be 1–100; offset must be nonnegative")
+        parameters = (self.repository, term, suite, suite)
+        where = """e.active=1 AND e.repository=? AND instr(lower(t.path),lower(?))>0
+                   AND (? IS NULL OR t.suite=?)"""
+        if failed_only:
+            where += " AND o.outcome IN ('FAIL','ERROR')"
+        total = self.db.execute(
+            f"""SELECT count(DISTINCT t.id) FROM testcase t
+            JOIN observation o ON o.testcase_id=t.id JOIN execution e ON e.id=o.execution_id
+            WHERE {where}""",
+            parameters,
+        ).fetchone()[0]
+        rows = self.db.execute(
+            f"""SELECT t.*,count(*) observations,
+            sum(o.outcome IN ('FAIL','ERROR')) failures,
+            count(DISTINCT CASE WHEN o.outcome IN ('FAIL','ERROR') THEN e.engine_sha END)
+                failed_commits,max(e.completed_at) last_completed_at
+            FROM testcase t JOIN observation o ON o.testcase_id=t.id
+            JOIN execution e ON e.id=o.execution_id WHERE {where}
+            GROUP BY t.id ORDER BY max(e.completed_at) DESC,t.path,t.variant LIMIT ? OFFSET ?""",
+            (*parameters, limit, offset),
+        )
+        return {
+            "schema_version": 1,
+            "total": total,
+            "limit": limit,
+            "offset": offset,
+            "cases": [{**dict(r), "variant": r["variant"] or None} for r in rows],
+            "generation": int(
+                self.db.execute("SELECT value FROM meta WHERE key='generation'").fetchone()[0]
+            ),
+        }
+
     def find(self, term, suite=None, variant=None):
         if variant == "unknown":
             variant = ""

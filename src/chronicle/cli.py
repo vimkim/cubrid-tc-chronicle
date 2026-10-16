@@ -91,6 +91,8 @@ def parser():
     )
     inspect = command("inspect", "Parse a local bundle without changing the index")
     inspect.add_argument("bundle", type=Path)
+    web = command("serve", "Serve the read-only web UI on loopback")
+    web.add_argument("--port", type=int, default=8765)
     return root
 
 
@@ -197,6 +199,11 @@ def format_history(report, commits=False):
 def main(argv=None):
     args = parser().parse_args(argv)
     try:
+        if args.command == "serve":
+            from .web import serve
+
+            serve(args.data_dir, args.port, args.repository)
+            return 0
         if args.command == "inspect":
             parsed = parse(read_bundle(args.bundle))
             result = {"schema_version": 1, **asdict(parsed)}

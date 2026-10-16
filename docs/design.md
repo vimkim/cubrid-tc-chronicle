@@ -1,8 +1,8 @@
 # CUBRID TC Chronicle: project design
 
-Status: proposed design. Date: **2026-10-16**. Delivery target: **CLI first, with a web UI later**, as selected by the user. The working CLI name is `tcc`.
+Status: core implemented; remaining proposals are identified below. Date: **2026-10-16**. Delivery sequence: **CLI first, then a local web UI**, as selected by the user. The CLI name is `tcc`.
 
-Implementation update: **0.1.0** now provides manual GHA collection, retained imports, offline queries, and a bounded pilot. See the [CLI guide](cli.md) and [pilot evidence](pilot.md). Unimplemented proposals remain future work, including verified attempt reconstruction, rename aliases, and symptom fingerprints.
+Implementation update: **0.2.0** provides manual GHA collection, retained imports, offline queries, and a local read-only web UI. See the [CLI guide](cli.md), [web guide](web.md), and [initial pilot evidence](pilot.md). Unimplemented proposals remain future work, including verified attempt reconstruction, rename aliases, and symptom fingerprints.
 
 ## 1. Product decision
 
@@ -171,7 +171,7 @@ flowchart LR
     P --> I["SQLite history index"]
     I --> Q["History queries"]
     Q --> T["CLI text and JSON"]
-    Q -.-> W["Later web UI"]
+    Q --> W["Read-only local web UI"]
 ```
 
 Keep these modules deep, with small interfaces:
@@ -183,7 +183,7 @@ Keep these modules deep, with small interfaces:
 | History index | `ingest(parsed_execution) -> Receipt` | Transactions, idempotence, schema migrations, references to retained evidence |
 | History query | `history(query) -> HistoryReport` | Target selection, recurrence, ancestry, comparison context, and coverage rules |
 
-The CLI formats reports and translates arguments. It contains no recurrence policy. A future web UI uses the same query interface.
+The CLI formats reports and translates arguments. It contains no recurrence policy. The web UI uses the same query interface through a read-only local HTTP adapter.
 
 Place transport seams at the actual sources: GitHub metadata and the internal result store. Recorded HTTP responses provide replay adapters for tests. Do not build a general CI-provider plugin framework before a second provider is implemented.
 

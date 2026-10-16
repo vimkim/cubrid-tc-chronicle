@@ -145,6 +145,11 @@ class Index:
         if not version or int(version[0]) != SCHEMA_VERSION:
             self.db.close()
             raise ValueError("unsupported index schema version")
+        if writable:
+            # Additive indexes remain compatible with the original schema and CLI.
+            self.db.execute("""CREATE INDEX IF NOT EXISTS observation_failures
+                ON observation(testcase_id,execution_id) WHERE outcome IN ('FAIL','ERROR')""")
+            self.db.commit()
 
     def __enter__(self):
         return self
@@ -200,10 +205,32 @@ class Index:
         timestamp = now()
         with self._transaction():
             prior = self.db.execute(
-                "SELECT id,complete FROM execution WHERE snapshot_key=? AND parser_version=?",
+                "SELECT id,complete,completed_at,metadata,manifest_digest FROM execution "
+                "WHERE snapshot_key=? AND parser_version=?",
                 (snapshot, parsed.parser_version),
             ).fetchone()
             if prior:
+                metadata = bundle.metadata
+                if (
+                    prior["completed_at"] is None
+                    and metadata.get("completed_at")
+                    and metadata.get("run_attempts") == 1
+                    and metadata.get("ordering") == "unique_job"
+                ):
+                    # A later consistency check can establish ordering after the
+                    # sole job completes. Keep the first provenance object too.
+                    metadata = {
+                        **json.loads(prior["metadata"]),
+                        **metadata,
+                        "previous_manifest_digest": prior["manifest_digest"],
+                    }
+                    manifest["metadata"] = metadata
+                    digest = self.archive.put(encode(manifest))
+                    self.db.execute(
+                        "UPDATE execution SET completed_at=?,metadata=?,"
+                        "manifest_digest=? WHERE id=?",
+                        (metadata["completed_at"], encode(metadata).decode(), digest, prior["id"]),
+                    )
                 self.db.execute(
                     "UPDATE execution SET last_seen=? WHERE id=?", (timestamp, prior[0])
                 )
@@ -345,9 +372,11 @@ class Index:
                     (repository, run_id, suite, location, reason, now()),
                 )
             else:
-                self.db.execute(
+                changed = self.db.execute(
                     "DELETE FROM availability WHERE repository=? AND run_id=? "
                     "AND suite=? AND location=?",
                     (repository, run_id, suite, location),
-                )
+                ).rowcount
+                if not changed:
+                    return
             self._advance()
