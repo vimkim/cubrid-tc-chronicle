@@ -11,19 +11,33 @@ The [expanded validation report](history-expansion.md) records the collected cor
 From the Chronicle checkout:
 
 ```sh
-uv sync --locked
-uv run tcc serve
+just setup
+just serve
 ```
 
-Open the access URL printed by the command. It contains a temporary token. The server exchanges that token for a session cookie and removes it from the document URL. Each server start creates a new token. The cookie is HTTP-only and uses SameSite Strict. The server binds to `127.0.0.1` and does not open a browser automatically.
+The server listens on all IPv4 interfaces and also on IPv6 when dual-stack support is available. It prints an access URL for each usable address on active interfaces, including LAN, VPN, secondary addresses, container bridges, and loopback. Each URL includes its interface name and the selected port. Wildcard bind addresses, inactive interfaces, and link-local addresses are excluded from the list. Linux's `ip` command from `iproute2` is required for address discovery.
 
-Use `--port` to select another port. Use the global `--data-dir` and `--repository` options to select the index and repository:
+Requests accept the printed IP addresses and the `localhost` alias. Restart the server to refresh this list after interface addresses change.
+
+Open a printed LAN or VPN URL from a computer that can reach that interface. Each URL contains a temporary token. The server exchanges that token for a session cookie and removes it from the document URL. Each server start creates a new token. The cookie is HTTP-only and uses SameSite Strict. The server does not open a browser automatically.
+
+For loopback-only access:
 
 ```sh
-uv run tcc --data-dir /path/to/index serve --port 8765
+just serve-local
 ```
 
-For a remote Linux host, run the server there. On your own computer, replace `HOST` below with that server's SSH name:
+This mode binds to `127.0.0.1` and works without interface discovery. Its direct CLI equivalent is `uv run tcc serve --local`. The default `uv run tcc serve` uses all interfaces, like `just serve`.
+
+Both recipes accept `--port`. Use the global `--data-dir` and `--repository` options through `just tcc` to select the index and repository:
+
+```sh
+just serve --port 8877
+just serve-local --port 8877
+just tcc --data-dir /path/to/index serve --port 8765
+```
+
+For optional SSH forwarding, run `just serve-local` on the remote Linux host. On your own computer, replace `HOST` below with that server's SSH name:
 
 ```sh
 ssh -N -L 8765:127.0.0.1:8765 HOST
@@ -90,10 +104,10 @@ JSON reports use schema version 1. Ambiguous identities return HTTP 409 and cand
 Run the Python checks and optional browser verification:
 
 ```sh
-uv run python -m unittest discover -s tests
-uv sync --locked --group browser
-uv run --group browser playwright install chromium
-uv run --group browser python scripts/browser_check.py
+just test
+just browser-setup
+just browser-check
+just browser-check --lan
 ```
 
-The browser check starts its own temporary loopback server, uses headless Chromium, and stops both afterward. It exercises real indexed `cbrd_27461` history, target selection, browser Back and Forward, date and outcome filters, evidence, coverage, deep-link reload, empty search, and mobile layout. Its JSON result includes screenshot paths. This check requires collected history for that testcase. Browser dependencies remain optional. Ordinary serving uses only Python's standard library and the packaged HTML, CSS, and JavaScript.
+The browser check starts its own temporary server, uses headless Chromium, and stops both afterward. By default, it uses loopback. The `--lan` check binds all interfaces and opens the page through an active LAN or VPN address. It exercises real indexed `cbrd_27461` history, target selection, browser Back and Forward, date and outcome filters, evidence, coverage, deep-link reload, empty search, and mobile layout. Its JSON result includes screenshot paths. This check requires collected history for that testcase. Browser dependencies remain optional. Ordinary serving uses only Python's standard library, the packaged HTML, CSS, and JavaScript, and `iproute2` for LAN address discovery.

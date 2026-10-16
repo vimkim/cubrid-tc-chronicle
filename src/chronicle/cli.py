@@ -91,8 +91,9 @@ def parser():
     )
     inspect = command("inspect", "Parse a local bundle without changing the index")
     inspect.add_argument("bundle", type=Path)
-    web = command("serve", "Serve the read-only web UI on loopback")
+    web = command("serve", "Serve the read-only web UI on all interfaces and print access URLs")
     web.add_argument("--port", type=int, default=8765)
+    web.add_argument("--local", action="store_true", help="Bind only to loopback")
     return root
 
 
@@ -202,7 +203,7 @@ def main(argv=None):
         if args.command == "serve":
             from .web import serve
 
-            serve(args.data_dir, args.port, args.repository)
+            serve(args.data_dir, args.port, args.repository, local=args.local)
             return 0
         if args.command == "inspect":
             parsed = parse(read_bundle(args.bundle))

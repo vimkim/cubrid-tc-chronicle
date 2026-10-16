@@ -1,4 +1,5 @@
 import json
+import socket
 import tempfile
 import threading
 import unittest
@@ -143,6 +144,34 @@ class WebTests(unittest.TestCase):
         self.assertEqual(self.fetch("/", headers={"Host": "example.test"})[0], 403)
         self.assertEqual(self.fetch("/", headers={"Host": "localhost:9876"})[0], 200)
         self.assertEqual(self.fetch("/app.js", method="HEAD")[2], b"")
+
+    def test_lan_hosts_work_with_authentication_and_same_origin_checks(self):
+        self.server.shutdown()
+        self.server.server_close()
+        self.thread.join(5)
+        with patch(
+            "chronicle.web.interface_addresses",
+            return_value=[("lan", "192.0.2.10"), ("vpn", "100.64.1.2"), ("vpn", "fd00::2")],
+        ):
+            self.server = create_server(self.root, port=0, local=False)
+        self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)
+        self.thread.start()
+        self.url = f"http://127.0.0.1:{self.server.server_port}"
+        hosts = ["192.0.2.10:9876", "100.64.1.2:9876"]
+        if self.server.address_family == socket.AF_INET6:
+            hosts.append("[fd00:0:0:0:0:0:0:2]:9876")
+        for host in hosts:
+            with self.subTest(host=host):
+                headers = {"Host": host, "Origin": f"http://{host}"}
+                self.assertEqual(self.fetch("/api/overview", headers=headers)[0], 200)
+                self.assertEqual(
+                    self.fetch("/api/overview", headers={**headers, "Cookie": ""})[0], 401
+                )
+                self.assertEqual(
+                    self.fetch("/api/overview", headers={**headers, "Origin": "http://other"})[0],
+                    403,
+                )
+        self.assertEqual(self.fetch("/", headers={"Host": "192.0.2.99"})[0], 403)
 
     def test_private_evidence_requires_the_per_session_access_link(self):
         status, _, body = self.fetch("/api/overview", headers={"Cookie": ""})

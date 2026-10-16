@@ -2,7 +2,7 @@
 
 Version: **0.2.0**. Supported host: Linux with Python 3.12 or later.
 
-The [web UI](web.md) uses these same queries. Start it with `uv run tcc serve` and open its printed access URL.
+The [web UI](web.md) uses these same queries. Start it with `just serve` or `uv run tcc serve` to listen on all interfaces and print the available LAN, VPN, and loopback URLs. Use `just serve-local` or `uv run tcc serve --local` for loopback-only access.
 
 ## Collection
 

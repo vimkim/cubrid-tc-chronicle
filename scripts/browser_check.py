@@ -4,6 +4,7 @@ uv run --group browser python scripts/browser_check.py
 """
 
 import argparse
+import ipaddress
 import json
 import tempfile
 import threading
@@ -104,14 +105,28 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--data-dir", type=Path, default=default_data_dir())
     parser.add_argument("--screenshots", type=Path)
+    parser.add_argument("--lan", action="store_true", help="Verify access through a LAN interface")
     args = parser.parse_args()
     screenshots = args.screenshots or Path(tempfile.mkdtemp(prefix="tcc-browser-"))
     screenshots.mkdir(parents=True, exist_ok=True)
-    server = create_server(args.data_dir, port=0)
+    server = create_server(args.data_dir, port=0, local=not args.lan)
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
     try:
-        check(f"http://127.0.0.1:{server.server_port}/?token={server.access_token}", screenshots)
+        address = "127.0.0.1"
+        if args.lan:
+            address = next(
+                (
+                    value
+                    for _, value in server.access_addresses
+                    if not ipaddress.ip_address(value).is_loopback
+                ),
+                None,
+            )
+            if address is None:
+                parser.error("--lan requires an active LAN or VPN address")
+        host = f"[{address}]" if ":" in address else address
+        check(f"http://{host}:{server.server_port}/?token={server.access_token}", screenshots)
     finally:
         server.shutdown()
         server.server_close()

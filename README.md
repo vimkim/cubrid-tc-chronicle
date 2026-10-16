@@ -9,7 +9,7 @@ Given a failed testcase, Chronicle answers:
 - Where can I inspect the original result and failure details?
 - How much relevant history is available, missing, or not yet indexed?
 
-Version **0.2.0** provides a CLI and a local web UI for GitHub Actions `gha-ci` SQL, medium, and shell evidence.
+Version **0.2.0** provides a CLI and a read-only web UI for GitHub Actions `gha-ci` SQL, medium, and shell evidence.
 
 ## Install and query
 
@@ -47,7 +47,9 @@ just serve
 
 Open the access URL printed in the terminal. The web UI searches retained testcases, explains earlier failures, and shows outcomes across tested engine commits. Select a failure as the investigation target, filter the timeline, and open checksum-verified evidence. Coverage details remain visible alongside every history result.
 
-The server uses loopback and a session access link. It reads the same local SQLite index as the CLI. Collection continues through `tcc sync`; the UI's Refresh button reads the latest committed index. The [web guide](docs/web.md) includes remote access through SSH, browser checks, and HTTP query behavior.
+By default, the server listens on all interfaces and prints session access URLs for the available IPv4 and IPv6 addresses. Open a LAN or VPN URL from another computer. Address discovery uses Linux's `ip` command from `iproute2`. Use `just serve-local` for loopback-only access.
+
+Both modes read the same local SQLite index as the CLI. Collection continues through `just sync`; the UI's Refresh button reads the latest committed index. The [web guide](docs/web.md) covers LAN access, optional SSH forwarding, browser checks, and HTTP query behavior.
 
 Run `just` to list the recipes. Recipes forward their arguments to the CLI. For example, use `just serve --port 8877` to select a port. Use `just tcc` for global options:
 

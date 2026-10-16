@@ -1,7 +1,9 @@
-"""Local, read-only HTTP adapter over Chronicle's existing query interface."""
+"""Read-only HTTP adapter over Chronicle's existing query interface."""
 
+import ipaddress
 import json
 import secrets
+import socket
 import sqlite3
 from http import HTTPStatus
 from http.cookies import SimpleCookie
@@ -11,6 +13,7 @@ from pathlib import Path
 from urllib.parse import parse_qs, urlencode, urlsplit
 
 from .models import SUITES
+from .network import interface_addresses
 from .query import AmbiguousIdentity, HistoryQuery, Queries
 from .storage import Index
 
@@ -21,14 +24,31 @@ ASSETS = {
 }
 
 
-def create_server(data_dir: Path, port=8765, repository="CUBRID/cubrid"):
-    """Bind loopback only. Each request reads one consistent SQLite snapshot.
+class _DualStackServer(ThreadingHTTPServer):
+    address_family = socket.AF_INET6
 
+    def server_bind(self):
+        self.socket.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_V6ONLY, 0)
+        super().server_bind()
+
+
+def create_server(data_dir: Path, port=8765, repository="CUBRID/cubrid", *, local=True):
+    """Bind loopback for internal callers, or all interfaces when local=False.
+
+    Each request reads one consistent SQLite snapshot.
     No route starts collection or accepts filesystem paths. Evidence URLs accept
     only an indexed snapshot and a filename already recorded in its manifest.
     """
     if not 0 <= port <= 65535:
         raise ValueError("port must be between 0 and 65535")
+    dual_stack = not local and socket.has_dualstack_ipv6()
+    addresses = [("lo", "127.0.0.1")] if local else interface_addresses()
+    if not dual_stack:
+        addresses = [(name, address) for name, address in addresses if ":" not in address]
+    for address in ("127.0.0.1", "::1") if dual_stack else ("127.0.0.1",):
+        if not any(value == address for _, value in addresses):
+            addresses.append(("lo", address))
+    allowed_hosts = {address for _, address in addresses} | {"localhost"}
 
     class Handler(BaseHTTPRequestHandler):
         def log_message(self, *_):
@@ -68,8 +88,19 @@ def create_server(data_dir: Path, port=8765, repository="CUBRID/cubrid"):
         def do_GET(self):
             try:
                 host = urlsplit("http://" + self.headers.get("Host", ""))
-                if host.hostname not in ("127.0.0.1", "localhost") or host.username is not None:
-                    self.error(HTTPStatus.FORBIDDEN, "Use the printed local URL or an SSH tunnel.")
+                hostname = host.hostname or ""
+                try:
+                    hostname = str(ipaddress.ip_address(hostname))
+                except ValueError:
+                    pass  # The localhost alias also supports SSH forwarding.
+                if (
+                    hostname not in allowed_hosts
+                    or host.username is not None
+                    or host.path
+                    or host.query
+                    or host.fragment
+                ):
+                    self.error(HTTPStatus.FORBIDDEN, "Use one of the printed access URLs.")
                     return
                 origin = self.headers.get("Origin")
                 if origin and origin != f"http://{host.netloc}":
@@ -212,18 +243,25 @@ def create_server(data_dir: Path, port=8765, repository="CUBRID/cubrid"):
             except (OSError, sqlite3.Error):
                 self.error(503, "The local index is unavailable. Run tcc sync, then retry.")
 
-    server = ThreadingHTTPServer(("127.0.0.1", port), Handler)
+    if dual_stack:
+        server = _DualStackServer(("::", port), Handler)
+    else:
+        server = ThreadingHTTPServer(("127.0.0.1" if local else "0.0.0.0", port), Handler)
     server.access_token = secrets.token_urlsafe(32)
+    server.access_addresses = addresses
     return server
 
 
-def serve(data_dir: Path, port=8765, repository="CUBRID/cubrid"):
-    with create_server(data_dir, port, repository) as server:
-        print(
-            f"Chronicle: http://127.0.0.1:{server.server_port}/?token={server.access_token}",
-            flush=True,
-        )
-        print("Read-only local evidence. Press Ctrl+C to stop.", flush=True)
+def serve(data_dir: Path, port=8765, repository="CUBRID/cubrid", *, local=False):
+    with create_server(data_dir, port, repository, local=local) as server:
+        print(f"Chronicle access URLs ({'local only' if local else 'all interfaces'}):", flush=True)
+        for interface, address in server.access_addresses:
+            host = f"[{address}]" if ":" in address else address
+            print(
+                f"  {interface}: http://{host}:{server.server_port}/?token={server.access_token}",
+                flush=True,
+            )
+        print("Read-only retained evidence. Press Ctrl+C to stop.", flush=True)
         try:
             server.serve_forever()
         except KeyboardInterrupt:

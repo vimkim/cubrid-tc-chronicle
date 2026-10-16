@@ -12,9 +12,13 @@ setup *args:
 tcc +args:
     uv run --locked tcc "$@"
 
-# Start the local web UI; accepts --port.
+# Serve the web UI on all LAN interfaces and print access URLs; accepts --port.
 serve *args:
     uv run --locked tcc serve "$@"
+
+# Serve the web UI only on loopback; accepts --port.
+serve-local *args:
+    uv run --locked tcc serve --local "$@"
 
 # Collect recent history, selected runs, or a bounded UTC window.
 sync *args:
