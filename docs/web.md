@@ -2,6 +2,10 @@
 
 Version: **0.2.0**. The web UI reads the same retained evidence and history policy as the CLI.
 
+![SQL testcase recurrence in the local Chronicle web UI](assets/web-ui.png)
+
+The [expanded validation report](history-expansion.md) records the collected corpus, source checks, coverage gaps, and browser verification.
+
 ## Start and open
 
 From the Chronicle checkout:

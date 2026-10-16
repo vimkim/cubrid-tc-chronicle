@@ -57,6 +57,8 @@ The current result store reuses directories across attempts. Chronicle reports u
 
 The initial pilot indexed 39,422 explicit outcomes in 72 result snapshots from four runs. It established an earlier failure of `cbrd_27461.sql` on engine `24d2542fa021…`, before the documented occurrence on `b74043dfabe0…`. The pilot covers a small window and selected runs.
 
+The [expanded validation](docs/history-expansion.md) retains **2,518,123 explicit outcomes in 7,327 snapshots from 368 run records**. It verifies three public SQL recurrences. Discovery found 370 runs; two unavailable GitHub inventories and other source gaps remain visible.
+
 Parser version 2 keeps missing verdicts unknown. A plan alone cannot establish `NOT_RUN`. Run `uv run tcc reparse` to update retained version 1 evidence without contacting the source servers.
 
 CircleCI, the QA portal, rename aliases, and symptom fingerprints remain future work. The detailed design includes proposals beyond this release.

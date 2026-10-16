@@ -1,0 +1,368 @@
+{
+  "schema_version": 1,
+  "validated_at": "2026-10-16T12:34:45Z",
+  "python": "3.14.0",
+  "counts": {
+    "observations": 2518123,
+    "testcases": 21993,
+    "failed_testcases": 1732,
+    "failed_commits": 77,
+    "runs": 368,
+    "snapshots": 7327
+  },
+  "coverage": {
+    "source": "gha-ci",
+    "repository": "CUBRID/cubrid",
+    "window": {
+      "since": "2026-10-14T00:00:00Z",
+      "until": "2026-10-16T11:25:00Z",
+      "basis": "run_creation_utc"
+    },
+    "discovery_complete": true,
+    "enumerated_runs": 370,
+    "missing_runs": [
+      38500611664,
+      38644093509
+    ],
+    "stale_runs": [],
+    "unverified_runs": [],
+    "missing_shards": [],
+    "executions": 7327,
+    "complete_results": 6739,
+    "partial_results": 588,
+    "unresolved_attempts": 7327,
+    "unresolved_revisions": 54,
+    "unordered_executions": 347,
+    "in_progress_runs": [],
+    "reasons": [
+      "access_denied_or_missing",
+      "attempt_unresolved",
+      "count_mismatch",
+      "counts_unavailable",
+      "execution_inventory_unknown",
+      "failure_list_only",
+      "incomplete_shard",
+      "no_observations",
+      "not_indexed",
+      "ordering_unknown",
+      "parse_unsupported",
+      "provenance_conflict",
+      "provenance_unresolved",
+      "results_unavailable",
+      "runner_error",
+      "size_limit_exceeded"
+    ],
+    "complete": false,
+    "excluded_sources": [
+      "CircleCI",
+      "QA portal",
+      "unit tests"
+    ],
+    "upstream_limit": "Runs deleted before initial collection may be undetectable.",
+    "last_sync": "2026-10-16T12:25:33Z",
+    "generation": 41004,
+    "earliest_retained_execution": "2026-10-14T00:30:32Z",
+    "availability_record_count": 448
+  },
+  "suites": [
+    {
+      "suite": "sql",
+      "observations": 2036500,
+      "testcases": 17618,
+      "failed_testcases": 1318,
+      "failed_commits": 33,
+      "runs": 368,
+      "snapshots": 1186,
+      "outcomes": {
+        "FAIL": 1763,
+        "PASS": 2034737
+      }
+    },
+    {
+      "suite": "medium",
+      "observations": 112120,
+      "testcases": 975,
+      "failed_testcases": 87,
+      "failed_commits": 5,
+      "runs": 368,
+      "snapshots": 115,
+      "outcomes": {
+        "FAIL": 100,
+        "PASS": 112020
+      }
+    },
+    {
+      "suite": "shell",
+      "observations": 369503,
+      "testcases": 3400,
+      "failed_testcases": 327,
+      "failed_commits": 65,
+      "runs": 368,
+      "snapshots": 6026,
+      "outcomes": {
+        "FAIL": 635,
+        "PASS": 365511,
+        "SKIP": 3357
+      }
+    }
+  ],
+  "samples": [
+    {
+      "path": "sql/_36_guava/cbrd_27461/cases/cbrd_27461.sql",
+      "classification": "SEEN_BEFORE",
+      "observations": 37,
+      "prior_failure_snapshots": 4,
+      "failed_commits": [
+        "24d2542fa021194b76114d93a856184e87bae07a",
+        "2b07f612a81e49cc16d766ed01090d13bba0884b",
+        "71ae9f3f615cf09025c6a29ed9841b2ad9ecaa43",
+        "b74043dfabe0ad36ee4939353a8848a939f90184",
+        "cbd466a2d3808604dfd08ebad3e6104708fd72d4"
+      ],
+      "earliest_failure": {
+        "id": 10714,
+        "ordinal": 1,
+        "run_id": 38690982337,
+        "shard": "09",
+        "completed_at": "2026-10-15T06:30:59Z",
+        "engine_sha": "cbd466a2d3808604dfd08ebad3e6104708fd72d4",
+        "testcase_sha": "60fb767bcc8750524985f5ae0077de9010af9784",
+        "outcome": "FAIL",
+        "source": "http://192.168.1.48:30080/runs/38690982337/sql/shard/09/summary_info",
+        "evidence_digest": "04f060be52fc00dfc260601a1703908e098d474ff4159b6ad45f22f41a199642",
+        "locator": "186"
+      },
+      "earliest_classification": "UNKNOWN_HISTORY",
+      "latest_failure": {
+        "id": 7399,
+        "ordinal": 1,
+        "run_id": 38868725373,
+        "shard": "09",
+        "completed_at": "2026-10-16T08:05:02Z",
+        "engine_sha": "b74043dfabe0ad36ee4939353a8848a939f90184",
+        "testcase_sha": "d54fe412eff5f6763245777d33139b974f4e21e0",
+        "outcome": "FAIL",
+        "source": "http://192.168.1.48:30080/runs/38868725373/sql/shard/09/summary_info",
+        "evidence_digest": "0fc230172a04022fa482eca4146874ec9407cc8b4bb495b86b26f6a2fb171d2a",
+        "locator": "187"
+      },
+      "unknown_order_snapshots": 1
+    },
+    {
+      "path": "sql/_13_issues/_26_2h/cases/cbrd_27596.sql",
+      "classification": "SEEN_BEFORE",
+      "observations": 64,
+      "prior_failure_snapshots": 11,
+      "failed_commits": [
+        "2b07f612a81e49cc16d766ed01090d13bba0884b",
+        "4adcd409072b189f5d965bde5750c53176d90de0",
+        "506f59a81e0b3545830c2e08e427cdb63c866ace",
+        "5b1867174df8dac9b6b9e9ce5a90f983f6bf19b2",
+        "6663cd8944422c25cb50a2a381cd1d5d98d21b92",
+        "bb29c282679d905baa5fdcea3b86c6007915177d",
+        "c0a9d2ff3d006ad5b1f6ab7b5dc70dd818ff1f18",
+        "cbd466a2d3808604dfd08ebad3e6104708fd72d4",
+        "d3c1a2245805a22a3929a9e5e38a2b0d4f72370b",
+        "e00fc7bf7d455b27bc6afb34581c9a830f83c5b8",
+        "eb417a01f37a8b20d48941c218daff24d2b5f1a9",
+        "f18c1faa27405005584b338e419207c123880694"
+      ],
+      "earliest_failure": {
+        "id": 7098,
+        "ordinal": 1,
+        "run_id": 38680302759,
+        "shard": "03",
+        "completed_at": "2026-10-15T04:31:11Z",
+        "engine_sha": "c0a9d2ff3d006ad5b1f6ab7b5dc70dd818ff1f18",
+        "testcase_sha": "59c86e3adee0cf1ed0b80829e8b068767b9269f1",
+        "outcome": "FAIL",
+        "source": "http://192.168.1.48:30080/runs/38680302759/sql/shard/03/summary_info",
+        "evidence_digest": "412463d4063ddeece8f176beaa8b7a64b433c0a1a402bae2301d3fe739e854e9",
+        "locator": "1546"
+      },
+      "earliest_classification": "UNKNOWN_HISTORY",
+      "latest_failure": {
+        "id": 8141,
+        "ordinal": 1,
+        "run_id": 38862915270,
+        "shard": "03",
+        "completed_at": "2026-10-16T07:34:42Z",
+        "engine_sha": "2b07f612a81e49cc16d766ed01090d13bba0884b",
+        "testcase_sha": "3182bdc8ee1bedd4c60affb4d571e224b6f7dc00",
+        "outcome": "FAIL",
+        "source": "http://192.168.1.48:30080/runs/38862915270/sql/shard/03/summary_info",
+        "evidence_digest": "aece5c10a35f15392259670464180da65722aaa429a40c22e80cc76416d11849",
+        "locator": "1547"
+      },
+      "unknown_order_snapshots": 1
+    },
+    {
+      "path": "sql/_13_issues/_26_2h/cases/cbrd_27624.sql",
+      "classification": "SEEN_BEFORE",
+      "observations": 81,
+      "prior_failure_snapshots": 11,
+      "failed_commits": [
+        "2b07f612a81e49cc16d766ed01090d13bba0884b",
+        "33d13423936b72f2796c1a89f148de9e716f257a",
+        "4adcd409072b189f5d965bde5750c53176d90de0",
+        "5b1867174df8dac9b6b9e9ce5a90f983f6bf19b2",
+        "6663cd8944422c25cb50a2a381cd1d5d98d21b92",
+        "bb29c282679d905baa5fdcea3b86c6007915177d",
+        "c0a9d2ff3d006ad5b1f6ab7b5dc70dd818ff1f18",
+        "cbd466a2d3808604dfd08ebad3e6104708fd72d4",
+        "d3c1a2245805a22a3929a9e5e38a2b0d4f72370b",
+        "e00fc7bf7d455b27bc6afb34581c9a830f83c5b8",
+        "eb417a01f37a8b20d48941c218daff24d2b5f1a9",
+        "f18c1faa27405005584b338e419207c123880694"
+      ],
+      "earliest_failure": {
+        "id": 7098,
+        "ordinal": 1,
+        "run_id": 38680302759,
+        "shard": "03",
+        "completed_at": "2026-10-15T04:31:11Z",
+        "engine_sha": "c0a9d2ff3d006ad5b1f6ab7b5dc70dd818ff1f18",
+        "testcase_sha": "59c86e3adee0cf1ed0b80829e8b068767b9269f1",
+        "outcome": "FAIL",
+        "source": "http://192.168.1.48:30080/runs/38680302759/sql/shard/03/summary_info",
+        "evidence_digest": "412463d4063ddeece8f176beaa8b7a64b433c0a1a402bae2301d3fe739e854e9",
+        "locator": "1548"
+      },
+      "earliest_classification": "UNKNOWN_HISTORY",
+      "latest_failure": {
+        "id": 8141,
+        "ordinal": 1,
+        "run_id": 38862915270,
+        "shard": "03",
+        "completed_at": "2026-10-16T07:34:42Z",
+        "engine_sha": "2b07f612a81e49cc16d766ed01090d13bba0884b",
+        "testcase_sha": "3182bdc8ee1bedd4c60affb4d571e224b6f7dc00",
+        "outcome": "FAIL",
+        "source": "http://192.168.1.48:30080/runs/38862915270/sql/shard/03/summary_info",
+        "evidence_digest": "aece5c10a35f15392259670464180da65722aaa429a40c22e80cc76416d11849",
+        "locator": "1549"
+      },
+      "unknown_order_snapshots": 4
+    }
+  ],
+  "timings_ms": {
+    "overview": {
+      "measurements": [
+        2363.955,
+        2417.519,
+        2315.409,
+        2325.984,
+        2391.127
+      ],
+      "median": 2363.955
+    },
+    "failed_catalog": {
+      "measurements": [
+        13.974,
+        12.47,
+        12.531,
+        13.056,
+        12.229
+      ],
+      "median": 12.531
+    },
+    "all_catalog": {
+      "measurements": [
+        5606.931,
+        5634.958,
+        5580.109,
+        5553.785,
+        5475.952
+      ],
+      "median": 5580.109
+    },
+    "all_search": {
+      "measurements": [
+        19.761,
+        18.902,
+        18.72,
+        18.612,
+        18.638
+      ],
+      "median": 18.72
+    },
+    "history": {
+      "measurements": [
+        803.328,
+        1003.342,
+        826.236,
+        788.092,
+        791.47
+      ],
+      "median": 803.328
+    }
+  },
+  "availability_reasons": {
+    "access_denied_or_missing": 296,
+    "execution_inventory_unknown": 149,
+    "not_indexed": 2,
+    "size_limit_exceeded": 1
+  },
+  "diagnostic_snapshots": {
+    "count_mismatch": 526,
+    "results_unavailable": 122,
+    "runner_error": 475,
+    "no_observations": 413,
+    "incomplete_shard": 412,
+    "parse_unsupported": 310,
+    "provenance_unresolved": 52,
+    "provenance_conflict": 54,
+    "counts_unavailable": 101,
+    "failure_list_only": 19
+  },
+  "parsers": [
+    {
+      "parser_version": 1,
+      "active": 0,
+      "snapshots": 3499
+    },
+    {
+      "parser_version": 2,
+      "active": 1,
+      "snapshots": 7327
+    }
+  ],
+  "retired_plan_only_not_run": 10050,
+  "database_bytes": 767655936,
+  "archive_bytes": 52092359,
+  "archive_objects": 27205,
+  "reparse": {
+    "schema_version": 1,
+    "snapshots": 7327,
+    "inserted": 3437
+  },
+  "browser": {
+    "desktop": "passed",
+    "mobile": "passed",
+    "javascript_errors": [],
+    "evidence_files": 8
+  },
+  "verification": {
+    "python_tests": 60,
+    "python_versions": [
+      "3.12.9",
+      "3.14.0"
+    ],
+    "public_sql_endpoint_verdicts_verified": 6,
+    "fields_verified": [
+      "summary_info verdict and SHA-256",
+      "build.read engine SHA",
+      "tc.read testcase SHA"
+    ],
+    "mermaid": {
+      "renderer": "12.2.0",
+      "mode": "render",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "result": "passed"
+    }
+  },
+  "measurement_notes": "Five queries per operation on one read-only connection with warm filesystem caches. No controlled cold-cache or concurrent-write workload."
+}
