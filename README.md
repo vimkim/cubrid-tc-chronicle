@@ -13,26 +13,26 @@ Version **0.2.0** provides a CLI and a local web UI for GitHub Actions `gha-ci` 
 
 ## Install and query
 
-Use Linux with Python 3.12 or later, `uv`, an authenticated `gh`, and access to the internal CUBRID result store.
+Use Linux with Python 3.12 or later, `uv`, `just`, an authenticated `gh`, and access to the internal CUBRID result store.
 
 ```sh
-uv sync --locked
+just setup
 
 # Collect a run. This reads GitHub and the internal result store.
-uv run tcc sync --run 38868725373
+just sync --run 38868725373
 
 # These queries use retained local evidence and work offline.
-uv run tcc find cbrd_27461
-uv run tcc history sql/_36_guava/cbrd_27461/cases/cbrd_27461.sql
-uv run tcc explain --run 38868725373 --suite sql \
+just find cbrd_27461
+just history sql/_36_guava/cbrd_27461/cases/cbrd_27461.sql
+just explain --run 38868725373 --suite sql \
   --case sql/_36_guava/cbrd_27461/cases/cbrd_27461.sql
 ```
 
 Import a bounded UTC run-creation window, then inspect its gaps:
 
 ```sh
-uv run tcc sync --since 2026-10-16T07:39:00Z --until 2026-10-16T07:47:00Z
-uv run tcc coverage --suite sql --json
+just sync --since 2026-10-16T07:39:00Z --until 2026-10-16T07:47:00Z
+just coverage --suite sql --json
 ```
 
 Chronicle reports **seen before**, **first observed in the selected window**, or **unknown history**. It does not infer a passing result from an absent failure entry.
@@ -42,12 +42,18 @@ The [CLI guide](docs/cli.md) covers filters, storage, replay, and error codes. T
 ## Browse the evidence
 
 ```sh
-uv run tcc serve
+just serve
 ```
 
 Open the access URL printed in the terminal. The web UI searches retained testcases, explains earlier failures, and shows outcomes across tested engine commits. Select a failure as the investigation target, filter the timeline, and open checksum-verified evidence. Coverage details remain visible alongside every history result.
 
 The server uses loopback and a session access link. It reads the same local SQLite index as the CLI. Collection continues through `tcc sync`; the UI's Refresh button reads the latest committed index. The [web guide](docs/web.md) includes remote access through SSH, browser checks, and HTTP query behavior.
+
+Run `just` to list the recipes. Recipes forward their arguments to the CLI. For example, use `just serve --port 8877` to select a port. Use `just tcc` for global options:
+
+```sh
+just tcc --data-dir /path/to/index history cbrd_27461
+```
 
 ## Evidence and limitations
 
@@ -59,29 +65,36 @@ The initial pilot indexed 39,422 explicit outcomes in 72 result snapshots from f
 
 The [expanded validation](docs/history-expansion.md) retains **2,518,123 explicit outcomes in 7,327 snapshots from 368 run records**. It verifies three public SQL recurrences. Discovery found 370 runs; two unavailable GitHub inventories and other source gaps remain visible.
 
-Parser version 2 keeps missing verdicts unknown. A plan alone cannot establish `NOT_RUN`. Run `uv run tcc reparse` to update retained version 1 evidence without contacting the source servers.
+Parser version 2 keeps missing verdicts unknown. A plan alone cannot establish `NOT_RUN`. Run `just reparse` to update retained version 1 evidence without contacting the source servers.
 
 CircleCI, the QA portal, rename aliases, and symptom fingerprints remain future work. The detailed design includes proposals beyond this release.
 
 ## Development
 
 ```sh
-uv sync --locked --group dev
-uv run ruff check src tests scripts
-uv run ruff format --check src tests scripts
-uv run python -m unittest discover -s tests
-uv build
+just setup
+just check
+just build
 ```
 
 Optional headless browser verification:
 
 ```sh
-uv sync --locked --group browser
-uv run --group browser playwright install chromium
-uv run --group browser python scripts/browser_check.py
+just browser-setup
+just browser-check
 ```
 
 The application has no third-party runtime dependencies. Tests use public recorded verdicts, sanitized shell specimens, and explicit replay adapters. Private evidence stays in the local data directory.
+
+Preview documents with `docserve` installed:
+
+```sh
+just docs
+just docs docs/web.md
+just docs docs/history-expansion.md
+just docs docs/cli.md
+just docs docs/design.md
+```
 
 ## Design documents
 
