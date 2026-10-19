@@ -225,7 +225,7 @@ class WebTests(unittest.TestCase):
         self.assertEqual(self.fetch("/")[0], 200)
         status, _, body = self.fetch("/api/overview")
         self.assertEqual(status, 503)
-        self.assertIn("tcc sync", json.loads(body)["error"])
+        self.assertIn("cubrid-tcc sync-data", json.loads(body)["error"])
 
 
 if __name__ == "__main__":

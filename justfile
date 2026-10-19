@@ -8,60 +8,60 @@ default:
 setup *args:
     uv sync --locked "$@"
 
-# Reinstall the user-level tcc command from the primary main checkout (daily-update).
+# Reinstall the user-level cubrid-tcc command from the primary main checkout (daily-update).
 sync:
     @test -d .git || { echo "Run just sync from the primary checkout, not a task worktree." >&2; exit 1; }
     @test "$(git branch --show-current)" = main || { echo "Run just sync from main." >&2; exit 1; }
     uv tool install --editable . --reinstall
-    @"$(uv tool dir --bin)/tcc" --version
+    @"$(uv tool dir --bin)/cubrid-tcc" --version
 
 # Run any CLI command, including global options such as --data-dir.
-tcc +args:
-    uv run --locked tcc "$@"
+cubrid-tcc +args:
+    uv run --locked cubrid-tcc "$@"
 
 # Serve the web UI on all LAN interfaces and print access URLs; accepts --port.
 serve *args:
-    uv run --locked tcc serve "$@"
+    uv run --locked cubrid-tcc serve "$@"
 
 # Serve the web UI only on loopback; accepts --port.
 serve-local *args:
-    uv run --locked tcc serve --local "$@"
+    uv run --locked cubrid-tcc serve --local "$@"
 
 # Collect recent history, selected runs, or a bounded UTC window.
 sync-data *args:
-    uv run --locked tcc sync-data "$@"
+    uv run --locked cubrid-tcc sync-data "$@"
 
 # Summarize recent verdicts, suspected flakiness, freshness, and evidence for a TC.
 status case *args:
-    uv run --locked tcc status "$@"
+    uv run --locked cubrid-tcc status "$@"
 
 # Find testcase identities by ticket, filename, or path.
 find term *args:
-    uv run --locked tcc find "$@"
+    uv run --locked cubrid-tcc find "$@"
 
 # Query retained history for a testcase; accepts history filters.
 history case *args:
-    uv run --locked tcc history "$@"
+    uv run --locked cubrid-tcc history "$@"
 
 # Explain a selected failure; requires --run or --execution and --case.
 explain +args:
-    uv run --locked tcc explain "$@"
+    uv run --locked cubrid-tcc explain "$@"
 
 # Inspect discovery, missing results, and provenance gaps.
 coverage *args:
-    uv run --locked tcc coverage "$@"
+    uv run --locked cubrid-tcc coverage "$@"
 
 # Read retained evidence; requires --execution.
 evidence +args:
-    uv run --locked tcc evidence "$@"
+    uv run --locked cubrid-tcc evidence "$@"
 
 # Verify and reparse retained evidence without network access.
 reparse *args:
-    uv run --locked tcc reparse "$@"
+    uv run --locked cubrid-tcc reparse "$@"
 
 # Parse a local evidence bundle without changing the index.
 inspect bundle *args:
-    uv run --locked tcc inspect "$@"
+    uv run --locked cubrid-tcc inspect "$@"
 
 # Preview a document with docserve; defaults to README.md.
 docs path="README.md" *args:

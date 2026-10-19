@@ -27,14 +27,14 @@ For loopback-only access:
 just serve-local
 ```
 
-This mode binds to `127.0.0.1` and works without interface discovery. Its direct CLI equivalent is `uv run tcc serve --local`. The default `uv run tcc serve` uses all interfaces, like `just serve`.
+This mode binds to `127.0.0.1` and works without interface discovery. Its direct CLI equivalent is `uv run cubrid-tcc serve --local`. The default `uv run cubrid-tcc serve` uses all interfaces, like `just serve`.
 
-Both recipes accept `--port`. Use the global `--data-dir` and `--repository` options through `just tcc` to select the index and repository:
+Both recipes accept `--port`. Use the global `--data-dir` and `--repository` options through `just cubrid-tcc` to select the index and repository:
 
 ```sh
 just serve --port 8877
 just serve-local --port 8877
-just tcc --data-dir /path/to/index serve --port 8765
+just cubrid-tcc --data-dir /path/to/index serve --port 8765
 ```
 
 For optional SSH forwarding, run `just serve-local` on the remote Linux host. On your own computer, replace `HOST` below with that server's SSH name:
@@ -71,7 +71,7 @@ Open **Coverage** to inspect the selected window, discovery completeness, missin
 The web UI is read-only. Continue collection in another terminal:
 
 ```sh
-uv run tcc sync-data --since 2026-10-14 --until 2026-10-16
+uv run cubrid-tcc sync-data --since 2026-10-14 --until 2026-10-16
 ```
 
 For existing history, retrieve PR titles, authors, and branch names without downloading testcase results:
@@ -84,14 +84,14 @@ New collections include PR details automatically. The [CLI guide](cli.md#collect
 
 Use **Refresh** to read the latest committed index. It does not start synchronization. Each HTTP query uses a read-only SQLite transaction. Queries remain available while collection writes a new snapshot.
 
-If an index does not exist, the page explains that `tcc sync-data` is required. After initialization, Refresh can read it without restarting the web server.
+If an index does not exist, the page explains that `cubrid-tcc sync-data` is required. After initialization, Refresh can read it without restarting the web server.
 
 ## Parser correction in 0.2
 
 The broader collection exposed a version 1 error: missing shell verdicts could become `NOT_RUN` observations from a selection plan. A selected testcase may have executed even when its result file is unavailable. Parser version 2 records a coverage gap for that uncertainty. It preserves explicit passes, failures, errors, and skips.
 
 ```sh
-uv run tcc reparse
+uv run cubrid-tcc reparse
 ```
 
 Reparse retains the original evidence and older parse records. It atomically selects the current parser's observations for queries. Missing counters now report unavailable evidence, rather than unsupported grammar. A later consistency check can establish ordering for an unchanged snapshot after its sole job completes. The earlier provenance object remains retained. The build producer's attempt still cannot identify the testcase execution attempt.

@@ -137,7 +137,7 @@ def main():
     parser.add_argument("--screenshots", type=Path)
     parser.add_argument("--lan", action="store_true", help="Verify access through a LAN interface")
     args = parser.parse_args()
-    screenshots = args.screenshots or Path(tempfile.mkdtemp(prefix="tcc-browser-"))
+    screenshots = args.screenshots or Path(tempfile.mkdtemp(prefix="cubrid-tcc-browser-"))
     screenshots.mkdir(parents=True, exist_ok=True)
     server = create_server(args.data_dir, port=0, local=not args.lan)
     thread = threading.Thread(target=server.serve_forever, daemon=True)

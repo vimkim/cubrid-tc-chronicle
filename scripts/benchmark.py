@@ -25,7 +25,9 @@ def main():
     if args.observations < 1000 or args.observations % 1000:
         parser.error("--observations must be a positive multiple of 1000")
     fixture = Path(__file__).resolve().parents[1] / "tests/fixtures/sql-recorded/bundle.json"
-    with tempfile.TemporaryDirectory(prefix="tcc-benchmark-", dir=args.temp_dir) as temporary:
+    with tempfile.TemporaryDirectory(
+        prefix="cubrid-tcc-benchmark-", dir=args.temp_dir
+    ) as temporary:
         root = Path(temporary)
         started = time.perf_counter()
         with Index(root, writable=True) as index:

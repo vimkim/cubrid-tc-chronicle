@@ -147,7 +147,9 @@ class ResultStore:
 
     def fetch(self, path):
         try:
-            request = urllib.request.Request(self.url(path), headers={"User-Agent": "tcc/0.1"})
+            request = urllib.request.Request(
+                self.url(path), headers={"User-Agent": "cubrid-tcc/0.1"}
+            )
             with urllib.request.urlopen(request, timeout=12) as response:
                 data = response.read(MAX_FILE_BYTES + 1)
                 if len(data) > MAX_FILE_BYTES:

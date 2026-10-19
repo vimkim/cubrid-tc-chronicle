@@ -116,7 +116,7 @@ def create_server(data_dir: Path, port=8765, repository="CUBRID/cubrid", *, loca
                     if not secrets.compare_digest(
                         args.pop("token").encode(), self.server.access_token.encode()
                     ):
-                        self.error(401, "Open the access URL printed by tcc serve.")
+                        self.error(401, "Open the access URL printed by cubrid-tcc serve.")
                         return
                     self.send_response(303)
                     self.send_header(
@@ -136,7 +136,7 @@ def create_server(data_dir: Path, port=8765, repository="CUBRID/cubrid", *, loca
                 if session is None or not secrets.compare_digest(
                     session.value.encode(), self.server.access_token.encode()
                 ):
-                    self.error(401, "Open the access URL printed by tcc serve.")
+                    self.error(401, "Open the access URL printed by cubrid-tcc serve.")
                     return
                 if url.path in ASSETS:
                     filename, mime = ASSETS[url.path]
@@ -241,7 +241,9 @@ def create_server(data_dir: Path, port=8765, repository="CUBRID/cubrid", *, loca
             except ValueError as e:
                 self.error(400, str(e))
             except (OSError, sqlite3.Error):
-                self.error(503, "The local index is unavailable. Run tcc sync-data, then retry.")
+                self.error(
+                    503, "The local index is unavailable. Run cubrid-tcc sync-data, then retry."
+                )
 
     if dual_stack:
         server = _DualStackServer(("::", port), Handler)

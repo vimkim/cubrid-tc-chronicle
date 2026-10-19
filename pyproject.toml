@@ -11,7 +11,7 @@ requires-python = ">=3.12"
 dependencies = []
 
 [project.scripts]
-tcc = "chronicle.cli:main"
+cubrid-tcc = "chronicle.cli:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/chronicle"]

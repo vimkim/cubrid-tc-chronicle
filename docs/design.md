@@ -1,6 +1,6 @@
 # CUBRID TC Chronicle: project design
 
-Status: core implemented; remaining proposals are identified below. Date: **2026-10-16**. Delivery sequence: **CLI first, then a local web UI**, as selected by the user. The CLI name is `tcc`.
+Status: core implemented; remaining proposals are identified below. Date: **2026-10-16**. Delivery sequence: **CLI first, then a local web UI**, as selected by the user. The CLI name is `cubrid-tcc`.
 
 Implementation update: **0.3.0** adds agent status queries and separates tool installation from evidence collection. It retains manual GHA collection, offline history queries, and the read-only web UI. See the [CLI guide](cli.md), [web guide](web.md), and [initial pilot evidence](pilot.md). Unimplemented proposals remain future work, including verified attempt reconstruction, rename aliases, and symptom fingerprints.
 
@@ -8,13 +8,13 @@ Implementation update: **0.3.0** adds agent status queries and separates tool in
 
 Build a local evidence index of CUBRID testcase outcomes across CI runs and engine commits. Query that index by testcase path, filename, ticket fragment, run, or commit.
 
-Separate collection from queries. `tcc sync-data` retrieves available evidence. `tcc history` and `tcc explain` read a consistent local snapshot without contacting GitHub. This makes repeated queries fast and preserves results after upstream retention removes them.
+Separate collection from queries. `cubrid-tcc sync-data` retrieves available evidence. `cubrid-tcc history` and `cubrid-tcc explain` read a consistent local snapshot without contacting GitHub. This makes repeated queries fast and preserves results after upstream retention removes them.
 
 The central record is an **observed testcase outcome**, tied to the engine revision actually tested. A failed workflow, red commit status, or CTP exit code does not by itself establish a failed testcase.
 
 ### Status query and update ownership
 
-The main terminal workflow is `tcc status NAME --json`. It resolves one identity and summarizes
+The main terminal workflow is `cubrid-tcc status NAME --json`. It resolves one identity and summarizes
 recent observations without selecting a failure target. History and status share the same observation
 filters. The status module owns latest-verdict classification, independent-execution comparison,
 and bounded evidence references. The query module adds coverage and freshness from one SQLite snapshot.
@@ -31,10 +31,10 @@ The [status contract](cli.md#testcase-status-for-agents) defines classifications
 | `just setup` | Locked development environment |
 | `just sync` | Editable uv tool installation from the primary `main` checkout |
 | `daily-update` | Refresh the registered clean checkout, then invoke `just sync` |
-| `tcc sync-data` / `just sync-data` | Explicit CI discovery and evidence collection |
-| `tcc status`, `history`, `explain`, `serve` | Offline reads of retained evidence |
+| `cubrid-tcc sync-data` / `just sync-data` | Explicit CI discovery and evidence collection |
+| `cubrid-tcc status`, `history`, `explain`, `serve` | Offline reads of retained evidence |
 
-The legacy `tcc sync` alias remains available for collection scripts. Daily upkeep never collects CI evidence.
+The legacy `cubrid-tcc sync` alias remains available for collection scripts. Daily upkeep never collects CI evidence.
 
 ### Questions the first version answers
 
@@ -133,25 +133,25 @@ This section describes the proposed interface. See the [CLI guide](cli.md) for i
 
 ```sh
 # Import a bounded recent window. Repository and store come from local config.
-tcc sync-data --since 2026-09-16 --until 2026-10-16
+cubrid-tcc sync-data --since 2026-09-16 --until 2026-10-16
 
 # Resolve a name, ticket fragment, or pasted path.
-tcc find cbrd_27461
+cubrid-tcc find cbrd_27461
 
 # Show distinct failed engine commits, plus linked execution occurrences.
-tcc history sql/_36_guava/cbrd_27461/cases/cbrd_27461.sql
+cubrid-tcc history sql/_36_guava/cbrd_27461/cases/cbrd_27461.sql
 
 # Decide whether this particular failure occurred before.
-tcc explain --run 38868725373 --suite sql \
+cubrid-tcc explain --run 38868725373 --suite sql \
   --case sql/_36_guava/cbrd_27461/cases/cbrd_27461.sql
 
 # Limit comparison to known ancestors of a selected engine revision.
-tcc history sql/_36_guava/cbrd_27461/cases/cbrd_27461.sql \
+cubrid-tcc history sql/_36_guava/cbrd_27461/cases/cbrd_27461.sql \
   --ancestor-of b74043dfabe0ad36ee4939353a8848a939f90184 --json
 
 # Inspect collection gaps and import one available run explicitly.
-tcc coverage --since 2026-09-16 --until 2026-10-16
-tcc sync-data --run 38868725373
+cubrid-tcc coverage --since 2026-09-16 --until 2026-10-16
+cubrid-tcc sync-data --run 38868725373
 ```
 
 Support filters for suite, time window, PR, recorded branch, engine SHA, pass/fail outcome, and fingerprint. All-scope queries include other branches and explain that scope. An ancestry filter reports unresolved ancestry rather than assuming unrelated commits.

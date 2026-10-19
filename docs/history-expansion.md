@@ -19,10 +19,10 @@ Collection resumed from the unfinished run inventory after the collector update.
 The window and replay can be requested with:
 
 ```sh
-uv run tcc sync --since 2026-10-14T00:00:00Z --until 2026-10-16T11:25:00Z \
+uv run cubrid-tcc sync-data --since 2026-10-14T00:00:00Z --until 2026-10-16T11:25:00Z \
   --request-budget 1400 --revisit-limit 0
-uv run tcc reparse
-uv run tcc coverage --since 2026-10-14T00:00:00Z --until 2026-10-16T11:25:00Z --json
+uv run cubrid-tcc reparse
+uv run cubrid-tcc coverage --since 2026-10-14T00:00:00Z --until 2026-10-16T11:25:00Z --json
 ```
 
 Upstream results can change after reruns. These commands do not promise reproduction of the recorded byte set.
@@ -49,9 +49,9 @@ Representative ordered endpoints are:
 The [numeric validation record](history-expansion-20261016.json) contains full SHAs, timestamps, source URLs, retained digests, and line locators. Those sources establish testcase recurrence. They do not establish a shared cause, an introducing commit, or flakiness. Testcase revisions and execution context differ or remain unknown. The earliest ordered failure in each selected history correctly returns **`UNKNOWN_HISTORY`**, because the available evidence cannot establish novelty.
 
 ```sh
-uv run tcc history sql/_36_guava/cbrd_27461/cases/cbrd_27461.sql --suite sql --variant unknown
-uv run tcc history sql/_13_issues/_26_2h/cases/cbrd_27596.sql --suite sql --variant unknown
-uv run tcc history sql/_13_issues/_26_2h/cases/cbrd_27624.sql --suite sql --variant unknown
+uv run cubrid-tcc history sql/_36_guava/cbrd_27461/cases/cbrd_27461.sql --suite sql --variant unknown
+uv run cubrid-tcc history sql/_13_issues/_26_2h/cases/cbrd_27596.sql --suite sql --variant unknown
+uv run cubrid-tcc history sql/_13_issues/_26_2h/cases/cbrd_27624.sql --suite sql --variant unknown
 ```
 
 ## Parser and coverage corrections

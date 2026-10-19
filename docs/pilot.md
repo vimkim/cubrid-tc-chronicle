@@ -11,7 +11,7 @@ The active index contains **39,422 outcomes in 72 shard snapshots from four runs
 The query below returns `SEEN_BEFORE` for `sql/_36_guava/cbrd_27461/cases/cbrd_27461.sql`:
 
 ```sh
-uv run tcc explain --run 38868725373 --suite sql \
+uv run cubrid-tcc explain --run 38868725373 --suite sql \
   --case sql/_36_guava/cbrd_27461/cases/cbrd_27461.sql
 ```
 

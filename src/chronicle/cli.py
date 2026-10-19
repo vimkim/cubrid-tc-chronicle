@@ -27,9 +27,10 @@ def default_data_dir():
 
 def parser():
     root = argparse.ArgumentParser(
-        prog="tcc", description="Check CUBRID testcase status and search retained CI evidence."
+        prog="cubrid-tcc",
+        description="Check CUBRID testcase status and search retained CI evidence.",
     )
-    root.add_argument("--version", action="version", version=f"tcc {__version__}")
+    root.add_argument("--version", action="version", version=f"cubrid-tcc {__version__}")
     root.add_argument("--data-dir", type=Path, default=default_data_dir())
     root.add_argument("--repository", default="CUBRID/cubrid")
     root.add_argument("--json", action="store_true")
@@ -265,7 +266,7 @@ def format_status(report):
             f"{(occurrence['engine_sha'] or 'unknown')[:12]}"
         )
         print("  " + format_pull_request(occurrence))
-        print(f"  Evidence: tcc evidence --execution {occurrence['execution_id']}")
+        print(f"  Evidence: cubrid-tcc evidence --execution {occurrence['execution_id']}")
     failure = report["latest_known_failure"]
     if failure:
         print(
@@ -283,13 +284,16 @@ def format_status(report):
         print("Status limits: " + ", ".join(report["reasons"]))
     format_coverage(report["coverage"])
     if report["freshness"]["needs_refresh"]:
-        print("Refresh evidence with tcc sync-data, or select an explicit --since/--until window.")
+        print(
+            "Refresh evidence with cubrid-tcc sync-data, "
+            "or select an explicit --since/--until window."
+        )
 
 
 def main(argv=None):
     args = parser().parse_args(argv)
     if args.command == "sync":
-        print("tcc sync is a legacy alias; use tcc sync-data.", file=sys.stderr)
+        print("cubrid-tcc sync is a legacy alias; use cubrid-tcc sync-data.", file=sys.stderr)
         args.command = "sync-data"
     try:
         if args.command == "serve":
@@ -305,7 +309,7 @@ def main(argv=None):
             return 0
         writable = args.command in ("sync-data", "reparse")
         if not writable and not (args.data_dir.expanduser() / "history.sqlite3").exists():
-            raise ValueError("index is not initialized; run tcc sync-data first")
+            raise ValueError("index is not initialized; run cubrid-tcc sync-data first")
         with Index(args.data_dir, writable=writable) as index:
             queries = Queries(index, args.repository)
             if args.command == "sync-data":
@@ -428,7 +432,7 @@ def main(argv=None):
         return 3
     except (ValueError, OverflowError, OSError, sqlite3.Error, CollectionError) as e:
         error = {"schema_version": 1, "error": "operational_error", "message": str(e)}
-        print(json.dumps(error) if args.json else f"tcc: {e}", file=sys.stderr)
+        print(json.dumps(error) if args.json else f"cubrid-tcc: {e}", file=sys.stderr)
         return 2
 
 

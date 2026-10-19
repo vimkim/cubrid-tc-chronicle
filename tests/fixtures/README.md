@@ -1,6 +1,6 @@
 # Parser fixtures
 
-`provenance.json` records each specimen's origin and SHA-256 digests. `bundle.json` maps parser evidence names to local filenames. Use `uv run tcc inspect PATH/bundle.json` to parse a fixture without changing the local index.
+`provenance.json` records each specimen's origin and SHA-256 digests. `bundle.json` maps parser evidence names to local filenames. Use `uv run cubrid-tcc inspect PATH/bundle.json` to parse a fixture without changing the local index.
 
 SQL and medium fixtures contain recorded public verdict bytes. The successful and failed samples cover both suites. Medium failure provenance came from an existing retained collection, with its plan checked against the live store.
 

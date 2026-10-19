@@ -2,30 +2,36 @@
 
 Version: **0.3.0**. Supported host: Linux with Python 3.12 or later.
 
-The [web UI](web.md) uses these same queries. Start it with `just serve` or `uv run tcc serve` to listen on all interfaces and print the available LAN, VPN, and loopback URLs. Use `just serve-local` or `uv run tcc serve --local` for loopback-only access.
+The [web UI](web.md) uses these same queries. Start it with `just serve` or `uv run cubrid-tcc serve` to listen on all interfaces and print the available LAN, VPN, and loopback URLs. Use `just serve-local` or `uv run cubrid-tcc serve --local` for loopback-only access.
 
 ## Install and update
 
-Run `just sync` from the primary checkout on `main`. It reinstalls `tcc` with
+Run `just sync` from the primary checkout on `main`. It reinstalls `cubrid-tcc` with
 `uv tool install --editable . --reinstall` and checks the installed version.
 The command then works from any directory. `just setup` installs the locked development environment.
+
+The executable is named `cubrid-tcc` (CUBRID Testcases Chronicle). Reinstalling removes the
+former project-installed `tcc` executable. Update scripts and agent instructions from `tcc`
+to `cubrid-tcc`, and from `just tcc` to `just cubrid-tcc`. No executable alias is installed.
+The data directory and the `TCC_DATA_DIR` and `TCC_STORE_URL` settings are unchanged.
 
 `daily-update` registers tool repositories explicitly. The companion dotfiles change adds
 `~/gh/cubrid-tc-chronicle`. Daily upkeep requires a clean primary `main` tracking the expected
 `origin/main`. It fetches remote `main`, fast-forwards, and runs `just sync`.
 It skips dirty or unsuitable checkouts. It never invokes Chronicle data collection.
 
-Use `just sync-data` or `tcc sync-data` to collect evidence. Existing `tcc sync` calls remain
-compatible and print a migration notice to stderr. `just sync` accepts no collection arguments.
+Use `just sync-data` or `cubrid-tcc sync-data` to collect evidence. The legacy `sync` subcommand
+remains available as `cubrid-tcc sync` and prints a migration notice to stderr.
+`just sync` accepts no collection arguments.
 
 ## Testcase status for agents
 
 ```sh
-tcc status cbrd_27461 --json
-tcc status cbrd_27461.sql --suite sql --variant unknown --json
-tcc status cbrd_27461 --pr 7925 --days 7 --json
-tcc status cbrd_27461 --branch develop --engine b74043df --json
-tcc status cbrd_27461 --since 2026-10-15 --until 2026-10-16 --limit 3 --json
+cubrid-tcc status cbrd_27461 --json
+cubrid-tcc status cbrd_27461.sql --suite sql --variant unknown --json
+cubrid-tcc status cbrd_27461 --pr 7925 --days 7 --json
+cubrid-tcc status cbrd_27461 --branch develop --engine b74043df --json
+cubrid-tcc status cbrd_27461 --since 2026-10-15 --until 2026-10-16 --limit 3 --json
 ```
 
 The query reads the local index without network access or a browser. It defaults to a 14-day
@@ -91,17 +97,17 @@ Discovery age uses both the window end and its check time. A future window end c
 `--limit` bounds each evidence list and the failed-commit list, from 1 to 100, with a default of 5.
 Counts and classifications always use every scoped observation. `failed_engine_commit_count` retains
 the full count. Truncation flags identify shortened lists. Status coverage replaces gap lists with counts.
-Use `tcc coverage --json` with the same suite and window to inspect the full gaps.
+Use `cubrid-tcc coverage --json` with the same suite and window to inspect the full gaps.
 Evidence references include local execution IDs, source URLs, digests, locators, and retained PR details.
 
 For an agent workflow:
 
-1. Run `tcc status NAME --json`.
+1. Run `cubrid-tcc status NAME --json`.
 2. Resolve exit code 3 with a returned path, suite, or variant.
 3. Inspect `status`, `flakiness.assessment`, `freshness`, and coverage separately.
-4. If freshness or coverage is insufficient, collect a chosen window with `tcc sync-data`, then repeat the query.
-5. Use `tcc history NAME --json` or `tcc explain --run ID --case NAME --json` to investigate recurrence.
-6. Read retained bytes with `tcc evidence --execution ID --file FILE` from an evidence reference.
+4. If freshness or coverage is insufficient, collect a chosen window with `cubrid-tcc sync-data`, then repeat the query.
+5. Use `cubrid-tcc history NAME --json` or `cubrid-tcc explain --run ID --case NAME --json` to investigate recurrence.
+6. Read retained bytes with `cubrid-tcc evidence --execution ID --file FILE` from an evidence reference.
 
 Query exit code 0 includes FAILING, UNKNOWN, and NOT_INDEXED. It means the query succeeded.
 Errors go to stderr. JSON output on stdout contains one report.
@@ -111,9 +117,9 @@ Errors go to stderr. JSON output on stdout contains one report.
 Run commands from the project checkout after `uv sync --locked`. GitHub reads use the existing `gh` authentication. The default internal result store is `http://192.168.1.48:30080`.
 
 ```sh
-uv run tcc sync-data --run 38868725373
-uv run tcc sync-data --run 38848190241 --suite sql
-uv run tcc sync-data --since 2026-10-15 --until 2026-10-16 --suite sql --json
+uv run cubrid-tcc sync-data --run 38868725373
+uv run cubrid-tcc sync-data --run 38848190241 --suite sql
+uv run cubrid-tcc sync-data --since 2026-10-15 --until 2026-10-16 --suite sql --json
 ```
 
 Date-only bounds include each complete UTC day. Timestamp bounds include both endpoints, at one-second precision. Discovery uses **run creation time**. Query date filters use the same basis. Testcase execution order uses recorded job completion time when the evidence supports that ordering.
@@ -142,9 +148,9 @@ Chronicle collects small provenance, plan, and verdict files. Each HTTP response
 ## Offline queries
 
 ```sh
-uv run tcc find cbrd_27461
-uv run tcc history sql/_36_guava/cbrd_27461/cases/cbrd_27461.sql --commits
-uv run tcc explain --run 38868725373 --suite sql \
+uv run cubrid-tcc find cbrd_27461
+uv run cubrid-tcc history sql/_36_guava/cbrd_27461/cases/cbrd_27461.sql --commits
+uv run cubrid-tcc explain --run 38868725373 --suite sql \
   --case sql/_36_guava/cbrd_27461/cases/cbrd_27461.sql --json
 ```
 
@@ -161,7 +167,7 @@ The target summary, occurrence list, and `--commits` output include the PR numbe
 An optional ancestry filter uses a local engine Git checkout:
 
 ```sh
-uv run tcc history sql/_36_guava/cbrd_27461/cases/cbrd_27461.sql \
+uv run cubrid-tcc history sql/_36_guava/cbrd_27461/cases/cbrd_27461.sql \
   --ancestor-of b74043dfabe0ad36ee4939353a8848a939f90184 \
   --engine-repository /path/to/CUBRID --json
 ```
@@ -181,7 +187,7 @@ The current shared result directories do not encode testcase execution attempts.
 The timeline counts **retained result snapshots**. A mutable shard can produce several snapshots, and unresolved invocation identity can prevent an exact execution count. Distinct failed commit counts exclude observations without a verified engine SHA.
 
 ```sh
-uv run tcc coverage --since 2026-10-16T07:39:00Z \
+uv run cubrid-tcc coverage --since 2026-10-16T07:39:00Z \
   --until 2026-10-16T07:47:00Z --suite sql --json
 ```
 
@@ -192,11 +198,11 @@ Coverage reports discovery, missing runs and shards, individual result gaps, unr
 The default data directory is `$XDG_DATA_HOME/cubrid-tc-chronicle`, or `~/.local/share/cubrid-tc-chronicle` when that variable is absent. Set `TCC_DATA_DIR` or use the global `--data-dir` option to select another index. Set `TCC_STORE_URL` or `sync-data --store URL` to change the result store. Global `--repository OWNER/REPO` selects the GitHub repository.
 
 ```sh
-uv run tcc --data-dir /path/to/private-index sync-data --run 38868725373
-uv run tcc evidence --execution 1 --json
-uv run tcc evidence --execution 1 --file summary_info
-uv run tcc reparse --json
-uv run tcc inspect tests/fixtures/sql-recorded/bundle.json
+uv run cubrid-tcc --data-dir /path/to/private-index sync-data --run 38868725373
+uv run cubrid-tcc evidence --execution 1 --json
+uv run cubrid-tcc evidence --execution 1 --file summary_info
+uv run cubrid-tcc reparse --json
+uv run cubrid-tcc inspect tests/fixtures/sql-recorded/bundle.json
 ```
 
 Snapshot IDs come from query output and belong to one local index. `evidence` checks retained object hashes before printing raw bytes. JSON history includes the original URL, evidence digest, locator, parser version, and manifest digest. The original URL can change after a rerun. The retained object preserves the bytes used by the parser.

@@ -1,6 +1,7 @@
 # CUBRID TC Chronicle
 
-Check testcase status from the terminal, or browse failure history across CUBRID commits and CI runs.
+Use `cubrid-tcc` (CUBRID Testcases Chronicle) to check testcase status from the terminal,
+or browse failure history across CUBRID commits and CI runs.
 
 Given a failed testcase, Chronicle answers:
 
@@ -21,24 +22,27 @@ Use Linux with Python 3.12 or later, `uv`, `just`, an authenticated `gh`, and ac
 ```sh
 just setup
 
-# Install tcc on your PATH. Run from the primary main checkout.
+# Install cubrid-tcc on your PATH. Run from the primary main checkout.
 just sync
 
 # Collect a run. This reads GitHub and the internal result store.
 just sync-data --run 38868725373
 
 # These queries use retained local evidence and work offline.
-tcc status cbrd_27461 --json
+cubrid-tcc status cbrd_27461 --json
 just find cbrd_27461
 just history sql/_36_guava/cbrd_27461/cases/cbrd_27461.sql
 just explain --run 38868725373 --suite sql \
   --case sql/_36_guava/cbrd_27461/cases/cbrd_27461.sql
 ```
 
-`just sync` reinstalls the user-level `tcc` command with an editable uv tool installation.
+`just sync` reinstalls the user-level `cubrid-tcc` command with an editable uv tool installation.
 Run it from the primary checkout on `main`. Use `just setup` for the development environment.
-`just sync-data` collects CI evidence. The installed equivalent is `tcc sync-data`.
-The old `tcc sync` command remains a collection alias and prints a migration notice.
+Reinstalling replaces the former `tcc` executable with `cubrid-tcc`. Update scripts and agent
+instructions to use `cubrid-tcc`; no `tcc` executable alias is installed. The local index,
+`TCC_DATA_DIR`, and `TCC_STORE_URL` settings are unchanged.
+`just sync-data` collects CI evidence. The installed equivalent is `cubrid-tcc sync-data`.
+The legacy `sync` subcommand remains available as `cubrid-tcc sync` and prints a migration notice.
 
 The companion dotfiles integration registers `~/gh/cubrid-tc-chronicle` with `daily-update`.
 It checks for a clean primary `main`, fetches `origin/main`, fast-forwards, and runs `just sync`.
@@ -47,9 +51,9 @@ Daily upkeep refreshes the installed CLI. Data collection remains an explicit co
 ## Query a testcase for an agent
 
 ```sh
-tcc status cbrd_27461.sql --suite sql --json
-tcc status cbrd_27461 --pr 7925 --days 7 --json
-tcc status cbrd_27461 --branch develop --engine b74043df --json
+cubrid-tcc status cbrd_27461.sql --suite sql --json
+cubrid-tcc status cbrd_27461 --pr 7925 --days 7 --json
+cubrid-tcc status cbrd_27461 --branch develop --engine b74043df --json
 ```
 
 `status` defaults to the preceding 14 days across indexed branches. It reports the latest observed
@@ -94,10 +98,10 @@ By default, the server listens on all interfaces and prints session access URLs 
 
 Both modes read the same local SQLite index as the CLI. Collection continues through `just sync-data`; the UI's Refresh button reads the latest committed index. The [web guide](docs/web.md) covers LAN access, optional SSH forwarding, browser checks, and HTTP query behavior.
 
-Run `just` to list the recipes. Recipes forward their arguments to the CLI. For example, use `just serve --port 8877` to select a port. Use `just tcc` for global options:
+Run `just` to list the recipes. Recipes forward their arguments to the CLI. For example, use `just serve --port 8877` to select a port. Use `just cubrid-tcc` for global options:
 
 ```sh
-just tcc --data-dir /path/to/index history cbrd_27461
+just cubrid-tcc --data-dir /path/to/index history cbrd_27461
 ```
 
 ## Evidence and limitations
