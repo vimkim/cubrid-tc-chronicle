@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 
 from .collection import timestamp
 from .parsing import canonical_path
+from .provenance import run_pull_request
 from .storage import Index
 
 
@@ -388,15 +389,26 @@ class Queries:
         )
         occurrences, unresolved_ancestry = [], 0
         unresolved_filters = set()
-        run_dates = {
-            r["run_id"]: json.loads(r["metadata"])["created_at"]
+        runs = {
+            r["run_id"]: json.loads(r["metadata"])
             for r in self.db.execute("SELECT * FROM run WHERE repository=?", (self.repository,))
         }
+        run_dates = {run_id: run["created_at"] for run_id, run in runs.items()}
         for row in rows:
             record = dict(row)
             record["metadata"] = json.loads(record["metadata"])
             record["diagnostics"] = json.loads(record["diagnostics"])
             m = record["metadata"]
+            record["pull_request"] = run_pull_request(runs.get(record["run_id"]))
+            if record["pull_request"] is None and m.get("engine_pr"):
+                record["pull_request"] = {
+                    "number": m["engine_pr"],
+                    "url": f"https://github.com/{self.repository}/pull/{m['engine_pr']}",
+                    "title": None,
+                    "author": None,
+                    "author_url": None,
+                    "association": "execution_metadata",
+                }
             record["engine_branch"] = m.get("engine_branch")
             if m.get("push_head_sha") == record["engine_sha"]:
                 record["engine_branch"] = m.get("push_branch")
@@ -417,8 +429,9 @@ class Queries:
                 if not record["engine_branch"]:
                     unresolved_filters.add("historical_branch_unknown")
                 continue
-            if query.pr is not None and m.get("engine_pr") != query.pr:
-                if m.get("engine_pr") is None:
+            pr_number = (record["pull_request"] or {}).get("number")
+            if query.pr is not None and pr_number != query.pr:
+                if pr_number is None:
                     unresolved_filters.add("historical_pr_unknown")
                 continue
             if query.outcome and record["outcome"] != query.outcome:

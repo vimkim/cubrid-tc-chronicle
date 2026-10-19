@@ -58,6 +58,21 @@ function utc(value) {
         hour12: false,
       });
 }
+function pullRequest(pr, stacked = false) {
+  if (!pr) return node("span", { class: "muted" }, "PR unknown · author unknown");
+  const author = pr.author
+    ? pr.author_url
+      ? link(`@${pr.author}`, pr.author_url)
+      : `@${pr.author}`
+    : "unknown";
+  return node(
+    "span",
+    { class: "pr-reference", title: pr.title || "Run-associated pull request" },
+    link(`PR #${pr.number}`, pr.url),
+    stacked ? null : " · ",
+    node("span", { class: stacked ? "pr-author" : "" }, "Author: ", author),
+  );
+}
 function reason(value) {
   return value.replaceAll("_", " ");
 }
@@ -478,6 +493,9 @@ function renderHistory(report) {
             ` · ${target.engine_sha?.slice(0, 12) || "unknown engine"} · ${report.target_selection === "explicit" ? "selected failure" : "latest indexed failure"}`,
           )
         : null,
+      target
+        ? node("p", { class: "target-pr" }, pullRequest(target.pull_request))
+        : null,
     ),
   );
   const meta = node(
@@ -569,6 +587,7 @@ function renderHistory(report) {
           "ENGINE COMMIT",
           "TESTCASE REVISION",
           "OUTCOME",
+          "PR / AUTHOR",
           "RUN / SNAPSHOT",
           "EVIDENCE",
         ].map((t) => node("th", { scope: "col" }, t)),
@@ -668,6 +687,7 @@ function renderHistory(report) {
               : "Unknown",
           ),
           node("td", {}, badge(o.outcome)),
+          node("td", { "data-label": "PR / author" }, pullRequest(o.pull_request, true)),
           runCell,
           node("td", { "data-label": "Evidence" }, actions),
         ),

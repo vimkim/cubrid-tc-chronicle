@@ -11,7 +11,8 @@ from datetime import UTC, datetime, timedelta
 
 from .models import SUITES, Bundle
 from .parsing import parse
-from .storage import Index, now
+from .provenance import run_pull_request
+from .storage import Index, encode, now
 
 MAX_FILE_BYTES = 16 * 1024 * 1024
 
@@ -185,6 +186,79 @@ class Collector:
         self.suites = tuple(suites)
         self.progress = progress or (lambda _: None)
 
+    def _reset_pr_requests(self):
+        self._pr_cache = {}
+        self._pr_failures = []
+        self._pr_limited = False
+
+    def _enrich_pr(self, run):
+        pr = run_pull_request(run)
+        if pr is None:
+            return
+        number = pr["number"]
+        if "chronicle_pr" not in run:
+            previous = self.index.db.execute(
+                "SELECT metadata FROM run WHERE repository=? AND run_id=?",
+                (self.repository, run["id"]),
+            ).fetchone()
+            retained = run_pull_request(json.loads(previous[0])) if previous else None
+            if retained and retained["number"] == number:
+                pr = {**retained, "association": pr["association"]}
+        if number not in self._pr_cache:
+            try:
+                self.progress(f"Reading PR #{number} author")
+                response = self.github.get(f"repos/{self.repository}/pulls/{number}")
+                if response.get("number") != number:
+                    raise CollectionError("GitHub returned a different PR number")
+                user = response.get("user") or {}
+                self._pr_cache[number] = {
+                    "title": response.get("title"),
+                    "author": user.get("login"),
+                    "author_url": user.get("html_url"),
+                    "metadata_digest": self.index.archive.put(encode(response)),
+                    "checked_at": now(),
+                }
+            except CollectionError as e:
+                self._pr_cache[number] = {"error": str(e)}
+                self._pr_limited = isinstance(e, RequestLimitError)
+        details = self._pr_cache[number]
+        pr.pop("error", None)
+        run["chronicle_pr"] = {**pr, **details}
+        if "error" in details:
+            self._pr_failures.append(
+                {"run_id": run["id"], "reason": f"PR #{number} metadata: {details['error']}"}
+            )
+
+    def refresh_pr_metadata(self, *, run_ids=()):
+        """Enrich retained runs without discovering runs or reading result files."""
+        self._reset_pr_requests()
+        rows = {
+            r["run_id"]: r
+            for r in self.index.db.execute(
+                "SELECT run_id,metadata,revisit_at FROM run WHERE repository=? ORDER BY run_id",
+                (self.repository,),
+            )
+        }
+        selected = list(dict.fromkeys(run_ids)) if run_ids else list(rows)
+        refreshed, linked, failures = 0, 0, []
+        for run_id in selected:
+            row = rows.get(run_id)
+            if row is None:
+                failures.append({"run_id": run_id, "reason": "run metadata is not indexed"})
+                continue
+            run = json.loads(row["metadata"])
+            self._enrich_pr(run)
+            self.index.record_run(run, row["revisit_at"])
+            refreshed += 1
+            linked += run_pull_request(run) is not None
+            if self._pr_limited:
+                break
+        return {
+            "runs": refreshed,
+            "linked_runs": linked,
+            "failures": failures + self._pr_failures,
+        }
+
     def _fetch(self, run_id, suite, relative):
         path = f"runs/{run_id}/{suite}/{relative}"
         data, reason = self.store.fetch(path)
@@ -205,6 +279,9 @@ class Collector:
             )
         run["repository"] = self.repository
         run["jobs"] = jobs
+        # PR details describe the run association. Its current head is never
+        # evidence of the historical engine revision in build.read.
+        self._enrich_pr(run)
         delay = timedelta(minutes=15) if run["status"] != "completed" else timedelta(hours=12)
         # Completed runs are checked again promptly, then remain in the revisit queue.
         previous = self.index.db.execute(
@@ -336,6 +413,7 @@ class Collector:
         return receipts
 
     def sync(self, *, run_ids=(), since=None, until=None, revisit_limit=20):
+        self._reset_pr_requests()
         if (since is None) != (until is None):
             raise ValueError("provide both --since and --until")
         runs = list(run_ids)
@@ -375,6 +453,8 @@ class Collector:
                     break
                 continue
             self.index.availability(self.repository, run_id, "*", "github_metadata", None)
+            if self._pr_limited:
+                break
         with self.index.db:
             self.index.db.execute("INSERT OR REPLACE INTO meta VALUES ('last_sync',?)", (now(),))
             self.index._advance()
@@ -382,7 +462,7 @@ class Collector:
             "runs": len(set(runs)),
             "inserted_snapshots": sum(r["inserted"] for r in receipts),
             "observations": sum(r["observations"] for r in receipts),
-            "failures": failures,
+            "failures": failures + self._pr_failures,
             "partial_snapshots": sum(not r.get("complete", True) for r in receipts),
             "unavailable_files": sum(
                 r[0] in set(runs)

@@ -5,6 +5,7 @@ Search testcase failure history across CUBRID commits and CI runs.
 Given a failed testcase, Chronicle answers:
 
 - Which tested engine commits show this failure?
+- Which PR's CI run recorded the failure, and who authored that PR?
 - Did this testcase fail before the selected occurrence?
 - Where can I inspect the original result and failure details?
 - How much relevant history is available, missing, or not yet indexed?
@@ -46,6 +47,14 @@ just serve
 ```
 
 Open the access URL printed in the terminal. The web UI searches retained testcases, explains earlier failures, and shows outcomes across tested engine commits. Select a failure as the investigation target, filter the timeline, and open checksum-verified evidence. Coverage details remain visible alongside every history result.
+
+The selected failure and timeline show the associated PR and its author, with links to both. New collections retain these details automatically. Refresh PR details for existing history without downloading testcase results:
+
+```sh
+just sync --pr-metadata-only
+```
+
+An unknown PR or unavailable author remains explicit. A failure in a PR's CI run does not establish that the PR caused it.
 
 By default, the server listens on all interfaces and prints session access URLs for the available IPv4 and IPv6 addresses. Open a LAN or VPN URL from another computer. Address discovery uses Linux's `ip` command from `iproute2`. Use `just serve-local` for loopback-only access.
 

@@ -8,7 +8,7 @@ import urllib.request
 from pathlib import Path
 from unittest.mock import patch
 
-from test_chronicle import CASE, sample
+from test_chronicle import CASE, run_metadata, sample
 
 from chronicle.parsing import parse
 from chronicle.query import Queries
@@ -87,6 +87,26 @@ class WebTests(unittest.TestCase):
         after = json.loads(self.fetch("/api/overview")[2])
         self.assertEqual(after["counts"]["observations"], before["counts"]["observations"] + 1)
         self.assertGreater(after["coverage"]["generation"], before["coverage"]["generation"])
+
+    def test_history_exposes_retained_pr_author_and_pr_filter_without_network(self):
+        run = {
+            **run_metadata(2),
+            "display_title": "PR #42 · A fix",
+            "chronicle_pr": {
+                "number": 42,
+                "author": "pr-author",
+                "author_url": "https://github.com/pr-author",
+            },
+        }
+        with Index(self.root, writable=True) as index:
+            index.record_run(run, "2030-01-01T00:00:00Z")
+        with patch("chronicle.collection.GitHub.get", side_effect=AssertionError("network")):
+            status, _, body = self.fetch(f"/api/history?case={CASE}&suite=sql&pr=42")
+        report = json.loads(body)
+        self.assertEqual(status, 200)
+        self.assertEqual(len(report["occurrences"]), 1)
+        self.assertEqual(report["target"]["pull_request"]["number"], 42)
+        self.assertEqual(report["target"]["pull_request"]["author"], "pr-author")
 
     def test_unknown_results_are_successful_queries(self):
         status, _, body = self.fetch("/api/history?case=not-indexed.sql")

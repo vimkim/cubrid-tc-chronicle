@@ -27,14 +27,32 @@ def check(url, screenshots):
             expect(page.locator(".stat")).to_have_count(4)
             page.get_by_role("searchbox").fill("cbrd_27461")
             expect(page.locator("#case-count")).to_have_text("1 testcase")
-            with page.expect_response(
-                lambda response: "/api/overview?suite=sql" in response.url
-            ) as stats:
+            with (
+                page.expect_response(
+                    lambda response: "/api/overview?suite=sql" in response.url
+                ) as stats,
+                page.expect_response(lambda response: "/api/history?" in response.url) as history,
+            ):
                 page.locator(".case-button").first.click()
             observations = stats.value.json()["counts"]["observations"]
             expect(page.locator(".stat").first).to_contain_text(f"{observations:,}")
             expect(page.get_by_text("This testcase has failed before.", exact=True)).to_be_visible()
             expect(page.locator("#detail")).to_be_visible()
+            pr = history.value.json()["target"]["pull_request"]
+            expect(page.get_by_role("columnheader", name="PR / AUTHOR", exact=True)).to_be_visible()
+            if pr:
+                target_pr = page.locator(".target-pr")
+                expect(target_pr.get_by_role("link", name=f"PR #{pr['number']}")).to_have_attribute(
+                    "href", pr["url"]
+                )
+                expect(target_pr).to_contain_text(
+                    f"Author: @{pr['author']}" if pr["author"] else "Author: unknown"
+                )
+                expect(page.locator('.target-row [data-label="PR / author"]')).to_contain_text(
+                    f"PR #{pr['number']}"
+                )
+            else:
+                expect(page.locator(".target-pr")).to_contain_text("PR unknown · author unknown")
             page.screenshot(path=str(screenshots / "desktop.png"))
             page.get_by_role("button", name="Coverage", exact=True).click()
             expect(page.get_by_role("dialog", name="Evidence coverage")).to_be_visible()
@@ -90,6 +108,7 @@ def check(url, screenshots):
                         "desktop": "passed",
                         "mobile": "passed",
                         "javascript_errors": errors,
+                        "target_pr": pr,
                         "evidence_files": files,
                         "deep_link": saved,
                         "screenshots": str(screenshots),

@@ -20,6 +20,19 @@ Without a run or window, `sync` discovers the preceding 24 hours. Every synchron
 
 Chronicle serializes GitHub requests. Discovery follows pages and splits windows before the filtered 1,000-run cap. Changed counts or duplicate page entries prevent complete discovery coverage. `--request-budget 2000` bounds GitHub requests. Rate-limit responses stop collection and preserve any `Retry-After` value in the error. Retry a failed synchronization to resume retained progress.
 
+Collection also retains the associated PR's number, title, author, and links. Refresh these details for existing history without downloading testcase results:
+
+```sh
+just sync --pr-metadata-only
+just sync --pr-metadata-only --run 38868725373
+```
+
+Without `--run`, this mode processes all retained run records for the selected repository. It accepts no date or suite filters. It preserves snapshot IDs, observations, and revisit deadlines. It uses the same request budget, with one PR lookup per distinct PR in the batch. Lookup failures return exit code 2. Successful updates remain retained for a retry.
+
+For comment-triggered and dispatched CUBRID runs, Chronicle reads the `PR #NUMBER · ` prefix from the recorded run title. PR events can supply one explicit association through `pull_requests`. Other runs retain an unknown PR. Testcase branches, CI actors, and current PR heads do not establish this association.
+
+Chronicle reads the author from the [GitHub pull request response](https://docs.github.com/en/rest/pulls/pulls#get-a-pull-request). It archives that response and records its checksum and retrieval time. A missing author remains unknown. A failed refresh preserves previously retained author details and reports the lookup error. PR titles and account names describe the latest successful lookup.
+
 Each run import enumerates every workflow attempt and its jobs. Internal result reads use at most six threads. A second read detects files that change during collection. Such snapshots retain their verdicts but lose verified revision attribution. A stable fetch cannot establish an attempt number.
 
 Chronicle collects small provenance, plan, and verdict files. Each HTTP response has a 16 MiB limit. An unavailable store or rejected response remains a coverage gap. A `404` means `access_denied_or_missing`, without an expiration claim. SQL failure details in supplementary XML and large core/debug archives remain outside this release.
@@ -37,7 +50,9 @@ uv run tcc explain --run 38868725373 --suite sql \
 
 `history` anchors its summary to the latest ordered indexed failure. `explain` selects a failure in a particular run. If several failure snapshots match that run, select `--execution ID` instead. `--ordinal N` resolves repeated case records inside a snapshot. A passing retry remains a separate observation and does not remove an earlier failure. A plan without case-level execution evidence cannot establish `NOT_RUN`.
 
-History filters include `--suite`, `--since`, `--until`, `--engine SHA_PREFIX`, `--branch`, `--pr`, `--outcome`, and `--variant`. Use `--variant unknown` for records without a known variant. Recorded engine references determine branch and PR matching. A workflow branch or testcase branch cannot substitute for an unknown historical engine reference. Current `issue_comment` evidence commonly lacks those engine references.
+History filters include `--suite`, `--since`, `--until`, `--engine SHA_PREFIX`, `--branch`, `--pr`, `--outcome`, and `--variant`. Use `--variant unknown` for records without a known variant. The `--pr` filter uses the retained run association or explicit execution PR metadata. Branch matching requires recorded engine references. A workflow branch or testcase branch cannot substitute for an unknown historical engine reference.
+
+The target summary, occurrence list, and `--commits` output include PR and author details. JSON occurrences expose a `pull_request` object, or `null` when the association is unknown. The object includes `number`, `url`, `title`, `author`, `author_url`, and `association`. Enriched objects also include `metadata_digest` and `checked_at`. An `error` field records a failed refresh. Queries remain offline. An observed failure in a PR's CI run does not identify the change that caused it.
 
 An optional ancestry filter uses a local engine Git checkout:
 

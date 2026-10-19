@@ -69,10 +69,13 @@
     grid-area: 2 / 2;
   }
   .history-table td:nth-child(5) {
-    grid-area: 3 / 1;
+    grid-area: 3 / 1 / 4 / 3;
   }
   .history-table td:nth-child(6) {
-    grid-area: 3 / 2;
+    grid-area: 4 / 1;
+  }
+  .history-table td:nth-child(7) {
+    grid-area: 4 / 2;
   }
   .history-table .table-path {
     white-space: normal;
@@ -757,6 +760,16 @@ tbody tr:hover {
 }
 .verdict .target-label strong {
   font-weight: 550;
+}
+.verdict .target-pr {
+  margin-top: 6px;
+  overflow-wrap: anywhere;
+}
+.pr-author {
+  display: block;
+  font-size: 10px;
+  margin-top: 3px;
+  color: var(--muted);
 }
 .history-meta {
   display: flex;

@@ -50,6 +50,11 @@ def parser():
     )
     sync.add_argument("--request-budget", type=int, default=2000)
     sync.add_argument("--revisit-limit", type=int, default=20)
+    sync.add_argument(
+        "--pr-metadata-only",
+        action="store_true",
+        help="Refresh PR details for retained runs without downloading testcase results",
+    )
     find = command("find", "Find testcase identities without merging ambiguous names")
     find.add_argument("term")
     find.add_argument("--suite", choices=SUITES)
@@ -150,6 +155,14 @@ def format_coverage(coverage):
     print(coverage["upstream_limit"])
 
 
+def format_pull_request(occurrence):
+    pr = occurrence.get("pull_request")
+    if pr is None:
+        return "PR unknown; author unknown"
+    author = f"@{pr['author']}" if pr.get("author") else "unknown"
+    return f"PR #{pr['number']}; author {author}; {pr['url']}"
+
+
 def format_history(report, commits=False):
     print(
         f"{report['history_result']}: {len(report['prior_failures'])} earlier failure snapshots; "
@@ -167,6 +180,7 @@ def format_history(report, commits=False):
             f"Target: run {target['run_id']} / snapshot {target['id']} / "
             f"{report['target_selection']}"
         )
+        print("  " + format_pull_request(target))
     print(
         f"Scope: {report['scope']['branches']}; prior verified executions: "
         f"{report['prior_verified_executions']}"
@@ -184,6 +198,8 @@ def format_history(report, commits=False):
                 if o["engine_sha"] == sha and o["outcome"] in ("FAIL", "ERROR")
             ]
             print(f"{sha}  " + ", ".join(f"run {o['run_id']}/snapshot {o['id']}" for o in refs))
+            for o in refs:
+                print(f"  Run {o['run_id']}: {format_pull_request(o)}")
     else:
         print("Completed UTC         Engine        TC revision   Outcome  Run / snapshot")
         for o in reversed(report["occurrences"]):
@@ -193,6 +209,7 @@ def format_history(report, commits=False):
                 f"{(o['completed_at'] or 'unknown'):21} {engine:12}  {tc:12}  "
                 f"{o['outcome']:7}  {o['run_id']} / {o['id']}"
             )
+            print("  " + format_pull_request(o))
             if o.get("source"):
                 print("  " + o["source"])
 
@@ -221,7 +238,9 @@ def main(argv=None):
                     raise ValueError(
                         "request budget must be positive; revisit limit must be nonnegative"
                     )
-                if not args.run and not args.since and not args.until:
+                if args.pr_metadata_only and (args.since or args.until or args.suite):
+                    raise ValueError("--pr-metadata-only accepts --run, but not dates or suites")
+                if not args.pr_metadata_only and not args.run and not args.since and not args.until:
                     args.since = (datetime.now(UTC) - timedelta(days=1)).isoformat()
                     args.until = datetime.now(UTC).isoformat()
                 collector = Collector(
@@ -232,15 +251,16 @@ def main(argv=None):
                     suites=args.suite or SUITES,
                     progress=lambda message: print(message, file=sys.stderr),
                 )
-                result = {
-                    "schema_version": 1,
-                    **collector.sync(
+                if args.pr_metadata_only:
+                    collected = collector.refresh_pr_metadata(run_ids=args.run)
+                else:
+                    collected = collector.sync(
                         run_ids=args.run,
                         since=args.since,
                         until=args.until,
                         revisit_limit=args.revisit_limit,
-                    ),
-                }
+                    )
+                result = {"schema_version": 1, **collected}
             elif args.command == "find":
                 result = {
                     "schema_version": 1,
@@ -291,6 +311,13 @@ def main(argv=None):
                 if not result["candidates"]:
                     print("No indexed testcase matches.")
                 format_coverage(result["coverage"])
+            elif args.command == "sync" and args.pr_metadata_only:
+                print(
+                    f"Refreshed PR metadata for {result['runs']} retained runs; "
+                    f"{result['linked_runs']} runs linked to a PR."
+                )
+                for failure in result["failures"]:
+                    print(f"Run {failure['run_id']}: {failure['reason']}", file=sys.stderr)
             else:
                 print(
                     f"Synchronized {result['runs']} runs; "
