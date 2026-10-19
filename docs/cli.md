@@ -52,7 +52,9 @@ uv run tcc explain --run 38868725373 --suite sql \
 
 History filters include `--suite`, `--since`, `--until`, `--engine SHA_PREFIX`, `--branch`, `--pr`, `--outcome`, and `--variant`. Use `--variant unknown` for records without a known variant. The `--pr` filter uses the retained run association or explicit execution PR metadata. Branch matching requires recorded engine references. A workflow branch or testcase branch cannot substitute for an unknown historical engine reference.
 
-The target summary, occurrence list, and `--commits` output include PR and author details. JSON occurrences expose a `pull_request` object, or `null` when the association is unknown. The object includes `number`, `url`, `title`, `author`, `author_url`, and `association`. Enriched objects also include `metadata_digest` and `checked_at`. An `error` field records a failed refresh. Queries remain offline. An observed failure in a PR's CI run does not identify the change that caused it.
+The target summary, occurrence list, and `--commits` output include the PR number, title, author, base branch, and head branch. JSON occurrences expose a `pull_request` object, or `null` when the association is unknown. The object includes `number`, `url`, `title`, `base_ref`, `head_ref`, `author`, `author_url`, and `association`. Enriched objects also include `metadata_digest` and `checked_at`. An `error` field records a failed refresh. Queries remain offline. An observed failure in a PR's CI run does not identify the change that caused it.
+
+`base_ref` names the PR's destination branch. `head_ref` names its source branch. Both reflect the last successful metadata refresh. They do not establish historical engine references or affect `--branch` filtering. Refresh existing history with `just sync --pr-metadata-only` to collect these fields. Unavailable titles and branch names remain explicit.
 
 An optional ancestry filter uses a local engine Git checkout:
 

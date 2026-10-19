@@ -405,6 +405,8 @@ class Queries:
                     "number": m["engine_pr"],
                     "url": f"https://github.com/{self.repository}/pull/{m['engine_pr']}",
                     "title": None,
+                    "base_ref": None,
+                    "head_ref": None,
                     "author": None,
                     "author_url": None,
                     "association": "execution_metadata",

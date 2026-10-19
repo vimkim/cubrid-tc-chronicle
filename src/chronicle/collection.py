@@ -206,13 +206,15 @@ class Collector:
                 pr = {**retained, "association": pr["association"]}
         if number not in self._pr_cache:
             try:
-                self.progress(f"Reading PR #{number} author")
+                self.progress(f"Reading PR #{number} details")
                 response = self.github.get(f"repos/{self.repository}/pulls/{number}")
                 if response.get("number") != number:
                     raise CollectionError("GitHub returned a different PR number")
                 user = response.get("user") or {}
                 self._pr_cache[number] = {
                     "title": response.get("title"),
+                    "base_ref": (response.get("base") or {}).get("ref"),
+                    "head_ref": (response.get("head") or {}).get("ref"),
                     "author": user.get("login"),
                     "author_url": user.get("html_url"),
                     "metadata_digest": self.index.archive.put(encode(response)),

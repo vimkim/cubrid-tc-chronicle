@@ -50,13 +50,15 @@ Then open the printed access URL in your computer's browser. Keep both commands 
 1. Search by ticket, filename, or path. Select a suite when useful. Clear **Show cases with failures** to include testcases with only passing or skipped evidence.
 2. Select a full testcase identity. Distinct paths, suites, and execution variants keep separate histories.
 3. Read the recurrence result. `SEEN_BEFORE` requires earlier case-level failure evidence. Partial or unordered history remains unknown when no earlier failure is established.
-4. Inspect the timeline. Each row shows the tested engine SHA, testcase revision, outcome, associated PR and author, run, and retained snapshot. The target summary also links to its PR and author. The default target is the latest indexed failure. Later passes remain visible.
+4. Inspect the timeline. Each row shows the tested engine SHA, testcase revision, outcome, PR details, run, and retained snapshot. PR details include the number, title, author, base branch, and head branch. The target summary shows the same details, with links to the PR and author. The default target is the latest indexed failure. Later passes remain visible.
 5. Select **Use as target** on another failure to investigate that occurrence. Outcome, engine SHA, and UTC run-creation dates filter the query. Reset clears the filters and explicit target.
 6. Open **Files** to inspect retained evidence. **Retained bytes** reads and verifies the archived object. **Original source** opens the upstream URL, whose bytes can change after reruns.
 
 The timeline displays completion times in UTC. Date filters select runs by creation time, matching CLI discovery. Unknown completion times appear as **Order unknown**. A newer passing observation does not remove an earlier failure.
 
 PR links identify the CI run's association. They do not establish that the PR caused the failure. Chronicle obtains the author from PR metadata. The person who triggers or reruns CI can be different. Unknown associations and unavailable authors remain visible.
+
+**Base** names the PR's destination branch. **Head** names its source branch. These names reflect the last successful metadata refresh. They do not establish the historical tested engine reference or change branch filters. Missing titles and branch names remain explicit.
 
 On desktop, the timeline uses a comparison table. On narrow screens, each row becomes a card with outcome, revisions, run, and evidence controls. The small outcome strip summarizes recent retained observations. Selecting a marker opens its evidence files.
 
@@ -72,7 +74,7 @@ The web UI is read-only. Continue collection in another terminal:
 uv run tcc sync --since 2026-10-14 --until 2026-10-16
 ```
 
-For existing history, retrieve PR authors without downloading testcase results:
+For existing history, retrieve PR titles, authors, and branch names without downloading testcase results:
 
 ```sh
 just sync --pr-metadata-only

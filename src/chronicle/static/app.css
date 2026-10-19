@@ -765,6 +765,29 @@ tbody tr:hover {
   margin-top: 6px;
   overflow-wrap: anywhere;
 }
+.pr-cell {
+  min-width: 220px;
+  max-width: 340px;
+  white-space: normal;
+}
+.pr-reference {
+  overflow-wrap: anywhere;
+}
+.pr-title {
+  display: block;
+  margin-top: 4px;
+}
+.pr-branches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 12px;
+  margin-top: 4px;
+  font-size: 10px;
+  color: var(--muted);
+}
+.pr-branches code {
+  font-size: inherit;
+}
 .pr-author {
   display: block;
   font-size: 10px;

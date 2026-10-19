@@ -48,7 +48,7 @@ just serve
 
 Open the access URL printed in the terminal. The web UI searches retained testcases, explains earlier failures, and shows outcomes across tested engine commits. Select a failure as the investigation target, filter the timeline, and open checksum-verified evidence. Coverage details remain visible alongside every history result.
 
-The selected failure and timeline show the associated PR and its author, with links to both. New collections retain these details automatically. Refresh PR details for existing history without downloading testcase results:
+The selected failure and timeline show the PR number, title, author, base branch, and head branch. PR numbers and authors link to GitHub. New collections retain these details automatically. Refresh PR details for existing history without downloading testcase results:
 
 ```sh
 just sync --pr-metadata-only

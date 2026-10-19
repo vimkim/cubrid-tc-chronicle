@@ -39,7 +39,9 @@ def check(url, screenshots):
             expect(page.get_by_text("This testcase has failed before.", exact=True)).to_be_visible()
             expect(page.locator("#detail")).to_be_visible()
             pr = history.value.json()["target"]["pull_request"]
-            expect(page.get_by_role("columnheader", name="PR / AUTHOR", exact=True)).to_be_visible()
+            expect(
+                page.get_by_role("columnheader", name="PULL REQUEST", exact=True)
+            ).to_be_visible()
             if pr:
                 target_pr = page.locator(".target-pr")
                 expect(target_pr.get_by_role("link", name=f"PR #{pr['number']}")).to_have_attribute(
@@ -48,9 +50,18 @@ def check(url, screenshots):
                 expect(target_pr).to_contain_text(
                     f"Author: @{pr['author']}" if pr["author"] else "Author: unknown"
                 )
-                expect(page.locator('.target-row [data-label="PR / author"]')).to_contain_text(
-                    f"PR #{pr['number']}"
-                )
+                row_pr = page.locator(".target-row .pr-cell")
+                expect(row_pr).to_contain_text(f"PR #{pr['number']}")
+                for reference in (target_pr, row_pr):
+                    expect(reference.locator(".pr-title")).to_have_text(
+                        pr.get("title") or "Title unavailable"
+                    )
+                    expect(reference.locator(".pr-branches")).to_contain_text(
+                        f"Base: {pr.get('base_ref') or 'unknown'}"
+                    )
+                    expect(reference.locator(".pr-branches")).to_contain_text(
+                        f"Head: {pr.get('head_ref') or 'unknown'}"
+                    )
             else:
                 expect(page.locator(".target-pr")).to_contain_text("PR unknown · author unknown")
             page.screenshot(path=str(screenshots / "desktop.png"))

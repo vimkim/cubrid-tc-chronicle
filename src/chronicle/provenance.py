@@ -27,6 +27,8 @@ def run_pull_request(run):
         "number": number,
         "url": f"https://github.com/{repository}/pull/{number}",
         "title": None,
+        "base_ref": None,
+        "head_ref": None,
         "author": None,
         "author_url": None,
         "association": association,

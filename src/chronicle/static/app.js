@@ -67,10 +67,17 @@ function pullRequest(pr, stacked = false) {
     : "unknown";
   return node(
     "span",
-    { class: "pr-reference", title: pr.title || "Run-associated pull request" },
+    { class: "pr-reference" },
     link(`PR #${pr.number}`, pr.url),
     stacked ? null : " · ",
     node("span", { class: stacked ? "pr-author" : "" }, "Author: ", author),
+    node("span", { class: "pr-title" }, pr.title || "Title unavailable"),
+    node(
+      "span",
+      { class: "pr-branches", title: "PR branches at the last metadata refresh" },
+      node("span", {}, "Base: ", node("code", {}, pr.base_ref || "unknown")),
+      node("span", {}, "Head: ", node("code", {}, pr.head_ref || "unknown")),
+    ),
   );
 }
 function reason(value) {
@@ -587,7 +594,7 @@ function renderHistory(report) {
           "ENGINE COMMIT",
           "TESTCASE REVISION",
           "OUTCOME",
-          "PR / AUTHOR",
+          "PULL REQUEST",
           "RUN / SNAPSHOT",
           "EVIDENCE",
         ].map((t) => node("th", { scope: "col" }, t)),
@@ -687,7 +694,11 @@ function renderHistory(report) {
               : "Unknown",
           ),
           node("td", {}, badge(o.outcome)),
-          node("td", { "data-label": "PR / author" }, pullRequest(o.pull_request, true)),
+          node(
+            "td",
+            { class: "pr-cell", "data-label": "Pull request" },
+            pullRequest(o.pull_request, true),
+          ),
           runCell,
           node("td", { "data-label": "Evidence" }, actions),
         ),

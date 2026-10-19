@@ -160,7 +160,11 @@ def format_pull_request(occurrence):
     if pr is None:
         return "PR unknown; author unknown"
     author = f"@{pr['author']}" if pr.get("author") else "unknown"
-    return f"PR #{pr['number']}; author {author}; {pr['url']}"
+    return (
+        f"PR #{pr['number']}; author {author}; title: {pr.get('title') or 'unavailable'}; "
+        f"base: {pr.get('base_ref') or 'unknown'}; head: {pr.get('head_ref') or 'unknown'}; "
+        f"{pr['url']}"
+    )
 
 
 def format_history(report, commits=False):

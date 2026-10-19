@@ -32,7 +32,8 @@ def pr_response(number=42, author="pr-author"):
         "html_url": f"https://github.com/CUBRID/cubrid/pull/{number}",
         "user": {"login": author, "html_url": f"https://github.com/{author}"} if author else None,
         # Today's PR head must not replace the historical tested engine revision.
-        "head": {"sha": "f" * 40},
+        "base": {"ref": "develop"},
+        "head": {"ref": "fix/something", "sha": "f" * 40},
     }
 
 
@@ -42,6 +43,8 @@ class RunAssociationTests(unittest.TestCase):
         self.assertEqual(run_pull_request(run)["number"], 42)
         self.assertEqual(run_pull_request(run)["association"], "run_title")
         self.assertIsNone(run_pull_request(run)["author"])
+        self.assertIsNone(run_pull_request(run)["base_ref"])
+        self.assertIsNone(run_pull_request(run)["head_ref"])
         for event in ("push", "schedule"):
             self.assertIsNone(run_pull_request({**run, "event": event}))
         self.assertEqual(run_pull_request({**run, "event": "workflow_dispatch"})["number"], 42)
@@ -98,9 +101,15 @@ class PullRequestHistoryTests(unittest.TestCase):
         self.assertIn("historical_pr_unknown", report["reasons"])
         pr = report["target"]["pull_request"]
         self.assertEqual(pr["author"], "pr-author")
+        self.assertEqual(pr["title"], "Fix something")
+        self.assertEqual(pr["base_ref"], "develop")
+        self.assertEqual(pr["head_ref"], "fix/something")
         self.assertEqual(pr["url"], "https://github.com/CUBRID/cubrid/pull/42")
         self.assertEqual(json.loads(self.index.archive.read(pr["metadata_digest"])), pr_response())
         self.assertEqual(report["target"]["engine_sha"], ENGINE)
+        self.assertIsNone(
+            self.queries.history(HistoryQuery(CASE, branch="fix/something"))["target"]
+        )
 
         for args in (
             ["history", CASE, "--pr", "42"],
@@ -111,6 +120,9 @@ class PullRequestHistoryTests(unittest.TestCase):
             with contextlib.redirect_stdout(out):
                 self.assertEqual(main(["--data-dir", str(self.root), *args]), 0)
             self.assertIn("PR #42; author @pr-author", out.getvalue())
+            self.assertIn(
+                "title: Fix something; base: develop; head: fix/something", out.getvalue()
+            )
 
     def test_normal_sync_enriches_old_history_without_duplicate_observations(self):
         run = pr_run()
@@ -146,6 +158,8 @@ class PullRequestHistoryTests(unittest.TestCase):
         target = self.queries.history(HistoryQuery(CASE))["target"]
         self.assertEqual(target["pull_request"]["author"], "pr-author")
         self.assertIn("error", target["pull_request"])
+        self.assertEqual(target["pull_request"]["base_ref"], "develop")
+        self.assertEqual(target["pull_request"]["head_ref"], "fix/something")
 
     def test_failed_pr_lookup_preserves_testcase_evidence(self):
         github = ReplayGitHub(
@@ -177,6 +191,8 @@ class PullRequestHistoryTests(unittest.TestCase):
         pr = self.queries.history(HistoryQuery(CASE))["target"]["pull_request"]
         self.assertEqual(pr["number"], 42)
         self.assertIsNone(pr["author"])
+        self.assertIsNone(pr["base_ref"])
+        self.assertIsNone(pr["head_ref"])
 
     def test_refresh_failure_keeps_retained_author_and_retry_clears_error(self):
         self.retain(pr_run())
@@ -209,10 +225,15 @@ class PullRequestHistoryTests(unittest.TestCase):
         self.retain(pr_run())
         self.retain(run_metadata(2))
         github = Mock()
-        github.get.return_value = pr_response(author=None)
+        response = pr_response(author=None)
+        response["base"] = None
+        response["head"] = {"sha": "f" * 40}
+        github.get.return_value = response
         Collector(self.index, github, Mock()).refresh_pr_metadata()
         report = self.queries.history(HistoryQuery(CASE))
         self.assertIsNone(report["occurrences"][0]["pull_request"]["author"])
+        self.assertIsNone(report["occurrences"][0]["pull_request"]["base_ref"])
+        self.assertIsNone(report["occurrences"][0]["pull_request"]["head_ref"])
         self.assertIsNone(report["occurrences"][1]["pull_request"])
         self.assertEqual(report["occurrences"][1]["testcase_branch"], "tc/pr-42")
 

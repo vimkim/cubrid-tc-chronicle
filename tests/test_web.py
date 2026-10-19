@@ -88,12 +88,15 @@ class WebTests(unittest.TestCase):
         self.assertEqual(after["counts"]["observations"], before["counts"]["observations"] + 1)
         self.assertGreater(after["coverage"]["generation"], before["coverage"]["generation"])
 
-    def test_history_exposes_retained_pr_author_and_pr_filter_without_network(self):
+    def test_history_exposes_retained_pr_details_and_pr_filter_without_network(self):
         run = {
             **run_metadata(2),
             "display_title": "PR #42 · A fix",
             "chronicle_pr": {
                 "number": 42,
+                "title": "A fix",
+                "base_ref": "develop",
+                "head_ref": "fix/something",
                 "author": "pr-author",
                 "author_url": "https://github.com/pr-author",
             },
@@ -107,6 +110,9 @@ class WebTests(unittest.TestCase):
         self.assertEqual(len(report["occurrences"]), 1)
         self.assertEqual(report["target"]["pull_request"]["number"], 42)
         self.assertEqual(report["target"]["pull_request"]["author"], "pr-author")
+        self.assertEqual(report["target"]["pull_request"]["title"], "A fix")
+        self.assertEqual(report["target"]["pull_request"]["base_ref"], "develop")
+        self.assertEqual(report["target"]["pull_request"]["head_ref"], "fix/something")
 
     def test_unknown_results_are_successful_queries(self):
         status, _, body = self.fetch("/api/history?case=not-indexed.sql")
