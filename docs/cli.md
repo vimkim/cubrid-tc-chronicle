@@ -4,6 +4,27 @@ Version: **0.3.0**. Supported host: Linux with Python 3.12 or later.
 
 The [web UI](web.md) uses these same queries. Start it with `just serve` or `uv run cubrid-tcc serve` to listen on all interfaces and print the available LAN, VPN, and loopback URLs. Use `just serve-local` or `uv run cubrid-tcc serve --local` for loopback-only access.
 
+## Help and examples
+
+```sh
+cubrid-tcc
+cubrid-tcc --help
+cubrid-tcc status --help
+cubrid-tcc sync-data --help
+```
+
+A bare `cubrid-tcc` prints help and examples, then exits with code 0.
+Help requires no local index, authentication, or network access.
+Every command's `--help` includes examples, option descriptions, and relevant defaults.
+Argument errors return code 2 and point to help for examples.
+
+For agents, start with `cubrid-tcc status NAME --json`.
+Use `cubrid-tcc find NAME --json` to resolve ambiguous names.
+Read the report's freshness and coverage before interpreting its verdict.
+Use `sync-data` to collect missing or stale evidence.
+Put global `--data-dir` and `--repository` options before the command.
+The `--json` option works before or after the command.
+
 ## Install and update
 
 Run `just sync` from the primary checkout on `main`. It reinstalls `cubrid-tcc` with

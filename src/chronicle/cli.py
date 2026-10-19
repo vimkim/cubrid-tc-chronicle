@@ -25,50 +25,149 @@ def default_data_dir():
     )
 
 
+class HelpParser(argparse.ArgumentParser):
+    def error(self, message):
+        super().error(f"{message}\nRun '{self.prog} --help' for examples.")
+
+
 def parser():
-    root = argparse.ArgumentParser(
+    root = HelpParser(
         prog="cubrid-tcc",
         description="Check CUBRID testcase status and search retained CI evidence.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""Examples:
+  cubrid-tcc status cbrd_27461 --json
+  cubrid-tcc find cbrd_27461 --json
+  cubrid-tcc history cbrd_27461 --suite sql --json
+  cubrid-tcc sync-data --run 38868725373 --revisit-limit 0
+
+For agents:
+  Start with status NAME --json. Queries read the local index offline.
+  If the index is missing or stale, collect evidence with sync-data.
+  sync-data reads GitHub and the result store, then writes the local index.
+  JSON reports use stdout. Errors and collection progress use stderr.
+  Exit 0: command succeeded, including FAILING, UNKNOWN, or empty query results.
+  Exit 2: invalid arguments or an operational or collection error.
+  Exit 3: ambiguous testcase or occurrence. Select a returned candidate.
+  Check freshness and coverage before drawing conclusions from a verdict.
+  Put --data-dir and --repository before the command. --json works on either side.
+  Run cubrid-tcc COMMAND --help for command details and examples.""",
     )
     root.add_argument("--version", action="version", version=f"cubrid-tcc {__version__}")
-    root.add_argument("--data-dir", type=Path, default=default_data_dir())
-    root.add_argument("--repository", default="CUBRID/cubrid")
-    root.add_argument("--json", action="store_true")
-    commands = root.add_subparsers(dest="command", required=True)
+    root.add_argument(
+        "--data-dir",
+        type=Path,
+        default=default_data_dir(),
+        help="Local index directory (default: %(default)s). "
+        "Uses TCC_DATA_DIR or XDG_DATA_HOME when set",
+    )
+    root.add_argument(
+        "--repository", default="CUBRID/cubrid", help="GitHub OWNER/REPO (default: CUBRID/cubrid)"
+    )
+    json_help = "Print a JSON report for agents and scripts"
+    root.add_argument("--json", action="store_true", help=json_help)
+    commands = root.add_subparsers(
+        dest="command", required=True, title="commands", metavar="COMMAND"
+    )
 
-    def command(name, help_text):
-        p = commands.add_parser(name, help=help_text)
-        p.add_argument("--json", action="store_true", default=argparse.SUPPRESS)
+    def command(name, help_text, description, *examples, notes=""):
+        epilog = "Examples:\n" + "\n".join(f"  cubrid-tcc {example}" for example in examples)
+        if notes:
+            epilog += "\n\n" + notes
+        p = commands.add_parser(
+            name,
+            help=help_text,
+            description=description,
+            epilog=epilog,
+            formatter_class=argparse.RawDescriptionHelpFormatter,
+        )
+        p.add_argument("--json", action="store_true", default=argparse.SUPPRESS, help=json_help)
         return p
 
-    sync = command("sync-data", "Collect a run or a bounded UTC creation-time window")
-    sync.add_argument("--run", type=int, action="append", default=[])
-    sync.add_argument("--since")
-    sync.add_argument("--until")
-    sync.add_argument("--suite", choices=SUITES, action="append")
-    sync.add_argument(
-        "--store", default=os.environ.get("TCC_STORE_URL", "http://192.168.1.48:30080")
+    since_help = "Earliest run creation time: YYYY-MM-DD or ISO 8601 timestamp (UTC)"
+    until_help = "Latest run creation time (UTC). A date includes the whole day"
+    case_help = "Full path, filename, or unambiguous testcase fragment"
+    sync = command(
+        "sync-data",
+        "Collect a run or a bounded UTC creation-time window",
+        "Read GitHub and the result store, then update the local index.\n"
+        "Collect runs created in the past 24 hours by default.",
+        "sync-data --run 38868725373 --revisit-limit 0",
+        "sync-data --since 2026-10-15 --until 2026-10-16 --suite sql --json",
+        "sync-data --pr-metadata-only",
+        notes="GitHub access requires an authenticated gh command.\n"
+        "Date selection requires both --since and --until.\n"
+        "Collection also checks due retained runs unless --revisit-limit is 0.\n"
+        "With --pr-metadata-only, omit --run to refresh every retained run.\n"
+        "Use coverage --json afterward to inspect missing evidence.",
     )
-    sync.add_argument("--request-budget", type=int, default=2000)
-    sync.add_argument("--revisit-limit", type=int, default=20)
+    sync.add_argument(
+        "--run",
+        type=int,
+        action="append",
+        default=[],
+        help="GitHub Actions run ID. Repeat for more runs",
+    )
+    sync.add_argument("--since", help=since_help)
+    sync.add_argument("--until", help=until_help)
+    sync.add_argument(
+        "--suite",
+        choices=SUITES,
+        action="append",
+        help="Collect this suite (default: all). Repeat for more",
+    )
+    sync.add_argument(
+        "--store",
+        default=os.environ.get("TCC_STORE_URL", "http://192.168.1.48:30080"),
+        help="Result store URL (default: TCC_STORE_URL or http://192.168.1.48:30080)",
+    )
+    sync.add_argument(
+        "--request-budget", type=int, default=2000, help="Maximum GitHub requests (default: 2000)"
+    )
+    sync.add_argument(
+        "--revisit-limit",
+        type=int,
+        default=20,
+        help="Maximum due retained runs to check in addition to the selection (default: 20)",
+    )
     sync.add_argument(
         "--pr-metadata-only",
         action="store_true",
-        help="Refresh PR details for retained runs without downloading testcase results",
+        help="Refresh PR details without testcase downloads. Accepts --run, no dates or suites",
     )
     # Keep existing collection scripts working. Installation belongs to just sync.
-    commands.add_parser("sync", parents=[sync], add_help=False, help="Legacy alias for sync-data")
-    status = command("status", "Summarize recent verdicts, suspected flakiness, and freshness")
-    status.add_argument("case", help="Full path, filename, or unambiguous testcase fragment")
-    status.add_argument("--suite", choices=SUITES)
+    commands.add_parser(
+        "sync",
+        parents=[sync],
+        add_help=False,
+        help="Legacy alias for sync-data",
+        description=sync.description,
+        epilog=sync.epilog,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    status = command(
+        "status",
+        "Summarize recent verdicts, suspected flakiness, and freshness",
+        "Read the local index offline.\n"
+        "Report the latest verdict, counts, suspected flakiness, freshness, and coverage.\n"
+        "The default window covers the past 14 days.",
+        "status cbrd_27461 --json",
+        "status cbrd_27461.sql --suite sql --variant unknown --json",
+        "status cbrd_27461 --pr 7925 --days 7 --json",
+        notes="Read status, flakiness.assessment, freshness, and coverage separately.\n"
+        "Exit 0 means the query succeeded. It does not mean the testcase passed.\n"
+        "For ambiguous names, use find NAME --json and select a path, suite, or variant.",
+    )
+    status.add_argument("case", help=case_help)
+    status.add_argument("--suite", choices=SUITES, help="Select one testcase suite")
     status.add_argument("--variant", help="Recorded execution variant, or 'unknown'")
     status.add_argument("--branch", help="Recorded engine branch")
-    status.add_argument("--engine", dest="engine_sha")
-    status.add_argument("--pr", type=int)
+    status.add_argument("--engine", dest="engine_sha", help="Recorded engine commit SHA or prefix")
+    status.add_argument("--pr", type=int, help="Retained pull request number")
     window = status.add_mutually_exclusive_group()
     window.add_argument("--days", type=int, help="Window length (default: 14 days)")
-    window.add_argument("--since", help="UTC run creation time, or date")
-    status.add_argument("--until", help="UTC run creation time, or date (default: now)")
+    window.add_argument("--since", help=since_help)
+    status.add_argument("--until", help=f"{until_help} (default: now)")
     status.add_argument(
         "--max-age-hours",
         type=float,
@@ -81,49 +180,131 @@ def parser():
         default=5,
         help="Maximum evidence examples per list, 1–100 (default: 5)",
     )
-    find = command("find", "Find testcase identities without merging ambiguous names")
-    find.add_argument("term")
-    find.add_argument("--suite", choices=SUITES)
+    find = command(
+        "find",
+        "Find testcase identities without merging ambiguous names",
+        "Search retained testcase paths offline by ticket, filename, or path fragment.\n"
+        "Return candidate paths, suites, and variants without combining identities.",
+        "find cbrd_27461 --json",
+        "find cbrd_27461.sql --suite sql --json",
+        notes="Use a returned path, suite, and variant with status, history, or explain.",
+    )
+    find.add_argument("term", help="Ticket, filename, or path fragment (search ignores case)")
+    find.add_argument("--suite", choices=SUITES, help="Select one testcase suite")
     find.add_argument("--variant", help="Recorded execution variant, or 'unknown'")
     for name in ("history", "explain"):
-        p = command(name, "Query offline testcase observations and earlier failures")
         if name == "history":
-            p.add_argument("case")
+            p = command(
+                name,
+                "Query offline testcase observations and earlier failures",
+                "Read retained observations offline.\n"
+                "Compare earlier failures with the latest ordered failure in the selected scope.\n"
+                "No date window applies by default.",
+                "history cbrd_27461 --json",
+                "history cbrd_27461 --suite sql --commits",
+                "history cbrd_27461 --branch develop --outcome FAIL --json",
+                notes="To select a failure in one run or snapshot, use explain.\n"
+                "--commits and --runs change text output only. JSON always includes occurrences.",
+            )
+            p.add_argument("case", help=case_help)
             view = p.add_mutually_exclusive_group()
-            view.add_argument("--commits", action="store_true")
-            view.add_argument("--runs", action="store_true")
+            view.add_argument(
+                "--commits", action="store_true", help="Group text output by failed engine commit"
+            )
+            view.add_argument(
+                "--runs", action="store_true", help="List observations by run (default text view)"
+            )
         else:
-            p.add_argument("--case", required=True)
+            p = command(
+                name,
+                "Explain one retained failure and compare earlier failures offline",
+                "Select a retained failure with --case and exactly one of --run or --execution.\n"
+                "Compare it with earlier retained failures without network access.",
+                "explain --run 38868725373 --case cbrd_27461 --suite sql --json",
+                "explain --execution 1 --case cbrd_27461 --json",
+                notes="Use execution IDs from query output in the same local index.\n"
+                "If a run matches several failures, select a returned --execution ID.\n"
+                "If a snapshot repeats a case, also select its returned --ordinal.",
+            )
+            p.add_argument("--case", required=True, help=case_help)
             target = p.add_mutually_exclusive_group(required=True)
-            target.add_argument("--run", type=int, dest="run_id")
-            target.add_argument("--execution", type=int, dest="execution_id")
-            p.add_argument("--ordinal", type=int)
-        p.add_argument("--suite", choices=SUITES)
-        p.add_argument("--since")
-        p.add_argument("--until")
-        p.add_argument("--engine", dest="engine_sha")
-        p.add_argument("--branch")
-        p.add_argument("--pr", type=int)
+            target.add_argument("--run", type=int, dest="run_id", help="GitHub Actions run ID")
+            target.add_argument(
+                "--execution", type=int, dest="execution_id", help="Local retained snapshot ID"
+            )
+            p.add_argument(
+                "--ordinal", type=int, help="Observation ordinal from an ambiguity candidate"
+            )
+        p.add_argument("--suite", choices=SUITES, help="Select one testcase suite")
+        p.add_argument("--since", help=since_help)
+        p.add_argument("--until", help=until_help)
+        p.add_argument("--engine", dest="engine_sha", help="Recorded engine commit SHA or prefix")
+        p.add_argument("--branch", help="Recorded engine branch")
+        p.add_argument("--pr", type=int, help="Retained pull request number")
         p.add_argument("--variant", help="Recorded execution variant, or 'unknown'")
-        p.add_argument("--outcome", choices=("PASS", "FAIL", "SKIP", "ERROR", "NOT_RUN"))
-        p.add_argument("--ancestor-of")
+        p.add_argument(
+            "--outcome",
+            choices=("PASS", "FAIL", "SKIP", "ERROR", "NOT_RUN"),
+            help="Keep this recorded verdict",
+        )
+        p.add_argument(
+            "--ancestor-of", help="Keep engine commits that are ancestors of this commit"
+        )
         p.add_argument(
             "--engine-repository", help="Local engine Git repository for offline ancestry checks"
         )
-    coverage = command("coverage", "Inspect discovery and result gaps")
-    coverage.add_argument("--since")
-    coverage.add_argument("--until")
-    coverage.add_argument("--suite", choices=SUITES)
-    command("reparse", "Verify and reparse retained snapshots without network access")
-    evidence = command("evidence", "Read retained evidence for one execution")
-    evidence.add_argument("--execution", type=int, required=True)
+    coverage = command(
+        "coverage",
+        "Inspect discovery and result gaps",
+        "Read local coverage offline.\nReport missing discovery, runs, results, and provenance.\n"
+        "Without dates, inspect the retained discovery and run window.",
+        "coverage --json",
+        "coverage --since 2026-10-15 --until 2026-10-16 --suite sql --json",
+    )
+    coverage.add_argument("--since", help=since_help)
+    coverage.add_argument("--until", help=until_help)
+    coverage.add_argument("--suite", choices=SUITES, help="Select one testcase suite")
+    command(
+        "reparse",
+        "Verify and reparse retained snapshots without network access",
+        "Check retained evidence hashes.\nUpdate the local index with the current parser.\n"
+        "This command writes the index without network access.",
+        "reparse --json",
+    )
+    evidence = command(
+        "evidence",
+        "Read retained evidence for one execution",
+        "Read one local snapshot offline.\nWithout --file, list retained filenames as JSON.\n"
+        "With --file, print the retained bytes after hash verification.",
+        "evidence --execution 1 --json",
+        "evidence --execution 1 --file summary_info",
+        notes="Use an execution ID from query output in the same local index.\n"
+        "Select --file from the returned files. --file prints raw bytes even with --json.",
+    )
+    evidence.add_argument("--execution", type=int, required=True, help="Local retained snapshot ID")
     evidence.add_argument(
         "--file", help="Print raw retained bytes for this shard-relative filename"
     )
-    inspect = command("inspect", "Parse a local bundle without changing the index")
-    inspect.add_argument("bundle", type=Path)
-    web = command("serve", "Serve the read-only web UI on all interfaces and print access URLs")
-    web.add_argument("--port", type=int, default=8765)
+    inspect = command(
+        "inspect",
+        "Parse a local bundle without changing the index",
+        "Parse a local bundle.json manifest and its evidence files offline.\n"
+        "Print JSON without changing the index.\nNo initialized index is required.",
+        "inspect tests/fixtures/sql-recorded/bundle.json",
+        notes="The example uses a fixture from the project checkout.",
+    )
+    inspect.add_argument("bundle", type=Path, help="Path to a local bundle.json replay manifest")
+    web = command(
+        "serve",
+        "Serve the read-only web UI on all interfaces and print access URLs",
+        "Serve retained evidence in a read-only web UI.\nListen on all interfaces by default.\n"
+        "Print access URLs without opening a browser.",
+        "serve --local",
+        "serve --port 8877",
+        notes="This command runs until interrupted. Use sync-data to collect new evidence.\n"
+        "--json does not change server output.",
+    )
+    web.add_argument("--port", type=int, default=8765, help="HTTP listening port (default: 8765)")
     web.add_argument("--local", action="store_true", help="Bind only to loopback")
     return root
 
@@ -291,7 +472,12 @@ def format_status(report):
 
 
 def main(argv=None):
-    args = parser().parse_args(argv)
+    root = parser()
+    argv = sys.argv[1:] if argv is None else list(argv)
+    if not argv:
+        root.print_help()
+        return 0
+    args = root.parse_args(argv)
     if args.command == "sync":
         print("cubrid-tcc sync is a legacy alias; use cubrid-tcc sync-data.", file=sys.stderr)
         args.command = "sync-data"
