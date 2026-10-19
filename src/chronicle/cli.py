@@ -13,7 +13,7 @@ from . import __version__
 from .collection import CollectionError, Collector, GitHub, ResultStore
 from .models import SUITES, Bundle
 from .parsing import parse
-from .query import AmbiguousIdentity, HistoryQuery, Queries
+from .query import AmbiguousIdentity, HistoryQuery, Queries, StatusQuery
 from .storage import Index
 
 
@@ -27,7 +27,7 @@ def default_data_dir():
 
 def parser():
     root = argparse.ArgumentParser(
-        prog="tcc", description="Search retained CUBRID testcase evidence."
+        prog="tcc", description="Check CUBRID testcase status and search retained CI evidence."
     )
     root.add_argument("--version", action="version", version=f"tcc {__version__}")
     root.add_argument("--data-dir", type=Path, default=default_data_dir())
@@ -40,7 +40,7 @@ def parser():
         p.add_argument("--json", action="store_true", default=argparse.SUPPRESS)
         return p
 
-    sync = command("sync", "Collect a run or a bounded UTC creation-time window")
+    sync = command("sync-data", "Collect a run or a bounded UTC creation-time window")
     sync.add_argument("--run", type=int, action="append", default=[])
     sync.add_argument("--since")
     sync.add_argument("--until")
@@ -54,6 +54,31 @@ def parser():
         "--pr-metadata-only",
         action="store_true",
         help="Refresh PR details for retained runs without downloading testcase results",
+    )
+    # Keep existing collection scripts working. Installation belongs to just sync.
+    commands.add_parser("sync", parents=[sync], add_help=False, help="Legacy alias for sync-data")
+    status = command("status", "Summarize recent verdicts, suspected flakiness, and freshness")
+    status.add_argument("case", help="Full path, filename, or unambiguous testcase fragment")
+    status.add_argument("--suite", choices=SUITES)
+    status.add_argument("--variant", help="Recorded execution variant, or 'unknown'")
+    status.add_argument("--branch", help="Recorded engine branch")
+    status.add_argument("--engine", dest="engine_sha")
+    status.add_argument("--pr", type=int)
+    window = status.add_mutually_exclusive_group()
+    window.add_argument("--days", type=int, help="Window length (default: 14 days)")
+    window.add_argument("--since", help="UTC run creation time, or date")
+    status.add_argument("--until", help="UTC run creation time, or date (default: now)")
+    status.add_argument(
+        "--max-age-hours",
+        type=float,
+        default=24,
+        help="Maximum discovery or TC observation age before STALE (default: 24)",
+    )
+    status.add_argument(
+        "--limit",
+        type=int,
+        default=5,
+        help="Maximum evidence examples per list, 1–100 (default: 5)",
     )
     find = command("find", "Find testcase identities without merging ambiguous names")
     find.add_argument("term")
@@ -218,8 +243,54 @@ def format_history(report, commits=False):
                 print("  " + o["source"])
 
 
+def format_status(report):
+    identity = report["identity"]
+    print(
+        f"{report['status']} | flaky: {report['flakiness']['assessment']} | "
+        f"data: {report['freshness']['state']}"
+    )
+    if identity:
+        print(f"Testcase: {identity['path']}; variant {identity['variant'] or 'unknown'}")
+    print(f"Latest observed completion: {report['latest_observed_at'] or 'unknown'}")
+    print(f"Window: {report['window']['since']} through {report['window']['until']} UTC")
+    print("Scope: " + ", ".join(f"{k}={v}" for k, v in report["scope"].items() if v is not None))
+    print(
+        f"{report['observations']} observations in {report['runs']} runs; "
+        + ", ".join(f"{k}={v}" for k, v in report["counts"].items())
+    )
+    for occurrence in report["latest_known"]:
+        print(
+            f"  {occurrence['outcome']} run {occurrence['run_id']} / "
+            f"snapshot {occurrence['execution_id']} / engine "
+            f"{(occurrence['engine_sha'] or 'unknown')[:12]}"
+        )
+        print("  " + format_pull_request(occurrence))
+        print(f"  Evidence: tcc evidence --execution {occurrence['execution_id']}")
+    failure = report["latest_known_failure"]
+    if failure:
+        print(
+            f"Latest known failure: {failure['completed_at']} / run {failure['run_id']} / "
+            f"snapshot {failure['execution_id']}; {report['failure_runs']} runs with failures"
+        )
+    flaky = report["flakiness"]
+    print(
+        f"Flakiness: {flaky['comparable_contexts']} comparable recorded contexts; "
+        f"{flaky['suspect_contexts']} with independent PASS and FAIL/ERROR evidence."
+    )
+    if flaky["reasons"]:
+        print("Flakiness limits: " + ", ".join(flaky["reasons"]))
+    if report["reasons"]:
+        print("Status limits: " + ", ".join(report["reasons"]))
+    format_coverage(report["coverage"])
+    if report["freshness"]["needs_refresh"]:
+        print("Refresh evidence with tcc sync-data, or select an explicit --since/--until window.")
+
+
 def main(argv=None):
     args = parser().parse_args(argv)
+    if args.command == "sync":
+        print("tcc sync is a legacy alias; use tcc sync-data.", file=sys.stderr)
+        args.command = "sync-data"
     try:
         if args.command == "serve":
             from .web import serve
@@ -232,12 +303,12 @@ def main(argv=None):
             result.pop("bundle")
             print(json.dumps(result, indent=2))
             return 0
-        writable = args.command in ("sync", "reparse")
+        writable = args.command in ("sync-data", "reparse")
         if not writable and not (args.data_dir.expanduser() / "history.sqlite3").exists():
-            raise ValueError("index is not initialized; run tcc sync first")
+            raise ValueError("index is not initialized; run tcc sync-data first")
         with Index(args.data_dir, writable=writable) as index:
             queries = Queries(index, args.repository)
-            if args.command == "sync":
+            if args.command == "sync-data":
                 if args.request_budget < 1 or args.revisit_limit < 0:
                     raise ValueError(
                         "request budget must be positive; revisit limit must be nonnegative"
@@ -271,6 +342,12 @@ def main(argv=None):
                     "candidates": queries.find(args.term, args.suite, args.variant),
                     "coverage": queries.coverage(suite=args.suite),
                 }
+            elif args.command == "status":
+                result = queries.status(
+                    StatusQuery(
+                        **{name: getattr(args, name) for name in StatusQuery.__dataclass_fields__}
+                    )
+                )
             elif args.command == "coverage":
                 result = {
                     "schema_version": 1,
@@ -307,6 +384,8 @@ def main(argv=None):
                 print(json.dumps(result, indent=2))
             elif args.command in ("history", "explain"):
                 format_history(result, getattr(args, "commits", False))
+            elif args.command == "status":
+                format_status(result)
             elif args.command == "coverage":
                 format_coverage(result)
             elif args.command == "find":
@@ -315,7 +394,7 @@ def main(argv=None):
                 if not result["candidates"]:
                     print("No indexed testcase matches.")
                 format_coverage(result["coverage"])
-            elif args.command == "sync" and args.pr_metadata_only:
+            elif args.command == "sync-data" and args.pr_metadata_only:
                 print(
                     f"Refreshed PR metadata for {result['runs']} retained runs; "
                     f"{result['linked_runs']} runs linked to a PR."
@@ -347,7 +426,7 @@ def main(argv=None):
             file=sys.stderr,
         )
         return 3
-    except (ValueError, OSError, sqlite3.Error, CollectionError) as e:
+    except (ValueError, OverflowError, OSError, sqlite3.Error, CollectionError) as e:
         error = {"schema_version": 1, "error": "operational_error", "message": str(e)}
         print(json.dumps(error) if args.json else f"tcc: {e}", file=sys.stderr)
         return 2

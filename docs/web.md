@@ -1,6 +1,6 @@
 # Chronicle web UI
 
-Version: **0.2.0**. The web UI reads the same retained evidence and history policy as the CLI.
+Version: **0.3.0**. The web UI reads the same retained evidence and history policy as the CLI.
 
 ![SQL testcase recurrence in the local Chronicle web UI](assets/web-ui.png)
 
@@ -71,20 +71,20 @@ Open **Coverage** to inspect the selected window, discovery completeness, missin
 The web UI is read-only. Continue collection in another terminal:
 
 ```sh
-uv run tcc sync --since 2026-10-14 --until 2026-10-16
+uv run tcc sync-data --since 2026-10-14 --until 2026-10-16
 ```
 
 For existing history, retrieve PR titles, authors, and branch names without downloading testcase results:
 
 ```sh
-just sync --pr-metadata-only
+just sync-data --pr-metadata-only
 ```
 
 New collections include PR details automatically. The [CLI guide](cli.md#collection) describes association evidence, lookup failures, and retained author details.
 
 Use **Refresh** to read the latest committed index. It does not start synchronization. Each HTTP query uses a read-only SQLite transaction. Queries remain available while collection writes a new snapshot.
 
-If an index does not exist, the page explains that `tcc sync` is required. After initialization, Refresh can read it without restarting the web server.
+If an index does not exist, the page explains that `tcc sync-data` is required. After initialization, Refresh can read it without restarting the web server.
 
 ## Parser correction in 0.2
 

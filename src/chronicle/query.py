@@ -3,11 +3,12 @@
 import json
 import subprocess
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 from .collection import timestamp
 from .parsing import canonical_path
 from .provenance import run_pull_request
+from .status import assess, comparison_context
 from .storage import Index
 
 
@@ -33,6 +34,21 @@ class HistoryQuery:
     pr: int | None = None
     ancestor_of: str | None = None
     engine_repository: str | None = None
+
+
+@dataclass
+class StatusQuery:
+    case: str
+    suite: str | None = None
+    variant: str | None = None
+    branch: str | None = None
+    engine_sha: str | None = None
+    pr: int | None = None
+    since: str | None = None
+    until: str | None = None
+    days: int | None = None
+    max_age_hours: float = 24
+    limit: int = 5
 
 
 class Queries:
@@ -338,47 +354,8 @@ class Queries:
             return None
         return {0: True, 1: False}.get(process.returncode)
 
-    @staticmethod
-    def _context(occurrence):
-        m = occurrence["metadata"]
-        return {
-            "testcase_sha": occurrence["testcase_sha"],
-            "build_mode": occurrence["build_mode"],
-            **{
-                key: m.get(key) or None
-                for key in ("ctp_sha", "platform", "configuration_digest", "execution_variant")
-            },
-        }
-
-    def history(self, query: HistoryQuery):
-        identity = self._resolve(query.case, query.suite, query.variant)
-        coverage = self.coverage(
-            query.since, query.until, query.suite or (identity or {}).get("suite")
-        )
-        report = {
-            "schema_version": 1,
-            "identity": identity,
-            "target": None,
-            "history_result": "UNKNOWN_HISTORY",
-            "prior_verified_executions": 0,
-            "prior_failures": [],
-            "failed_commits": [],
-            "occurrences": [],
-            "coverage": coverage,
-            "comparison_groups": {},
-            "inconsistent_observed_outcomes": [],
-            "scope": {
-                "branches": query.branch or "all indexed branches",
-                "engine_sha": query.engine_sha,
-                "ancestor_of": query.ancestor_of,
-                "outcome": query.outcome,
-                "pr": query.pr,
-            },
-            "reasons": [],
-        }
-        if identity is None:
-            report["reasons"] = ["not_indexed"]
-            return report
+    def _occurrences(self, identity, query):
+        """Read scoped observations for history and status through the same filters."""
         rows = self.db.execute(
             """SELECT e.*,o.ordinal,o.outcome,o.duration_ms,o.original,o.raw_verdict,
             o.evidence,o.locator
@@ -450,10 +427,48 @@ class Queries:
             record["source"] = manifest["sources"].get(record["evidence"])
             record["evidence_digest"] = manifest["files"].get(record["evidence"])
             occurrences.append(record)
-        report["occurrences"] = occurrences
         if unresolved_ancestry:
-            report["reasons"].append("ancestry_unknown")
-        report["reasons"].extend(sorted(unresolved_filters))
+            unresolved_filters.add("ancestry_unknown")
+        return occurrences, sorted(unresolved_filters)
+
+    def history(self, query: HistoryQuery):
+        identity = self._resolve(query.case, query.suite, query.variant)
+        coverage = self.coverage(
+            query.since, query.until, query.suite or (identity or {}).get("suite")
+        )
+        report = {
+            "schema_version": 1,
+            "identity": identity,
+            "target": None,
+            "history_result": "UNKNOWN_HISTORY",
+            "prior_verified_executions": 0,
+            "prior_failures": [],
+            "failed_commits": [],
+            "occurrences": [],
+            "coverage": coverage,
+            "comparison_groups": {},
+            "inconsistent_observed_outcomes": [],
+            "scope": {
+                "branches": query.branch or "all indexed branches",
+                "engine_sha": query.engine_sha,
+                "ancestor_of": query.ancestor_of,
+                "outcome": query.outcome,
+                "pr": query.pr,
+            },
+            "reasons": [],
+        }
+        if identity is None:
+            report["reasons"] = ["not_indexed"]
+            return report
+        occurrences, limits = self._occurrences(identity, query)
+        report["occurrences"] = occurrences
+        report["reasons"].extend(limits)
+        unresolved_ancestry = "ancestry_unknown" in limits
+        unresolved_filters = limits
+        run_dates = {
+            r["run_id"]: json.loads(r["metadata"])["created_at"]
+            for r in self.db.execute("SELECT * FROM run WHERE repository=?", (self.repository,))
+        }
         failures = [o for o in occurrences if o["outcome"] in ("FAIL", "ERROR")]
         report["failed_commits"] = sorted({o["engine_sha"] for o in failures if o["engine_sha"]})
         targets = failures
@@ -522,9 +537,9 @@ class Queries:
             if ambiguous_order:
                 report["reasons"].append("ordering_unknown")
         groups = {"ancestors": [], "same_branch": [], "other_or_unknown_branch": []}
-        target_context = self._context(target)
+        target_context = comparison_context(target)
         for previous in report["prior_failures"]:
-            context = self._context(previous)
+            context = comparison_context(previous)
             comparison = {
                 key: (
                     "unknown"
@@ -549,7 +564,7 @@ class Queries:
         report["comparison_groups"] = groups
         by_context = {}
         for o in occurrences:
-            context = self._context(o)
+            context = comparison_context(o)
             if not o["engine_sha"] or any(v is None for v in context.values()):
                 continue
             key = (o["engine_sha"], *context.values())
@@ -560,3 +575,129 @@ class Queries:
                 report["inconsistent_observed_outcomes"].append(sorted({o["id"] for o in group}))
         report["reasons"] = sorted(set(report["reasons"]))
         return report
+
+    def status(self, query: StatusQuery, *, now=None):
+        """Assess recent retained evidence, without refreshing sources or selecting a failure."""
+        if query.days is not None and (query.days < 1 or query.since is not None):
+            raise ValueError("--days must be positive and cannot be combined with --since")
+        if not 1 <= query.limit <= 100 or not 0 < query.max_age_hours <= 8760:
+            raise ValueError("--limit must be 1–100; --max-age-hours must be >0 and <=8760")
+        evaluated_at = timestamp((now or datetime.now(UTC)).isoformat())
+        until = timestamp(query.until, end=True) if query.until else evaluated_at
+        since = (
+            timestamp(query.since)
+            if query.since
+            else timestamp(
+                (datetime.fromisoformat(until) - timedelta(days=query.days or 14)).isoformat()
+            )
+        )
+        identity = self._resolve(query.case, query.suite, query.variant)
+        suite = query.suite or (identity or {}).get("suite")
+        coverage = self.coverage(since, until, suite)
+        history_query = HistoryQuery(
+            query.case,
+            suite=suite,
+            variant=query.variant,
+            since=since,
+            until=until,
+            branch=query.branch,
+            engine_sha=query.engine_sha,
+            pr=query.pr,
+        )
+        occurrences, limits = self._occurrences(identity, history_query) if identity else ([], [])
+        summary = assess(occurrences, query.limit)
+        if identity is None:
+            summary["status"] = "NOT_INDEXED"
+            summary["reasons"] = ["not_indexed"]
+        if limits:
+            # Unknown dates or engine references can hide a newer scoped outcome.
+            summary["status"] = "UNKNOWN"
+        discovery = self.db.execute(
+            "SELECT until,checked_at FROM discovery WHERE repository=? AND complete=1 "
+            "ORDER BY min(until,checked_at) DESC LIMIT 1",
+            (self.repository,),
+        ).fetchone()
+        discovery_through = discovery["until"] if discovery else None
+        discovery_checked_at = discovery["checked_at"] if discovery else None
+
+        def age_hours(at):
+            return (
+                max(
+                    0,
+                    (
+                        datetime.fromisoformat(evaluated_at) - datetime.fromisoformat(at)
+                    ).total_seconds()
+                    / 3600,
+                )
+                if at
+                else None
+            )
+
+        def freshness_state(age):
+            return "UNKNOWN" if age is None else "STALE" if age > query.max_age_hours else "FRESH"
+
+        discovery_age = (
+            max(age_hours(discovery_through), age_hours(discovery_checked_at))
+            if discovery
+            else None
+        )
+        observation_age = age_hours(summary["latest_observed_at"])
+        discovery_state = freshness_state(discovery_age)
+        observation_state = freshness_state(observation_age)
+        states = (discovery_state, observation_state)
+        freshness = "STALE" if "STALE" in states else "UNKNOWN" if "UNKNOWN" in states else "FRESH"
+        reasons = set(summary["reasons"]) | set(limits) | set(coverage["reasons"])
+        if discovery_state != "FRESH":
+            reasons.add(
+                "discovery_stale" if discovery_age is not None else "discovery_freshness_unknown"
+            )
+        if observation_state != "FRESH":
+            reasons.add(
+                "observation_stale"
+                if observation_age is not None
+                else "observation_freshness_unknown"
+            )
+        gap_lists = (
+            "missing_runs",
+            "stale_runs",
+            "unverified_runs",
+            "missing_shards",
+            "gaps",
+            "in_progress_runs",
+        )
+        compact_coverage = {k: v for k, v in coverage.items() if k not in gap_lists}
+        compact_coverage["gap_counts"] = {k: len(coverage[k]) for k in gap_lists}
+        return {
+            "schema_version": 1,
+            **summary,
+            "requested_case": query.case,
+            "identity": identity,
+            "window": coverage["window"],
+            "scope": {
+                "repository": self.repository,
+                "suite": suite,
+                "branch": query.branch,
+                "engine_sha": query.engine_sha,
+                "pr": query.pr,
+                "variant": query.variant,
+            },
+            "freshness": {
+                "state": freshness,
+                "evaluated_at": evaluated_at,
+                "discovery_through": discovery_through,
+                "discovery_checked_at": discovery_checked_at,
+                "discovery_state": discovery_state,
+                "discovery_age_hours": round(discovery_age, 3)
+                if discovery_age is not None
+                else None,
+                "observation_state": observation_state,
+                "observation_age_hours": round(observation_age, 3)
+                if observation_age is not None
+                else None,
+                "max_age_hours": query.max_age_hours,
+                "last_sync": coverage["last_sync"],
+                "needs_refresh": freshness != "FRESH" or not coverage["complete"],
+            },
+            "coverage": compact_coverage,
+            "reasons": sorted(reasons),
+        }

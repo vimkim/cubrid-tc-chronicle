@@ -2,15 +2,39 @@
 
 Status: core implemented; remaining proposals are identified below. Date: **2026-10-16**. Delivery sequence: **CLI first, then a local web UI**, as selected by the user. The CLI name is `tcc`.
 
-Implementation update: **0.2.0** provides manual GHA collection, retained imports, offline queries, and a local read-only web UI. See the [CLI guide](cli.md), [web guide](web.md), and [initial pilot evidence](pilot.md). Unimplemented proposals remain future work, including verified attempt reconstruction, rename aliases, and symptom fingerprints.
+Implementation update: **0.3.0** adds agent status queries and separates tool installation from evidence collection. It retains manual GHA collection, offline history queries, and the read-only web UI. See the [CLI guide](cli.md), [web guide](web.md), and [initial pilot evidence](pilot.md). Unimplemented proposals remain future work, including verified attempt reconstruction, rename aliases, and symptom fingerprints.
 
 ## 1. Product decision
 
 Build a local evidence index of CUBRID testcase outcomes across CI runs and engine commits. Query that index by testcase path, filename, ticket fragment, run, or commit.
 
-Separate collection from queries. `tcc sync` retrieves available evidence. `tcc history` and `tcc explain` read a consistent local snapshot without contacting GitHub. This makes repeated queries fast and preserves results after upstream retention removes them.
+Separate collection from queries. `tcc sync-data` retrieves available evidence. `tcc history` and `tcc explain` read a consistent local snapshot without contacting GitHub. This makes repeated queries fast and preserves results after upstream retention removes them.
 
 The central record is an **observed testcase outcome**, tied to the engine revision actually tested. A failed workflow, red commit status, or CTP exit code does not by itself establish a failed testcase.
+
+### Status query and update ownership
+
+The main terminal workflow is `tcc status NAME --json`. It resolves one identity and summarizes
+recent observations without selecting a failure target. History and status share the same observation
+filters. The status module owns latest-verdict classification, independent-execution comparison,
+and bounded evidence references. The query module adds coverage and freshness from one SQLite snapshot.
+The CLI only parses arguments and formats the result.
+
+Keep three assessments separate: latest observed status, suspected flakiness, and freshness.
+Missing ordering or filter provenance prevents a latest-status claim. Missing comparison context
+prevents a flakiness claim. Discovery and testcase observation ages remain separate.
+The default window is 14 days across indexed branches, with an explicit scope in every report.
+The [status contract](cli.md#testcase-status-for-agents) defines classifications, limits, and exit codes.
+
+| Command | Owned work |
+|---|---|
+| `just setup` | Locked development environment |
+| `just sync` | Editable uv tool installation from the primary `main` checkout |
+| `daily-update` | Refresh the registered clean checkout, then invoke `just sync` |
+| `tcc sync-data` / `just sync-data` | Explicit CI discovery and evidence collection |
+| `tcc status`, `history`, `explain`, `serve` | Offline reads of retained evidence |
+
+The legacy `tcc sync` alias remains available for collection scripts. Daily upkeep never collects CI evidence.
 
 ### Questions the first version answers
 
@@ -109,7 +133,7 @@ This section describes the proposed interface. See the [CLI guide](cli.md) for i
 
 ```sh
 # Import a bounded recent window. Repository and store come from local config.
-tcc sync --since 2026-09-16 --until 2026-10-16
+tcc sync-data --since 2026-09-16 --until 2026-10-16
 
 # Resolve a name, ticket fragment, or pasted path.
 tcc find cbrd_27461
@@ -127,7 +151,7 @@ tcc history sql/_36_guava/cbrd_27461/cases/cbrd_27461.sql \
 
 # Inspect collection gaps and import one available run explicitly.
 tcc coverage --since 2026-09-16 --until 2026-10-16
-tcc sync --run 38868725373
+tcc sync-data --run 38868725373
 ```
 
 Support filters for suite, time window, PR, recorded branch, engine SHA, pass/fail outcome, and fingerprint. All-scope queries include other branches and explain that scope. An ancestry filter reports unresolved ancestry rather than assuming unrelated commits.
@@ -182,6 +206,7 @@ Keep these modules deep, with small interfaces:
 | Result parsing | `parse(bundle) -> ParsedExecution` | Suite grammars, identity normalization, duplicate handling, counters, and diagnostics |
 | History index | `ingest(parsed_execution) -> Receipt` | Transactions, idempotence, schema migrations, references to retained evidence |
 | History query | `history(query) -> HistoryReport` | Target selection, recurrence, ancestry, comparison context, and coverage rules |
+| Status query | `status(query) -> StatusReport` | Recent window, latest verdict, independent comparison, freshness, and bounded evidence |
 
 The CLI formats reports and translates arguments. It contains no recurrence policy. The web UI uses the same query interface through a read-only local HTTP adapter.
 
@@ -238,7 +263,7 @@ Use a recent overlapping discovery window for new runs, plus an explicit revisit
 
 Separate the discovery watermark from result ingestion progress. A temporarily inaccessible result does not require redownloading every metadata page. Honor GitHub request headers and retry budgets. Do not permanently label a `404` as expiration without supporting evidence.
 
-Manual `sync` is sufficient initially. Recommend an hourly invocation on a host with internal-store access, installed only when requested. Completed runs receive a second consistency check. The polling interval is a retention measure and cannot guarantee capture before a rapid rerun overwrites results.
+Manual `sync-data` is sufficient initially. Recommend an hourly invocation on a host with internal-store access, installed only when requested. Completed runs receive a second consistency check. The polling interval is a retention measure and cannot guarantee capture before a rapid rerun overwrites results.
 
 ### Source and outcome rules
 
@@ -302,7 +327,7 @@ Unknown-result reasons include `not_indexed`, `source_unreachable`, `access_deni
 | Step | Deliverable | Acceptance evidence |
 |---|---|---|
 | 1. Evidence spike | Recorded fixtures and parsers for all three suites | One failed and one successful sample per suite, plus a partial rerun and an incomplete shard |
-| 2. Durable import | SQLite schema, evidence archive, and `sync --run` | Real failed SQL sample imports with actual engine SHA, testcase revision, and linked raw verdict |
+| 2. Durable import | SQLite schema, evidence archive, and `sync-data --run` | Real failed SQL sample imports with actual engine SHA, testcase revision, and linked raw verdict |
 | 3. Local queries | `find`, `history`, `explain`, JSON, and `coverage` | A seeded multi-run history correctly distinguishes recurrence, first-observed-in-window, and unknown |
 | 4. Backfill and incremental sync | Date-window discovery, pagination, revisit queue, and resumable imports | Overlapping/repeated sync creates no duplicate observations and revisits an older rerun |
 | 5. Pilot | Recent accessible GHA history and measured performance | Review real recurring failures, inspect gaps, measure archive growth, and benchmark lookup |

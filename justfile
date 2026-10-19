@@ -8,6 +8,13 @@ default:
 setup *args:
     uv sync --locked "$@"
 
+# Reinstall the user-level tcc command from the primary main checkout (daily-update).
+sync:
+    @test -d .git || { echo "Run just sync from the primary checkout, not a task worktree." >&2; exit 1; }
+    @test "$(git branch --show-current)" = main || { echo "Run just sync from main." >&2; exit 1; }
+    uv tool install --editable . --reinstall
+    @"$(uv tool dir --bin)/tcc" --version
+
 # Run any CLI command, including global options such as --data-dir.
 tcc +args:
     uv run --locked tcc "$@"
@@ -21,8 +28,12 @@ serve-local *args:
     uv run --locked tcc serve --local "$@"
 
 # Collect recent history, selected runs, or a bounded UTC window.
-sync *args:
-    uv run --locked tcc sync "$@"
+sync-data *args:
+    uv run --locked tcc sync-data "$@"
+
+# Summarize recent verdicts, suspected flakiness, freshness, and evidence for a TC.
+status case *args:
+    uv run --locked tcc status "$@"
 
 # Find testcase identities by ticket, filename, or path.
 find term *args:

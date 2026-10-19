@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "cubrid-tc-chronicle"
-version = "0.2.0"
-description = "Local evidence and testcase failure history for CUBRID gha-ci"
+version = "0.3.0"
+description = "Evidence-backed testcase status and failure history for CUBRID gha-ci"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = []

@@ -1,30 +1,132 @@
 # Chronicle CLI guide
 
-Version: **0.2.0**. Supported host: Linux with Python 3.12 or later.
+Version: **0.3.0**. Supported host: Linux with Python 3.12 or later.
 
 The [web UI](web.md) uses these same queries. Start it with `just serve` or `uv run tcc serve` to listen on all interfaces and print the available LAN, VPN, and loopback URLs. Use `just serve-local` or `uv run tcc serve --local` for loopback-only access.
+
+## Install and update
+
+Run `just sync` from the primary checkout on `main`. It reinstalls `tcc` with
+`uv tool install --editable . --reinstall` and checks the installed version.
+The command then works from any directory. `just setup` installs the locked development environment.
+
+`daily-update` registers tool repositories explicitly. The companion dotfiles change adds
+`~/gh/cubrid-tc-chronicle`. Daily upkeep requires a clean primary `main` tracking the expected
+`origin/main`. It fetches remote `main`, fast-forwards, and runs `just sync`.
+It skips dirty or unsuitable checkouts. It never invokes Chronicle data collection.
+
+Use `just sync-data` or `tcc sync-data` to collect evidence. Existing `tcc sync` calls remain
+compatible and print a migration notice to stderr. `just sync` accepts no collection arguments.
+
+## Testcase status for agents
+
+```sh
+tcc status cbrd_27461 --json
+tcc status cbrd_27461.sql --suite sql --variant unknown --json
+tcc status cbrd_27461 --pr 7925 --days 7 --json
+tcc status cbrd_27461 --branch develop --engine b74043df --json
+tcc status cbrd_27461 --since 2026-10-15 --until 2026-10-16 --limit 3 --json
+```
+
+The query reads the local index without network access or a browser. It defaults to a 14-day
+window ending now. `--days N` selects a different length. `--since` replaces that length.
+`--until` sets the window end. Date bounds select complete UTC days.
+Windows use run creation time. Latest verdicts use recorded execution completion time.
+
+Names resolve as they do for `history`. Supply a full path, suite, or variant when several identities
+match. Use `--variant unknown` for missing variants. Identities never combine automatically.
+Branch, engine, and PR filters require retained evidence. An unknown reference cannot match a filter.
+Excluded observations with unknown filter fields keep the status unknown because they can hide a newer verdict.
+
+Read these independent report fields:
+
+| Field | Meaning |
+|---|---|
+| `status` | Latest observed verdict classification within the window and scope |
+| `counts`, `runs`, `failure_runs`, `passing_runs` | Explicit outcomes and distinct run counts, without estimating a failure probability |
+| `latest_known`, `latest_known_count` | Observations at the latest known completion time, with the total before the example limit |
+| `latest_known_failure`, `latest_known_pass` | Most recent ordered evidence of each kind, or `null` |
+| `flakiness` | Comparison of independent executions with equal recorded context |
+| `freshness` | Discovery age and TC observation age, checked separately |
+| `coverage`, `reasons` | Discovery, result, provenance, ordering, and filter limitations |
+| `recent` | Bounded evidence references, newest known completion first, then unordered records |
+
+Status classifications are:
+
+| Value | Rule |
+|---|---|
+| `FAILING` | Latest known completion contains FAIL or ERROR, without PASS |
+| `PASSING` | Latest known completion contains PASS, without FAIL or ERROR |
+| `MIXED` | Latest known completion contains both PASS and FAIL/ERROR |
+| `UNKNOWN` | No observations in the window, unknown ordering, uncertain filters, or only SKIP/NOT_RUN at the latest completion |
+| `NOT_INDEXED` | No retained testcase identity matches |
+
+Any unordered observation prevents a latest-status claim. `latest_known` still exposes ordered evidence.
+A later pass never deletes a previous failure. Status describes observations in the selected scope.
+It does not establish that a testcase passes on the current engine head.
+
+`flakiness.assessment` is `SUSPECTED` only when independent PASS and FAIL/ERROR evidence share all these fields:
+
+- Engine SHA and testcase SHA.
+- Build mode and execution variant.
+- CTP SHA, platform, and configuration digest.
+
+Different runs count as independent. Within one run, both executions need verified attempt and job
+identities, with a distinct attempt, job, or shard. Repeated records with unresolved invocations
+cannot establish independence. Multiple snapshots of one mutable result directory are insufficient.
+Missing comparison fields remain unknown. Different revisions can explain mixed outcomes without flakiness.
+
+`NOT_OBSERVED` means at least one comparable context has independent repeat evidence without a mixed pair.
+It does not prove stability. `UNKNOWN` means comparable repeat evidence is insufficient.
+`mixed_outcomes` records the broader PASS and FAIL/ERROR mixture even when context prevents classification.
+Examples include the full context and both retained evidence references. Real collected history often
+lacks some context fields, so mixed outcomes can still yield `UNKNOWN`.
+
+`freshness.state` combines discovery age and TC observation age. Each becomes `STALE` after 24 hours
+by default. Change this threshold with `--max-age-hours`. Missing timestamps yield `UNKNOWN` unless
+another age is already stale. `last_sync` is informational: a recent sync stamp does not prove fresh discovery.
+Discovery age uses both the window end and its check time. A future window end cannot keep an old scan fresh.
+`needs_refresh` also flags partial coverage. Discovery can be fresh while the requested window still has gaps.
+
+`--limit` bounds each evidence list and the failed-commit list, from 1 to 100, with a default of 5.
+Counts and classifications always use every scoped observation. `failed_engine_commit_count` retains
+the full count. Truncation flags identify shortened lists. Status coverage replaces gap lists with counts.
+Use `tcc coverage --json` with the same suite and window to inspect the full gaps.
+Evidence references include local execution IDs, source URLs, digests, locators, and retained PR details.
+
+For an agent workflow:
+
+1. Run `tcc status NAME --json`.
+2. Resolve exit code 3 with a returned path, suite, or variant.
+3. Inspect `status`, `flakiness.assessment`, `freshness`, and coverage separately.
+4. If freshness or coverage is insufficient, collect a chosen window with `tcc sync-data`, then repeat the query.
+5. Use `tcc history NAME --json` or `tcc explain --run ID --case NAME --json` to investigate recurrence.
+6. Read retained bytes with `tcc evidence --execution ID --file FILE` from an evidence reference.
+
+Query exit code 0 includes FAILING, UNKNOWN, and NOT_INDEXED. It means the query succeeded.
+Errors go to stderr. JSON output on stdout contains one report.
 
 ## Collection
 
 Run commands from the project checkout after `uv sync --locked`. GitHub reads use the existing `gh` authentication. The default internal result store is `http://192.168.1.48:30080`.
 
 ```sh
-uv run tcc sync --run 38868725373
-uv run tcc sync --run 38848190241 --suite sql
-uv run tcc sync --since 2026-10-15 --until 2026-10-16 --suite sql --json
+uv run tcc sync-data --run 38868725373
+uv run tcc sync-data --run 38848190241 --suite sql
+uv run tcc sync-data --since 2026-10-15 --until 2026-10-16 --suite sql --json
 ```
 
 Date-only bounds include each complete UTC day. Timestamp bounds include both endpoints, at one-second precision. Discovery uses **run creation time**. Query date filters use the same basis. Testcase execution order uses recorded job completion time when the evidence supports that ordering.
 
-Without a run or window, `sync` discovers the preceding 24 hours. Every synchronization also checks up to 20 due runs from the persistent revisit queue. Use `--revisit-limit 0` to collect only the explicit selection. New runs receive a second check after 15 minutes. Completed runs then remain due for checks every 12 hours. In-progress runs remain due every 15 minutes. These are queue deadlines. A manual `sync` performs the checks. Chronicle does not install a scheduler.
+Without a run or window, `sync-data` discovers the preceding 24 hours. Every synchronization also checks up to 20 due runs from the persistent revisit queue. Use `--revisit-limit 0` to collect only the explicit selection. New runs receive a second check after 15 minutes. Completed runs then remain due for checks every 12 hours. In-progress runs remain due every 15 minutes. These are queue deadlines. A manual `sync-data` performs the checks. Chronicle does not install a scheduler.
 
 Chronicle serializes GitHub requests. Discovery follows pages and splits windows before the filtered 1,000-run cap. Changed counts or duplicate page entries prevent complete discovery coverage. `--request-budget 2000` bounds GitHub requests. Rate-limit responses stop collection and preserve any `Retry-After` value in the error. Retry a failed synchronization to resume retained progress.
 
 Collection also retains the associated PR's number, title, author, and links. Refresh these details for existing history without downloading testcase results:
 
 ```sh
-just sync --pr-metadata-only
-just sync --pr-metadata-only --run 38868725373
+just sync-data --pr-metadata-only
+just sync-data --pr-metadata-only --run 38868725373
 ```
 
 Without `--run`, this mode processes all retained run records for the selected repository. It accepts no date or suite filters. It preserves snapshot IDs, observations, and revisit deadlines. It uses the same request budget, with one PR lookup per distinct PR in the batch. Lookup failures return exit code 2. Successful updates remain retained for a retry.
@@ -54,7 +156,7 @@ History filters include `--suite`, `--since`, `--until`, `--engine SHA_PREFIX`, 
 
 The target summary, occurrence list, and `--commits` output include the PR number, title, author, base branch, and head branch. JSON occurrences expose a `pull_request` object, or `null` when the association is unknown. The object includes `number`, `url`, `title`, `base_ref`, `head_ref`, `author`, `author_url`, and `association`. Enriched objects also include `metadata_digest` and `checked_at`. An `error` field records a failed refresh. Queries remain offline. An observed failure in a PR's CI run does not identify the change that caused it.
 
-`base_ref` names the PR's destination branch. `head_ref` names its source branch. Both reflect the last successful metadata refresh. They do not establish historical engine references or affect `--branch` filtering. Refresh existing history with `just sync --pr-metadata-only` to collect these fields. Unavailable titles and branch names remain explicit.
+`base_ref` names the PR's destination branch. `head_ref` names its source branch. Both reflect the last successful metadata refresh. They do not establish historical engine references or affect `--branch` filtering. Refresh existing history with `just sync-data --pr-metadata-only` to collect these fields. Unavailable titles and branch names remain explicit.
 
 An optional ancestry filter uses a local engine Git checkout:
 
@@ -87,10 +189,10 @@ Coverage reports discovery, missing runs and shards, individual result gaps, unr
 
 ## Storage and replay
 
-The default data directory is `$XDG_DATA_HOME/cubrid-tc-chronicle`, or `~/.local/share/cubrid-tc-chronicle` when that variable is absent. Set `TCC_DATA_DIR` or use the global `--data-dir` option to select another index. Set `TCC_STORE_URL` or `sync --store URL` to change the result store. Global `--repository OWNER/REPO` selects the GitHub repository.
+The default data directory is `$XDG_DATA_HOME/cubrid-tc-chronicle`, or `~/.local/share/cubrid-tc-chronicle` when that variable is absent. Set `TCC_DATA_DIR` or use the global `--data-dir` option to select another index. Set `TCC_STORE_URL` or `sync-data --store URL` to change the result store. Global `--repository OWNER/REPO` selects the GitHub repository.
 
 ```sh
-uv run tcc --data-dir /path/to/private-index sync --run 38868725373
+uv run tcc --data-dir /path/to/private-index sync-data --run 38868725373
 uv run tcc evidence --execution 1 --json
 uv run tcc evidence --execution 1 --file summary_info
 uv run tcc reparse --json
