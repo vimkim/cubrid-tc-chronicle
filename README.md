@@ -36,8 +36,14 @@ just explain --run 38868725373 --suite sql \
   --case sql/_36_guava/cbrd_27461/cases/cbrd_27461.sql
 ```
 
-`just sync` reinstalls the user-level `cubrid-tcc` command with an editable uv tool installation.
-Run it from the primary checkout on `main`. Use `just setup` for the development environment.
+`just sync` reinstalls the user-level `cubrid-tcc` command with `uv tool install --reinstall .`.
+Run it from the primary checkout on `main`. The regular installation runs without this checkout or its `.venv`.
+Run sync after source changes, including changes without a version bump.
+The next sync converts existing editable installations. Use `just setup` and `uv run --locked` for development.
+Use `uv tool dir --bin` to locate commands, or `UV_TOOL_BIN_DIR` to select another directory.
+Run `uv tool update-shell` if that directory is absent from PATH.
+Uninstall with `uv tool uninstall cubrid-tc-chronicle`.
+Tool installation resolves dependencies separately from `uv.lock`. This package has no third-party runtime dependencies.
 Reinstalling replaces the former `tcc` executable with `cubrid-tcc`. Update scripts and agent
 instructions to use `cubrid-tcc`; no `tcc` executable alias is installed. The local index,
 `TCC_DATA_DIR`, and `TCC_STORE_URL` settings are unchanged.

@@ -12,7 +12,7 @@ setup *args:
 sync:
     @test -d .git || { echo "Run just sync from the primary checkout, not a task worktree." >&2; exit 1; }
     @test "$(git branch --show-current)" = main || { echo "Run just sync from main." >&2; exit 1; }
-    uv tool install --editable . --reinstall
+    uv tool install --reinstall .
     @"$(uv tool dir --bin)/cubrid-tcc" --version
 
 # Run any CLI command, including global options such as --data-dir.
