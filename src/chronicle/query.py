@@ -22,6 +22,46 @@ COVERAGE_GAP_LISTS = (
 COVERAGE_FORMS = ("compact", "full")
 
 
+# Reasons a sync can clear. Every other reason (unresolved attempts, denied or
+# missing files, parser diagnostics, ...) persists after a sync and is structural.
+REFRESHABLE_REASONS = frozenset(
+    {
+        "discovery_incomplete",
+        "discovery_stale",
+        "discovery_freshness_unknown",
+        "not_indexed",
+        "metadata_stale",
+        "run_metadata_unknown",
+        "runs_in_progress",
+        "source_unreachable",
+    }
+)
+SYNC_RUN_LIMIT = 5
+
+
+def split_reasons(reasons):
+    """Return (refreshable, structural) sorted reason lists."""
+    reasons = set(reasons)
+    return (
+        sorted(reasons & REFRESHABLE_REASONS),
+        sorted(reasons - REFRESHABLE_REASONS),
+    )
+
+
+def sync_argv(runs, window, suite):
+    """Build the cubrid-tcc sync-data argv: a few run IDs, else an exact window."""
+    argv = ["cubrid-tcc", "sync-data"]
+    if runs:
+        argv += [item for run_id in runs for item in ("--run", str(run_id))]
+    elif window:
+        argv += ["--since", window[0], "--until", window[1]]
+    else:
+        return None
+    if suite:
+        argv += ["--suite", suite]
+    return argv + ["--revisit-limit", "0"]
+
+
 def shape_coverage(coverage, form="compact"):
     """Replace the suite-wide gap lists by their counts, unless the full form is requested."""
     if form not in COVERAGE_FORMS:
@@ -283,7 +323,8 @@ class Queries:
             return None
         return {**candidates[0], "variant": candidates[0]["variant"] or None}
 
-    def coverage(self, since=None, until=None, suite=None):
+    def coverage(self, since=None, until=None, suite=None, tail_tolerance_hours=0):
+        """Report gaps. A discovery tail younger than the tolerance is not refreshable."""
         since = timestamp(since) if since else None
         until = timestamp(until, end=True) if until else None
         if since and until and since > until:
@@ -410,6 +451,39 @@ class Queries:
         ]
         if in_progress:
             reasons.add("runs_in_progress")
+        refreshable, structural = split_reasons(reasons)
+        gap_start = None
+        if not discovery_complete and since and until and cursor is not None:
+            gap_start = timestamp(
+                (
+                    datetime.fromisoformat(cursor.replace("Z", "+00:00")) + timedelta(seconds=1)
+                ).isoformat()
+            )
+            tail = datetime.fromisoformat(until) - datetime.fromisoformat(gap_start)
+            if tail <= timedelta(hours=tail_tolerance_hours):
+                # Fresh discovery lags a live window end by design; a sync would not close it.
+                gap_start = None
+                refreshable.remove("discovery_incomplete")
+                structural.append("discovery_incomplete")
+                structural.sort()
+        refresh_runs = sorted(
+            set(missing)
+            | set(stale)
+            | set(unverified_runs)
+            | set(in_progress)
+            | {m["run_id"] for m in missing_shards}
+            | {g["run_id"] for g in gaps if g["reason"] in REFRESHABLE_REASONS}
+        )
+        spans = [
+            (runs.get(r) or selected_runs.get(r) or {}).get("created_at") for r in refresh_runs
+        ]
+        spans = [t for t in spans if t]
+        if gap_start:
+            spans += [gap_start, until]
+        window = (min(spans), max(spans)) if spans else None
+        use_runs = refresh_runs if refresh_runs and len(refresh_runs) <= SYNC_RUN_LIMIT else []
+        if gap_start:
+            use_runs = []
         return {
             "source": "gha-ci",
             "repository": self.repository,
@@ -429,6 +503,10 @@ class Queries:
             "in_progress_runs": in_progress,
             "gaps": gaps,
             "reasons": sorted(reasons),
+            "refreshable_reasons": refreshable,
+            "structural_reasons": structural,
+            "needs_refresh": bool(refreshable),
+            "suggested_sync": sync_argv(use_runs, window, suite) if refreshable else None,
             "complete": not reasons,
             "excluded_sources": ["CircleCI", "QA portal", "unit tests"],
             "upstream_limit": "Runs deleted before initial collection may be undetectable.",
@@ -559,7 +637,20 @@ class Queries:
                 "pr": query.pr,
             },
             "reasons": [],
+            "target_run_indexed": None,
+            "suggested_sync": None,
         }
+        if query.run_id is not None:
+            run_suite = query.suite or (identity or {}).get("suite")
+            indexed = query.run_id in self._runs() or bool(
+                self.db.execute(
+                    "SELECT 1 FROM execution WHERE repository=? AND run_id=? LIMIT 1",
+                    (self.repository, query.run_id),
+                ).fetchone()
+            )
+            report["target_run_indexed"] = indexed
+            if not indexed:
+                report["suggested_sync"] = sync_argv([query.run_id], None, run_suite)
         if identity is None:
             report["reasons"] = ["not_indexed"]
             return report
@@ -695,7 +786,7 @@ class Queries:
         )
         identity = self._resolve(query.case, query.suite, query.variant)
         suite = query.suite or (identity or {}).get("suite")
-        coverage = self.coverage(since, until, suite)
+        coverage = self.coverage(since, until, suite, tail_tolerance_hours=query.max_age_hours)
         history_query = HistoryQuery(
             query.case,
             suite=suite,
@@ -759,6 +850,19 @@ class Queries:
                 if observation_age is not None
                 else "observation_freshness_unknown"
             )
+        # Only coverage and discovery age are scoped to a sync. A testcase-level
+        # reason such as an unknown identity stays structural.
+        refreshable = sorted(
+            set(coverage["refreshable_reasons"])
+            | (reasons & {"discovery_stale", "discovery_freshness_unknown"})
+        )
+        structural = sorted(reasons - set(refreshable))
+        needs_refresh = bool(refreshable)
+        suggested = coverage["suggested_sync"]
+        if needs_refresh and suggested is None and discovery_state != "FRESH":
+            # Nothing is listed as missing, but discovery is old: scan from its end.
+            start = discovery_through or since
+            suggested = sync_argv([], (max(start, since), until), suite)
         return {
             "schema_version": 1,
             **summary,
@@ -788,7 +892,10 @@ class Queries:
                 else None,
                 "max_age_hours": query.max_age_hours,
                 "last_sync": coverage["last_sync"],
-                "needs_refresh": freshness != "FRESH" or not coverage["complete"],
+                "needs_refresh": needs_refresh,
+                "refreshable_reasons": refreshable,
+                "structural_reasons": structural,
+                "suggested_sync": suggested,
             },
             "coverage": shape_coverage(coverage),
             "reasons": sorted(reasons),

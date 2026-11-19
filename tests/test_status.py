@@ -270,6 +270,91 @@ class StatusTests(unittest.TestCase):
                 )
                 self.assertEqual("legacy alias" in err.getvalue(), command == "sync")
 
+    """Live-shaped data: attempts are null and structural gaps never clear."""
+
+    def live_shaped(self, until=NOW):
+        self.ingest(1, "FAIL", metadata={"execution_attempt": None, "ordering": "unknown"})
+        self.index.availability(
+            "CUBRID/cubrid", 1, "*", "plan/plan.tsv", "access_denied_or_missing"
+        )
+        self.discover(until)
+
+    def test_structural_reasons_do_not_request_a_refresh(self):
+        self.live_shaped()
+        report = self.status()
+        self.assertIn("attempt_unresolved", report["coverage"]["reasons"])
+        self.assertFalse(report["coverage"]["complete"])
+        fresh = report["freshness"]
+        self.assertEqual(fresh["refreshable_reasons"], [])
+        self.assertIn("attempt_unresolved", fresh["structural_reasons"])
+        self.assertIn("access_denied_or_missing", fresh["structural_reasons"])
+        self.assertFalse(fresh["needs_refresh"])
+        self.assertIsNone(fresh["suggested_sync"])
+
+    def test_few_missing_runs_list_run_ids(self):
+        self.live_shaped()
+        found = [run_metadata(1), run_metadata(7), run_metadata(8)]
+        self.index.record_discovery(
+            "CUBRID/cubrid", "2026-10-01T00:00:00Z", "2026-10-15T16:00:00Z", found, True
+        )
+        fresh = self.status(suite="shell")["freshness"]
+        self.assertTrue(fresh["needs_refresh"])
+        self.assertIn("not_indexed", fresh["refreshable_reasons"])
+        self.assertEqual(
+            fresh["suggested_sync"],
+            [
+                "cubrid-tcc",
+                "sync-data",
+                "--run",
+                "7",
+                "--run",
+                "8",
+                "--suite",
+                "shell",
+                "--revisit-limit",
+                "0",
+            ],
+        )
+
+    def test_many_missing_runs_use_the_exact_window(self):
+        self.live_shaped()
+        found = [run_metadata(1)] + [run_metadata(n) for n in range(10, 17)]
+        self.index.record_discovery(
+            "CUBRID/cubrid", "2026-10-01T00:00:00Z", "2026-10-15T16:00:00Z", found, True
+        )
+        argv = self.status()["freshness"]["suggested_sync"]
+        self.assertEqual(argv[:2], ["cubrid-tcc", "sync-data"])
+        self.assertNotIn("--run", argv)
+        self.assertIn("--since", argv)
+        self.assertIn("--until", argv)
+        self.assertEqual(argv[-2:], ["--revisit-limit", "0"])
+
+    def test_old_discovery_asks_for_the_uncovered_window(self):
+        self.live_shaped(NOW - timedelta(days=3))
+        fresh = self.status()["freshness"]
+        self.assertTrue(fresh["needs_refresh"])
+        self.assertIn("discovery_stale", fresh["refreshable_reasons"])
+        argv = fresh["suggested_sync"]
+        self.assertEqual(argv[argv.index("--until") + 1], "2026-10-15T16:00:00Z")
+        self.assertEqual(argv[-2:], ["--revisit-limit", "0"])
+
+    def test_explain_reports_whether_the_target_run_is_indexed(self):
+        from chronicle.query import HistoryQuery
+
+        self.live_shaped()
+        indexed = self.queries.history(HistoryQuery(CASE, suite="shell", run_id=1))
+        self.assertIs(indexed["target_run_indexed"], True)
+        self.assertIsNone(indexed["suggested_sync"])
+        absent = self.queries.history(HistoryQuery(CASE, suite="shell", run_id=99))
+        self.assertIs(absent["target_run_indexed"], False)
+        self.assertEqual(
+            absent["suggested_sync"],
+            ["cubrid-tcc", "sync-data", "--run", "99", "--suite", "shell", "--revisit-limit", "0"],
+        )
+        self.assertIsNone(
+            self.queries.history(HistoryQuery(CASE, suite="shell"))["target_run_indexed"]
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

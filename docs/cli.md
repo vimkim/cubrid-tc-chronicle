@@ -113,7 +113,11 @@ lacks some context fields, so mixed outcomes can still yield `UNKNOWN`.
 by default. Change this threshold with `--max-age-hours`. Missing timestamps yield `UNKNOWN` unless
 another age is already stale. `last_sync` is informational: a recent sync stamp does not prove fresh discovery.
 Discovery age uses both the window end and its check time. A future window end cannot keep an old scan fresh.
-`needs_refresh` also flags partial coverage. Discovery can be fresh while the requested window still has gaps.
+`needs_refresh` is true only when a sync can clear a reason, scoped to the query window and suite. Reasons that a sync never clears are structural and do not set it: unresolved attempts, denied or missing result files, parser diagnostics, `provenance_unresolved`, `count_mismatch`, `runner_error`, `ordering_unknown`, `observation_stale`, and so on.
+`freshness.refreshable_reasons` lists the reasons that set the flag; `freshness.structural_reasons` lists the rest (the whole `reasons` list is unchanged).
+Refreshable codes: `not_indexed`, `metadata_stale`, `run_metadata_unknown`, `runs_in_progress`, `source_unreachable`, `discovery_stale`, `discovery_freshness_unknown`, and `discovery_incomplete`.
+A discovery gap at the end of the window that is younger than `--max-age-hours` is tolerated: it moves to `structural_reasons`, because fresh discovery lags a live window end by design.
+`freshness.suggested_sync` is `null` unless `needs_refresh` is true. Otherwise it is an argv list for cubrid-tcc (run it without a shell). With 5 or fewer runs to refresh and no discovery gap, it names them: `["cubrid-tcc","sync-data","--run","7","--run","8","--suite","shell","--revisit-limit","0"]`. In any other case it names the exact uncovered window with `--since` and `--until`. It carries `--suite` when the query has a suite. `coverage` carries the same `needs_refresh`, `refreshable_reasons`, `structural_reasons` and `suggested_sync` fields for the coverage scope.
 
 `--limit` bounds each evidence list and the failed-commit list, from 1 to 100, with a default of 5.
 Counts and classifications always use every scoped observation. `failed_engine_commit_count` retains
@@ -198,6 +202,8 @@ uv run cubrid-tcc history sql/_36_guava/cbrd_27461/cases/cbrd_27461.sql \
 Missing commits or an unavailable Git checkout produce unknown ancestry. Queries do not fetch Git objects. Earlier failures include comparison fields for testcase revision, tooling, build mode, platform, configuration, and variant. Missing fields remain unknown. Mixed pass/fail outcomes establish a possible intermittent failure only when every recorded context field agrees.
 
 ## Classification and coverage
+
+`explain --run R` (and `history --run R`) adds `target_run_indexed`: `false` when run R has no run metadata or snapshot in the index, else `true`. It is `null` when the query names no run. When it is `false`, the report's `suggested_sync` is the run sync `["cubrid-tcc","sync-data","--run","R","--suite","S","--revisit-limit","0"]`; otherwise `suggested_sync` is `null`. A `false` value means the run is not indexed; with `true`, an empty `target` means the testcase did not fail in that run.
 
 | Result | Meaning |
 |---|---|
