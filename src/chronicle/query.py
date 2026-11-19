@@ -493,9 +493,13 @@ class Queries:
         use_runs = refresh_runs if refresh_runs and len(refresh_runs) <= SYNC_RUN_LIMIT else []
         if gap_start:
             use_runs = []
-        # Only discovered-but-unimported runs: drain the queue instead of rediscovering.
-        only_missing = bool(missing) and not gap_start and set(refresh_runs) <= set(missing)
-        drain = only_missing and not use_runs
+        # Mostly discovered-but-unimported runs: drain the queue instead of rediscovering.
+        # The few other refreshable runs show up as the next, run-list suggestion.
+        others = set(refresh_runs) - set(missing)
+        drain = bool(missing) and not gap_start and not use_runs and len(others) <= SYNC_RUN_LIMIT
+        if drain:
+            made = [(selected_runs.get(r) or {}).get("created_at") for r in missing]
+            window = (min(made), max(made))
         return {
             "source": "gha-ci",
             "repository": self.repository,
