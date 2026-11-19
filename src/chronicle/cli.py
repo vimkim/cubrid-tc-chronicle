@@ -13,7 +13,14 @@ from . import __version__
 from .collection import CollectionError, Collector, GitHub, ResultStore
 from .models import SUITES, Bundle
 from .parsing import parse
-from .query import AmbiguousIdentity, HistoryQuery, Queries, StatusQuery
+from .query import (
+    COVERAGE_FORMS,
+    AmbiguousIdentity,
+    HistoryQuery,
+    Queries,
+    StatusQuery,
+    shape_coverage,
+)
 from .storage import Index
 
 
@@ -86,6 +93,10 @@ For agents:
 
     since_help = "Earliest run creation time: YYYY-MM-DD or ISO 8601 timestamp (UTC)"
     until_help = "Latest run creation time (UTC). A date includes the whole day"
+    coverage_help = (
+        "Coverage detail: compact counts the gaps (default); full lists every gap. "
+        "Use the coverage command for the suite-wide lists"
+    )
     case_help = "Full path, filename, or unambiguous testcase fragment"
     sync = command(
         "sync-data",
@@ -192,6 +203,7 @@ For agents:
     find.add_argument("term", help="Ticket, filename, or path fragment (search ignores case)")
     find.add_argument("--suite", choices=SUITES, help="Select one testcase suite")
     find.add_argument("--variant", help="Recorded execution variant, or 'unknown'")
+    find.add_argument("--coverage", choices=COVERAGE_FORMS, default="compact", help=coverage_help)
     for name in ("history", "explain"):
         if name == "history":
             p = command(
@@ -236,6 +248,7 @@ For agents:
                 "--ordinal", type=int, help="Observation ordinal from an ambiguity candidate"
             )
         p.add_argument("--suite", choices=SUITES, help="Select one testcase suite")
+        p.add_argument("--coverage", choices=COVERAGE_FORMS, default="compact", help=coverage_help)
         p.add_argument("--since", help=since_help)
         p.add_argument("--until", help=until_help)
         p.add_argument("--engine", dest="engine_sha", help="Recorded engine commit SHA or prefix")
@@ -537,9 +550,9 @@ def main(argv=None):
                 result = {"schema_version": 1, **collected}
             elif args.command == "find":
                 result = {
-                    "schema_version": 1,
+                    "schema_version": 2,
                     "candidates": queries.find(args.term, args.suite, args.variant),
-                    "coverage": queries.coverage(suite=args.suite),
+                    "coverage": shape_coverage(queries.coverage(suite=args.suite), args.coverage),
                 }
             elif args.command == "status":
                 result = queries.status(

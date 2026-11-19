@@ -205,7 +205,8 @@ def create_server(data_dir: Path, port=8765, repository="CUBRID/cubrid", *, loca
                             "NOT_RUN",
                         ):
                             raise ValueError("invalid outcome")
-                        result = query.history(HistoryQuery(**values))
+                        # The page lists coverage gaps, so it asks for the full form.
+                        result = query.history(HistoryQuery(**values, coverage="full"))
                     elif url.path == "/api/evidence":
                         bundle = index.bundle(int(args.get("execution", "0")))
                         if args.get("file"):

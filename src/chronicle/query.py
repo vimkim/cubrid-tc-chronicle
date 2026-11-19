@@ -11,6 +11,27 @@ from .provenance import run_pull_request
 from .status import assess, comparison_context
 from .storage import Index, summarize_discovered, summarize_run
 
+COVERAGE_GAP_LISTS = (
+    "missing_runs",
+    "stale_runs",
+    "unverified_runs",
+    "missing_shards",
+    "gaps",
+    "in_progress_runs",
+)
+COVERAGE_FORMS = ("compact", "full")
+
+
+def shape_coverage(coverage, form="compact"):
+    """Replace the suite-wide gap lists by their counts, unless the full form is requested."""
+    if form not in COVERAGE_FORMS:
+        raise ValueError("coverage form must be compact or full")
+    if form == "full":
+        return coverage
+    compact = {k: v for k, v in coverage.items() if k not in COVERAGE_GAP_LISTS}
+    compact["gap_counts"] = {k: len(coverage[k]) for k in COVERAGE_GAP_LISTS}
+    return compact
+
 
 class AmbiguousIdentity(ValueError):
     def __init__(self, candidates):
@@ -34,6 +55,7 @@ class HistoryQuery:
     pr: int | None = None
     ancestor_of: str | None = None
     engine_repository: str | None = None
+    coverage: str = "compact"
 
 
 @dataclass
@@ -511,12 +533,14 @@ class Queries:
         return occurrences, sorted(unresolved_filters)
 
     def history(self, query: HistoryQuery):
+        if query.coverage not in COVERAGE_FORMS:
+            raise ValueError("coverage form must be compact or full")
         identity = self._resolve(query.case, query.suite, query.variant)
         coverage = self.coverage(
             query.since, query.until, query.suite or (identity or {}).get("suite")
         )
         report = {
-            "schema_version": 1,
+            "schema_version": 2,
             "identity": identity,
             "target": None,
             "history_result": "UNKNOWN_HISTORY",
@@ -524,7 +548,7 @@ class Queries:
             "prior_failures": [],
             "failed_commits": [],
             "occurrences": [],
-            "coverage": coverage,
+            "coverage": shape_coverage(coverage, query.coverage),
             "comparison_groups": {},
             "inconsistent_observed_outcomes": [],
             "scope": {
@@ -589,8 +613,10 @@ class Queries:
         report["prior_verified_executions"] = sum(
             o["outcome"] in ("PASS", "FAIL", "ERROR") for o in prior
         )
-        report["prior_failures"] = [o for o in prior if o["outcome"] in ("FAIL", "ERROR")]
-        if report["prior_failures"]:
+        prior_failures = [o for o in prior if o["outcome"] in ("FAIL", "ERROR")]
+        # Each prior failure is also in occurrences, so IDs are enough to look it up.
+        report["prior_failures"] = [o["id"] for o in prior_failures]
+        if prior_failures:
             report["history_result"] = "SEEN_BEFORE"
         elif (
             coverage["complete"]
@@ -614,7 +640,7 @@ class Queries:
                 report["reasons"].append("ordering_unknown")
         groups = {"ancestors": [], "same_branch": [], "other_or_unknown_branch": []}
         target_context = comparison_context(target)
-        for previous in report["prior_failures"]:
+        for previous in prior_failures:
             context = comparison_context(previous)
             comparison = {
                 key: (
@@ -733,16 +759,6 @@ class Queries:
                 if observation_age is not None
                 else "observation_freshness_unknown"
             )
-        gap_lists = (
-            "missing_runs",
-            "stale_runs",
-            "unverified_runs",
-            "missing_shards",
-            "gaps",
-            "in_progress_runs",
-        )
-        compact_coverage = {k: v for k, v in coverage.items() if k not in gap_lists}
-        compact_coverage["gap_counts"] = {k: len(coverage[k]) for k in gap_lists}
         return {
             "schema_version": 1,
             **summary,
@@ -774,6 +790,6 @@ class Queries:
                 "last_sync": coverage["last_sync"],
                 "needs_refresh": freshness != "FRESH" or not coverage["complete"],
             },
-            "coverage": compact_coverage,
+            "coverage": shape_coverage(coverage),
             "reasons": sorted(reasons),
         }

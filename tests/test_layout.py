@@ -23,7 +23,7 @@ def downgrade(index):
     index.db.commit()
 
 
-class LayoutTests(unittest.TestCase):
+class Fixture(unittest.TestCase):
     def setUp(self):
         self.temporary = tempfile.TemporaryDirectory()
         self.addCleanup(self.temporary.cleanup)
@@ -39,7 +39,7 @@ class LayoutTests(unittest.TestCase):
             ]
             runs.append(run)
             self.index.record_run(run, "2026-10-17T00:00:00Z")
-            self.index.ingest(parse(sample(run_id, outcome)))
+            self.index.ingest(parse(sample(run_id, outcome, at=f"2026-10-15T1{run_id}:30:00Z")))
         self.index.record_discovery(
             "CUBRID/cubrid",
             "2026-10-15T00:00:00Z",
@@ -51,6 +51,8 @@ class LayoutTests(unittest.TestCase):
     def tearDown(self):
         self.index.__exit__()
 
+
+class LayoutTests(Fixture):
     def reports(self):
         with Index(self.path) as index:
             queries = Queries(index)
@@ -138,6 +140,63 @@ class LayoutTests(unittest.TestCase):
             main(["--data-dir", str(self.path), "migrate", "--json"])
         self.assertFalse(json.loads(output.getvalue())["migrated"])
         self.index = Index(self.path, writable=True)
+
+
+class CompactOutputTests(Fixture):
+    GAP_LISTS = (
+        "missing_runs",
+        "stale_runs",
+        "unverified_runs",
+        "missing_shards",
+        "gaps",
+        "in_progress_runs",
+    )
+
+    def history(self, **kwargs):
+        with Index(self.path) as index:
+            return Queries(index).history(HistoryQuery(CASE, run_id=3, **kwargs))
+
+    def test_history_is_compact_by_default_and_full_on_request(self):
+        compact, full = self.history(), self.history(coverage="full")
+        self.assertEqual(compact["schema_version"], 2)
+        for key in self.GAP_LISTS:
+            self.assertNotIn(key, compact["coverage"])
+            self.assertIn(key, full["coverage"])
+        self.assertEqual(
+            compact["coverage"]["gap_counts"], {k: len(full["coverage"][k]) for k in self.GAP_LISTS}
+        )
+        self.assertEqual(compact["coverage"]["reasons"], full["coverage"]["reasons"])
+        self.assertEqual(compact["occurrences"], full["occurrences"])
+
+    def test_prior_failures_are_execution_ids(self):
+        report = self.history()
+        ids = {o["id"] for o in report["occurrences"]}
+        self.assertEqual(len(report["prior_failures"]), 1)
+        self.assertTrue(set(report["prior_failures"]) <= ids)
+        self.assertNotIn(report["target"]["id"], report["prior_failures"])
+
+    def test_cli_find_history_and_explain_flag(self):
+        def call(*args):
+            out = io.StringIO()
+            with contextlib.redirect_stdout(out):
+                self.assertEqual(main(["--data-dir", str(self.path), *args, "--json"]), 0)
+            return json.loads(out.getvalue())
+
+        self.index.__exit__()
+        try:
+            for args in (
+                ("find", "apis"),
+                ("history", CASE),
+                ("explain", "--case", CASE, "--run", "3"),
+            ):
+                with self.subTest(args=args):
+                    compact, full = call(*args), call(*args, "--coverage", "full")
+                    self.assertEqual(compact["schema_version"], 2)
+                    self.assertIn("gap_counts", compact["coverage"])
+                    self.assertNotIn("gaps", compact["coverage"])
+                    self.assertIn("gaps", full["coverage"])
+        finally:
+            self.index = Index(self.path, writable=True)
 
 
 if __name__ == "__main__":

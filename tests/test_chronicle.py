@@ -382,6 +382,10 @@ class IndexTests(unittest.TestCase):
         self.assertEqual(report["history_result"], "SEEN_BEFORE")
         self.assertEqual(report["prior_verified_executions"], 2)
         self.assertEqual(len(report["prior_failures"]), 1)
+        self.assertEqual(report["schema_version"], 2)
+        self.assertEqual(  # prior failures are IDs of records already in occurrences
+            report["prior_failures"], [o["id"] for o in report["occurrences"][:1]]
+        )
         self.assertEqual(report["failed_commits"], [ENGINE])
         self.assertNotEqual(
             report["target"]["engine_sha"], report["target"]["metadata"]["workflow_sha"]
@@ -428,7 +432,7 @@ class IndexTests(unittest.TestCase):
             [run_metadata(1, attempt=2)],
             True,
         )
-        report = self.query.history(HistoryQuery(CASE))
+        report = self.query.history(HistoryQuery(CASE, coverage="full"))
         self.assertEqual(report["history_result"], "UNKNOWN_HISTORY")
         self.assertEqual(report["coverage"]["stale_runs"], [1])
 
@@ -446,7 +450,7 @@ class IndexTests(unittest.TestCase):
             {**run_metadata(1), "updated_at": "2026-10-15T12:00:00Z"},
             "2026-10-17T00:00:00Z",
         )
-        report = self.query.history(HistoryQuery(CASE))
+        report = self.query.history(HistoryQuery(CASE, coverage="full"))
         self.assertEqual(report["coverage"]["stale_runs"], [])
         self.assertNotIn("metadata_stale", report["coverage"]["reasons"])
         self.assertEqual(report["history_result"], "FIRST_OBSERVED_IN_WINDOW")
@@ -514,7 +518,7 @@ class IndexTests(unittest.TestCase):
             [run_metadata(1), run_metadata(2)],
             True,
         )
-        report = self.query.history(HistoryQuery(CASE))
+        report = self.query.history(HistoryQuery(CASE, coverage="full"))
         self.assertEqual(report["history_result"], "UNKNOWN_HISTORY")
         self.assertIn(2, report["coverage"]["missing_runs"])
 
@@ -563,16 +567,18 @@ class IndexTests(unittest.TestCase):
         self.ingest()
         self.ingest(suite="medium")
         with patch("chronicle.collection.GitHub.get", side_effect=AssertionError("network")):
-            for command, expected in [
-                (["history", CASE, "--json"], 0),
-                (["history", "shared.sql", "--json"], 3),
-                (["evidence", "--execution", "999", "--json"], 2),
+            for command, expected, version in [
+                (["history", CASE, "--json"], 0, 2),
+                (["history", "shared.sql", "--json"], 3, 1),
+                (["evidence", "--execution", "999", "--json"], 2, 1),
             ]:
                 out, err = io.StringIO(), io.StringIO()
                 with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
                     code = main(["--data-dir", str(self.path), *command])
                 self.assertEqual(code, expected)
-                self.assertEqual(json.loads(out.getvalue() or err.getvalue())["schema_version"], 1)
+                self.assertEqual(
+                    json.loads(out.getvalue() or err.getvalue())["schema_version"], version
+                )
 
 
 class ReplayGitHub:

@@ -455,7 +455,8 @@ async function showEvidence(execution) {
 function renderHistory(report) {
   updateCoverage(report.coverage);
   const target = report.target;
-  const prior = report.prior_failures;
+  const priorIds = new Set(report.prior_failures);
+  const prior = report.occurrences.filter((o) => priorIds.has(o.id));
   const status = report.history_result;
   const noFailures = !report.occurrences.some((o) =>
     ["FAIL", "ERROR"].includes(o.outcome),

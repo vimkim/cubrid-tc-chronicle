@@ -70,7 +70,9 @@ class WebTests(unittest.TestCase):
         with Index(self.root) as index:
             from chronicle.query import HistoryQuery
 
-            expected = Queries(index).history(HistoryQuery(CASE, suite="sql", variant="unknown"))
+            expected = Queries(index).history(
+                HistoryQuery(CASE, suite="sql", variant="unknown", coverage="full")
+            )
         with patch("chronicle.collection.GitHub.get", side_effect=AssertionError("network")):
             status, _, body = self.fetch(f"/api/history?case={CASE}&suite=sql&variant=unknown")
         actual = json.loads(body)

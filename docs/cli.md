@@ -185,6 +185,8 @@ The target summary, occurrence list, and `--commits` output include the PR numbe
 
 `base_ref` names the PR's destination branch. `head_ref` names its source branch. Both reflect the last successful metadata refresh. They do not establish historical engine references or affect `--branch` filtering. Refresh existing history with `just sync-data --pr-metadata-only` to collect these fields. Unavailable titles and branch names remain explicit.
 
+`find`, `history`, and `explain` return compact coverage by default, as `status` does: the gap lists (`missing_runs`, `stale_runs`, `unverified_runs`, `missing_shards`, `gaps`, `in_progress_runs`) become `coverage.gap_counts`. Those lists are suite-wide, not about one testcase, and filled about 63 % of a per-testcase answer. Pass `--coverage full` for the lists, or use `coverage --json`. `prior_failures` holds execution IDs. Each ID is also an `id` in `occurrences`, which carries the full record. These two reports use `schema_version: 2`.
+
 An optional ancestry filter uses a local engine Git checkout:
 
 ```sh
@@ -246,7 +248,7 @@ cubrid-tcc migrate --json     # {"migrated": true, "runs": N, "discoveries": M}
 
 Queries never write. On an index that is not migrated, they still return the same answers by parsing the run JSON as before (about 10 s and 1 GB). They also parse only the runs and discoveries whose columns are missing or stale. A run is stale when its `metadata_digest` differs from the one recorded in `run_summary`, as happens after an older build replaces the run. Run `cubrid-tcc migrate` once after upgrading to remove that cost. Builds without this layout do not update the columns, so run `migrate` again after one of them writes.
 
-JSON reports use `schema_version: 1`. Command exit codes are:
+JSON reports use `schema_version: 1`, except `find`, `history`, and `explain` (version 2: compact coverage by default, `prior_failures` as IDs). Command exit codes are:
 
 | Code | Meaning |
 |---|---|
