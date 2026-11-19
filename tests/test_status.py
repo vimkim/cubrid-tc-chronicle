@@ -266,7 +266,7 @@ class StatusTests(unittest.TestCase):
                 self.assertEqual(code, 0)
                 self.assertEqual(json.loads(out.getvalue())["runs"], 0)
                 collect.assert_called_once_with(
-                    run_ids=[42], since=None, until=None, revisit_limit=20
+                    run_ids=[42], since=None, until=None, revisit_limit=0, missing=False
                 )
                 self.assertEqual("legacy alias" in err.getvalue(), command == "sync")
 
@@ -325,9 +325,10 @@ class StatusTests(unittest.TestCase):
         argv = self.status()["freshness"]["suggested_sync"]
         self.assertEqual(argv[:2], ["cubrid-tcc", "sync-data"])
         self.assertNotIn("--run", argv)
+        # Every gap is a discovered-but-unimported run, so the queue drains it.
+        self.assertEqual(argv[2], "--missing")
         self.assertIn("--since", argv)
         self.assertIn("--until", argv)
-        self.assertEqual(argv[-2:], ["--revisit-limit", "0"])
 
     def test_old_discovery_asks_for_the_uncovered_window(self):
         self.live_shaped(NOW - timedelta(days=3))

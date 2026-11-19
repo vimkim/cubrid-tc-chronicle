@@ -105,10 +105,13 @@ For agents:
         "Collect runs created in the past 24 hours by default.",
         "sync-data --run 38868725373 --revisit-limit 0",
         "sync-data --since 2026-10-15 --until 2026-10-16 --suite sql --json",
+        "sync-data --missing --suite shell --request-budget 300",
         "sync-data --pr-metadata-only",
         notes="GitHub access requires an authenticated gh command.\n"
-        "Date selection requires both --since and --until.\n"
-        "Collection also checks due retained runs unless --revisit-limit is 0.\n"
+        "--since without --until means until now.\n"
+        "--missing imports runs that discovery listed but no sync imported, oldest first,\n"
+        "without new discovery. --since/--until then only filter the queue.\n"
+        "Collection also checks due retained runs (default 20; 0 with --run or --missing).\n"
         "With --pr-metadata-only, omit --run to refresh every retained run.\n"
         "Use coverage --json afterward to inspect missing evidence.",
     )
@@ -121,6 +124,11 @@ For agents:
     )
     sync.add_argument("--since", help=since_help)
     sync.add_argument("--until", help=until_help)
+    sync.add_argument(
+        "--missing",
+        action="store_true",
+        help="Import queued runs that discovery listed but no sync imported (oldest first)",
+    )
     sync.add_argument(
         "--suite",
         choices=SUITES,
@@ -138,8 +146,9 @@ For agents:
     sync.add_argument(
         "--revisit-limit",
         type=int,
-        default=20,
-        help="Maximum due retained runs to check in addition to the selection (default: 20)",
+        default=None,
+        help="Maximum due retained runs to check in addition to the selection "
+        "(default: 20; 0 with --run or --missing)",
     )
     sync.add_argument(
         "--pr-metadata-only",
@@ -521,13 +530,23 @@ def main(argv=None):
         with Index(args.data_dir, writable=writable) as index:
             queries = Queries(index, args.repository)
             if args.command == "sync-data":
+                if args.revisit_limit is None:
+                    args.revisit_limit = 0 if args.run or args.missing else 20
                 if args.request_budget < 1 or args.revisit_limit < 0:
                     raise ValueError(
                         "request budget must be positive; revisit limit must be nonnegative"
                     )
-                if args.pr_metadata_only and (args.since or args.until or args.suite):
+                if args.pr_metadata_only and (
+                    args.since or args.until or args.suite or args.missing
+                ):
                     raise ValueError("--pr-metadata-only accepts --run, but not dates or suites")
-                if not args.pr_metadata_only and not args.run and not args.since and not args.until:
+                if (
+                    not args.pr_metadata_only
+                    and not args.run
+                    and not args.missing
+                    and not args.since
+                    and not args.until
+                ):
                     args.since = (datetime.now(UTC) - timedelta(days=1)).isoformat()
                     args.until = datetime.now(UTC).isoformat()
                 collector = Collector(
@@ -546,6 +565,7 @@ def main(argv=None):
                         since=args.since,
                         until=args.until,
                         revisit_limit=args.revisit_limit,
+                        missing=args.missing,
                     )
                 result = {"schema_version": 1, **collected}
             elif args.command == "find":

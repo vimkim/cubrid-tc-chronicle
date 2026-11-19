@@ -48,9 +48,18 @@ def split_reasons(reasons):
     )
 
 
-def sync_argv(runs, window, suite):
-    """Build the cubrid-tcc sync-data argv: a few run IDs, else an exact window."""
+def sync_argv(runs, window, suite, missing=False):
+    """Build the cubrid-tcc sync-data argv: a few run IDs, else an exact window.
+
+    With missing, the window drains discovered-but-unimported runs without discovery.
+    """
     argv = ["cubrid-tcc", "sync-data"]
+    if missing and window and not runs:
+        return (
+            argv
+            + ["--missing", "--since", window[0], "--until", window[1]]
+            + (["--suite", suite] if suite else [])
+        )
     if runs:
         argv += [item for run_id in runs for item in ("--run", str(run_id))]
     elif window:
@@ -484,6 +493,9 @@ class Queries:
         use_runs = refresh_runs if refresh_runs and len(refresh_runs) <= SYNC_RUN_LIMIT else []
         if gap_start:
             use_runs = []
+        # Only discovered-but-unimported runs: drain the queue instead of rediscovering.
+        only_missing = bool(missing) and not gap_start and set(refresh_runs) <= set(missing)
+        drain = only_missing and not use_runs
         return {
             "source": "gha-ci",
             "repository": self.repository,
@@ -506,7 +518,7 @@ class Queries:
             "refreshable_reasons": refreshable,
             "structural_reasons": structural,
             "needs_refresh": bool(refreshable),
-            "suggested_sync": sync_argv(use_runs, window, suite) if refreshable else None,
+            "suggested_sync": sync_argv(use_runs, window, suite, drain) if refreshable else None,
             "complete": not reasons,
             "excluded_sources": ["CircleCI", "QA portal", "unit tests"],
             "upstream_limit": "Runs deleted before initial collection may be undetectable.",

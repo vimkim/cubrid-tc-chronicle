@@ -12,7 +12,7 @@ from chronicle.parsing import parse
 from chronicle.query import HistoryQuery, Queries
 from chronicle.storage import Index
 
-LAYOUT_TABLES = ("run_summary", "run_shard", "discovery_run", "discovery_indexed")
+LAYOUT_TABLES = ("run_summary", "run_shard", "discovery_run", "discovery_indexed", "run_queue")
 
 
 def downgrade(index):
@@ -69,7 +69,7 @@ class LayoutTests(Fixture):
             [("shell", "2"), ("shell", "9")],
         )
         self.assertEqual(db.execute("SELECT count(*) FROM discovery_run").fetchone()[0], 4)
-        self.assertEqual(db.execute("SELECT value FROM meta WHERE key='layout'").fetchone()[0], "2")
+        self.assertEqual(db.execute("SELECT value FROM meta WHERE key='layout'").fetchone()[0], "3")
 
     def test_old_index_answers_identically_before_and_after_migrate(self):
         current = self.reports()

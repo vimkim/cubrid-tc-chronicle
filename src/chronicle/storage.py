@@ -19,7 +19,7 @@ from .provenance import run_pull_request
 # schema_version stays 1: the layout tables below are additive, so Chronicle
 # builds that predate them keep opening a migrated index.
 SCHEMA_VERSION = 1
-LAYOUT_VERSION = 2
+LAYOUT_VERSION = 3
 
 
 def now() -> str:
@@ -136,6 +136,11 @@ CREATE TABLE IF NOT EXISTS discovery_run (
 );
 CREATE INDEX IF NOT EXISTS discovery_run_discovery ON discovery_run(discovery_id);
 CREATE TABLE IF NOT EXISTS discovery_indexed (discovery_id INTEGER PRIMARY KEY);
+CREATE TABLE IF NOT EXISTS run_queue (
+    repository TEXT NOT NULL, run_id INTEGER NOT NULL, created_at TEXT NOT NULL,
+    queued_at TEXT NOT NULL, attempts INTEGER NOT NULL DEFAULT 0, last_error TEXT,
+    PRIMARY KEY(repository, run_id)
+);
 """
 
 
@@ -215,10 +220,10 @@ class Index:
             r[0]
             for r in self.db.execute(
                 "SELECT name FROM sqlite_master WHERE type='table' AND name IN "
-                "('run_summary','run_shard','discovery_run','discovery_indexed')"
+                "('run_summary','run_shard','discovery_run','discovery_indexed','run_queue')"
             )
         }
-        return len(have) == 4
+        return len(have) == 5
 
     def migrate(self) -> dict:
         """Create and backfill the query columns. Needs the writer lock, and is idempotent.
@@ -227,6 +232,8 @@ class Index:
         and never see a partial backfill, because it commits as one transaction.
         """
         row = self.db.execute("SELECT value FROM meta WHERE key='layout'").fetchone()
+        # Layout 2 already holds the summaries; layout 3 only adds run_queue.
+        had_summaries = bool(row and int(row[0]) >= 2)
         if row and int(row[0]) >= LAYOUT_VERSION and self._layout_ready():
             self.layout = True
             return {"migrated": False, "layout": int(row[0])}
@@ -236,9 +243,12 @@ class Index:
                 if statement.strip():
                     self.db.execute(statement)
             runs = 0
-            for r in self.db.execute("SELECT repository,run_id,metadata,metadata_digest FROM run"):
-                self._write_summary(json.loads(r["metadata"]), r["metadata_digest"])
-                runs += 1
+            if not had_summaries:
+                for r in self.db.execute(
+                    "SELECT repository,run_id,metadata,metadata_digest FROM run"
+                ):
+                    self._write_summary(json.loads(r["metadata"]), r["metadata_digest"])
+                    runs += 1
             discoveries = 0
             for r in self.db.execute(
                 "SELECT id,evidence_digest FROM discovery WHERE complete=1 AND id NOT IN "
@@ -248,6 +258,14 @@ class Index:
                     r["id"], json.loads(self.archive.read(r["evidence_digest"]))
                 )
                 discoveries += 1
+            queued = self.db.execute(
+                "INSERT OR IGNORE INTO run_queue(repository,run_id,created_at,queued_at) "
+                "SELECT d.repository,r.run_id,MIN(r.created_at),MIN(d.checked_at) "
+                "FROM discovery_run r JOIN discovery d ON d.id=r.discovery_id "
+                "WHERE d.complete=1 AND NOT EXISTS "
+                "(SELECT 1 FROM run x WHERE x.repository=d.repository AND x.run_id=r.run_id) "
+                "GROUP BY d.repository,r.run_id"
+            ).rowcount
             self.db.execute(
                 "INSERT OR REPLACE INTO meta VALUES ('layout', ?)", (str(LAYOUT_VERSION),)
             )
@@ -257,6 +275,7 @@ class Index:
             "layout": LAYOUT_VERSION,
             "runs": runs,
             "discoveries": discoveries,
+            "queued_runs": queued,
         }
 
     def _write_summary(self, metadata: dict, digest: str):
@@ -484,6 +503,10 @@ class Index:
                 ),
             )
             self._write_summary(metadata, digest)
+            self.db.execute(
+                "DELETE FROM run_queue WHERE repository=? AND run_id=?",
+                (metadata["repository"], metadata["id"]),
+            )
             self._advance()
         return digest
 
@@ -496,7 +519,25 @@ class Index:
             )
             if complete:
                 self._write_discovery_runs(cursor.lastrowid, runs)
+                # Runs that discovery listed but no sync imported yet stay queued.
+                self.db.executemany(
+                    "INSERT OR IGNORE INTO run_queue(repository,run_id,created_at,queued_at) "
+                    "SELECT ?,?,?,? WHERE NOT EXISTS "
+                    "(SELECT 1 FROM run WHERE repository=? AND run_id=?)",
+                    (
+                        (repository, run["id"], run["created_at"], now(), repository, run["id"])
+                        for run in runs
+                    ),
+                )
             self._advance()
+
+    def queue_failed(self, repository, run_id, reason):
+        with self.db:
+            self.db.execute(
+                "UPDATE run_queue SET attempts=attempts+1,last_error=? "
+                "WHERE repository=? AND run_id=?",
+                (reason[:200], repository, run_id),
+            )
 
     def availability(self, repository, run_id, suite, location, reason):
         with self.db:

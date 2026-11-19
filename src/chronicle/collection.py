@@ -416,15 +416,29 @@ class Collector:
                 receipts.append(self.index.ingest(parsed))
         return receipts
 
-    def sync(self, *, run_ids=(), since=None, until=None, revisit_limit=20):
+    def queued(self, since=None, until=None):
+        """Discovered runs not yet imported, oldest first. Failed runs go last."""
+        return self.index.db.execute(
+            "SELECT run_id FROM run_queue WHERE repository=? AND (? IS NULL OR created_at>=?) "
+            "AND (? IS NULL OR created_at<=?) ORDER BY attempts,created_at,run_id",
+            (self.repository, since, since, until, until),
+        ).fetchall()
+
+    def sync(self, *, run_ids=(), since=None, until=None, revisit_limit=20, missing=False):
         self._reset_pr_requests()
-        if (since is None) != (until is None):
-            raise ValueError("provide both --since and --until")
+        if until is not None and since is None:
+            raise ValueError("--until requires --since")
+        if since is not None and until is None:
+            until = now()
         runs = list(run_ids)
         if since is not None:
             since, until = timestamp(since), timestamp(until, end=True)
             if since > until:
                 raise ValueError("--since must not be later than --until")
+        if missing:
+            # Discovery already listed these runs; a window only filters the queue.
+            runs.extend(r[0] for r in self.queued(since, until))
+        elif since is not None:
             discovered = []
             try:
                 discovered = self.github.discover(self.repository, since, until)
@@ -455,6 +469,7 @@ class Collector:
                 failures.append({"run_id": run_id, "reason": str(e)})
                 if isinstance(e, RequestLimitError):
                     break
+                self.index.queue_failed(self.repository, run_id, str(e))
                 continue
             self.index.availability(self.repository, run_id, "*", "github_metadata", None)
             if self._pr_limited:
@@ -462,8 +477,10 @@ class Collector:
         with self.index.db:
             self.index.db.execute("INSERT OR REPLACE INTO meta VALUES ('last_sync',?)", (now(),))
             self.index._advance()
+        remaining = self.queued(since, until) if missing else self.queued()
         return {
             "runs": len(set(runs)),
+            "missing_remaining": len(remaining),
             "inserted_snapshots": sum(r["inserted"] for r in receipts),
             "observations": sum(r["observations"] for r in receipts),
             "failures": failures + self._pr_failures,
