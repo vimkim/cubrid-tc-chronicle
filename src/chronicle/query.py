@@ -48,7 +48,7 @@ def split_reasons(reasons):
     )
 
 
-def sync_argv(runs, window, suite, missing=False):
+def sync_argv(runs, window, suite, missing=False, revisit=0):
     """Build the cubrid-tcc sync-data argv: a few run IDs, else an exact window.
 
     With missing, the window drains discovered-but-unimported runs without discovery.
@@ -493,10 +493,12 @@ class Queries:
         use_runs = refresh_runs if refresh_runs and len(refresh_runs) <= SYNC_RUN_LIMIT else []
         if gap_start:
             use_runs = []
-        # Mostly discovered-but-unimported runs: drain the queue instead of rediscovering.
-        # The few other refreshable runs show up as the next, run-list suggestion.
+        # Discovered-but-unimported runs drain from the queue instead of rediscovering the
+        # window. In-progress and stale runs are due in the revisit queue, so ask for
+        # revisits too; any other refreshable run shows up in the suggestion after the drain.
         others = set(refresh_runs) - set(missing)
-        drain = bool(missing) and not gap_start and not use_runs and len(others) <= SYNC_RUN_LIMIT
+        drain = bool(missing) and not gap_start and not use_runs
+        revisit = bool(others & (set(in_progress) | set(stale)))
         if drain:
             made = [(selected_runs.get(r) or {}).get("created_at") for r in missing]
             window = (min(made), max(made))
@@ -522,7 +524,9 @@ class Queries:
             "refreshable_reasons": refreshable,
             "structural_reasons": structural,
             "needs_refresh": bool(refreshable),
-            "suggested_sync": sync_argv(use_runs, window, suite, drain) if refreshable else None,
+            "suggested_sync": sync_argv(use_runs, window, suite, drain, 20 if revisit else 0)
+            if refreshable
+            else None,
             "complete": not reasons,
             "excluded_sources": ["CircleCI", "QA portal", "unit tests"],
             "upstream_limit": "Runs deleted before initial collection may be undetectable.",
