@@ -232,6 +232,20 @@ New data directories use mode `0700`. New database, archive, and writer-lock fil
 
 The database uses SQLite WAL. One process holds the writer lock. Queries use read-only connections and a consistent transaction snapshot. Imports publish an execution atomically after archive verification. Interrupted imports can leave unreferenced compressed objects, but cannot publish half an execution. `reparse` verifies every active bundle before it atomically selects the new parse generation. Older evidence remains retained.
 
+### Query columns and migration
+
+Queries read run and discovery facts from columns, not from the GitHub JSON: `run_summary` (created and updated time, status, attempt, PR association), `run_shard` (the `shard SUITE N` jobs of each run), `discovery_run` (the runs each complete discovery listed), and `discovery_indexed` (which discoveries are filled). The `layout` row in `meta` records version 2. `schema_version` stays 1, so Chronicle builds without these columns still open the index and keep working.
+
+An index from an older build moves to this layout with one writing step that runs once:
+
+```sh
+cubrid-tcc migrate --json     # {"migrated": true, "runs": N, "discoveries": M}
+```
+
+`sync-data`, `reparse`, and `migrate` all run this step when they open the index, under the writer lock. It commits as one transaction, so concurrent readers keep their snapshot and never see a partial backfill. A second run changes nothing and reports `"migrated": false`. A second writer gets the usual "another Chronicle writer is active" error.
+
+Queries never write. On an index that is not migrated, they still return the same answers by parsing the run JSON as before (about 10 s and 1 GB). They also parse only the runs and discoveries whose columns are missing or stale. A run is stale when its `metadata_digest` differs from the one recorded in `run_summary`, as happens after an older build replaces the run. Run `cubrid-tcc migrate` once after upgrading to remove that cost. Builds without this layout do not update the columns, so run `migrate` again after one of them writes.
+
 JSON reports use `schema_version: 1`. Command exit codes are:
 
 | Code | Meaning |

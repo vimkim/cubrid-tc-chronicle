@@ -9,7 +9,7 @@ from .collection import timestamp
 from .parsing import canonical_path
 from .provenance import run_pull_request
 from .status import assess, comparison_context
-from .storage import Index
+from .storage import Index, summarize_discovered, summarize_run
 
 
 class AmbiguousIdentity(ValueError):
@@ -56,6 +56,100 @@ class Queries:
         self.index = index
         self.db = index.db
         self.repository = repository
+        self._run_cache = None
+
+    def _runs(self):
+        """Run summaries in run_id order. Parse metadata only for rows the columns lack.
+
+        Rows are missing or stale when the index predates the query columns, or a
+        Chronicle build without them replaced a run. Those fall back to the JSON.
+        """
+        generation = self.db.execute("SELECT value FROM meta WHERE key='generation'").fetchone()[0]
+        if self._run_cache is not None and self._run_cache[0] == generation:
+            return self._run_cache[1]
+        summaries, shards = {}, {}
+        if self.index.layout:
+            for r in self.db.execute(
+                "SELECT run_id,metadata_digest,created_at,updated_at,status,run_attempt,"
+                "has_jobs,pull_request FROM run_summary WHERE repository=?",
+                (self.repository,),
+            ):
+                summaries[r["run_id"]] = r
+            for r in self.db.execute(
+                "SELECT run_id,suite,shard,conclusion FROM run_shard WHERE repository=? "
+                "ORDER BY rowid",
+                (self.repository,),
+            ):
+                shards.setdefault(r["run_id"], []).append((r["suite"], r["shard"], r["conclusion"]))
+        runs = {}
+        for r in self.db.execute(
+            "SELECT run_id,metadata_digest FROM run WHERE repository=? ORDER BY run_id",
+            (self.repository,),
+        ).fetchall():
+            row = summaries.get(r["run_id"])
+            if row is not None and row["metadata_digest"] == r["metadata_digest"]:
+                runs[r["run_id"]] = {
+                    "created_at": row["created_at"],
+                    "updated_at": row["updated_at"],
+                    "status": row["status"],
+                    "run_attempt": row["run_attempt"],
+                    "has_jobs": bool(row["has_jobs"]),
+                    "pull_request": json.loads(row["pull_request"])
+                    if row["pull_request"]
+                    else None,
+                    "shards": shards.get(r["run_id"], []),
+                }
+                continue
+            metadata = json.loads(
+                self.db.execute(
+                    "SELECT metadata FROM run WHERE repository=? AND run_id=?",
+                    (self.repository, r["run_id"]),
+                ).fetchone()[0]
+            )
+            summary, parsed_shards = summarize_run(metadata)
+            runs[r["run_id"]] = {
+                **summary,
+                "has_jobs": bool(summary["has_jobs"]),
+                "pull_request": run_pull_request(metadata),
+                "shards": parsed_shards,
+            }
+        self._run_cache = (generation, runs)
+        return runs
+
+    def _selected_runs(self, discovery, since, until):
+        """Runs listed by complete discoveries inside the window; later discoveries win."""
+        indexed = set()
+        rows = {}
+        if self.index.layout:
+            indexed = {r[0] for r in self.db.execute("SELECT discovery_id FROM discovery_indexed")}
+        by_discovery = {}
+        if indexed:
+            for r in self.db.execute(
+                "SELECT discovery_id,run_id,created_at,run_attempt,updated_at,status "
+                "FROM discovery_run"
+            ):
+                by_discovery.setdefault(r["discovery_id"], []).append(tuple(r)[1:])
+        for record in discovery:
+            if not record["complete"]:
+                continue
+            if record["id"] in indexed:
+                found = by_discovery.get(record["id"], [])
+            else:
+                found = [
+                    summarize_discovered(run)
+                    for run in json.loads(self.index.archive.read(record["evidence_digest"]))
+                ]
+            for run_id, created_at, attempt, updated_at, status in found:
+                if (since is None or created_at >= since) and (
+                    until is None or created_at <= until
+                ):
+                    rows[run_id] = {
+                        "created_at": created_at,
+                        "run_attempt": attempt,
+                        "updated_at": updated_at,
+                        "status": status,
+                    }
+        return rows
 
     def overview(self, suite=None):
         """Summarize the same retained observations available to history queries."""
@@ -180,10 +274,7 @@ class Queries:
                 (self.repository,),
             )
         ]
-        runs = {
-            r["run_id"]: json.loads(r["metadata"])
-            for r in self.db.execute("SELECT * FROM run WHERE repository=?", (self.repository,))
-        }
+        runs = self._runs()
         starts = [r["since"] for r in discovery] + [r["created_at"] for r in runs.values()]
         ends = [r["until"] for r in discovery] + [r["created_at"] for r in runs.values()]
         since = since or (min(starts) if starts else None)
@@ -214,26 +305,18 @@ class Queries:
         discovery_complete = bool(since and until and cursor >= until)
         if not discovery_complete:
             reasons.add("discovery_incomplete")
-        selected_runs = {}
-        for record in discovery:
-            if not record["complete"]:
-                continue
-            for run in json.loads(self.index.archive.read(record["evidence_digest"])):
-                if (since is None or run["created_at"] >= since) and (
-                    until is None or run["created_at"] <= until
-                ):
-                    selected_runs[run["id"]] = run
+        selected_runs = self._selected_runs(discovery, since, until)
         missing = sorted(set(selected_runs) - set(runs))
         stale = [
             run_id
             for run_id, discovered in selected_runs.items()
             if run_id in runs
             and (
-                discovered.get("run_attempt", 1) > runs[run_id].get("run_attempt", 1)
-                or discovered.get("updated_at", "") > runs[run_id].get("updated_at", "")
+                discovered["run_attempt"] > runs[run_id]["run_attempt"]
+                or discovered["updated_at"] > runs[run_id]["updated_at"]
                 or (
-                    discovered.get("status") != runs[run_id].get("status")
-                    and discovered.get("updated_at", "") >= runs[run_id].get("updated_at", "")
+                    discovered["status"] != runs[run_id]["status"]
+                    and discovered["updated_at"] >= runs[run_id]["updated_at"]
                 )
             )
         ]
@@ -267,16 +350,15 @@ class Queries:
         for run_id, run in runs.items():
             if not in_scope(run_id):
                 continue
-            if "jobs" not in run:
+            if not run["has_jobs"]:
                 # Explicit replay manifests can provide an empty inventory.
                 continue
-            for job in run["jobs"]:
-                parts = job["name"].split()
-                if len(parts) != 3 or parts[0] != "shard" or (suite and parts[1] != suite):
+            for job_suite, shard, conclusion in run["shards"]:
+                if suite and job_suite != suite:
                     continue
-                key = (run_id, parts[1], parts[2])
-                if job.get("conclusion") != "skipped" and key not in known_shards:
-                    missing_shards.append({"run_id": run_id, "suite": parts[1], "shard": parts[2]})
+                key = (run_id, job_suite, shard)
+                if conclusion != "skipped" and key not in known_shards:
+                    missing_shards.append({"run_id": run_id, "suite": job_suite, "shard": shard})
         if missing_shards:
             reasons.add("not_indexed")
         gaps = [
@@ -366,17 +448,14 @@ class Queries:
         )
         occurrences, unresolved_ancestry = [], 0
         unresolved_filters = set()
-        runs = {
-            r["run_id"]: json.loads(r["metadata"])
-            for r in self.db.execute("SELECT * FROM run WHERE repository=?", (self.repository,))
-        }
+        runs = self._runs()
         run_dates = {run_id: run["created_at"] for run_id, run in runs.items()}
         for row in rows:
             record = dict(row)
             record["metadata"] = json.loads(record["metadata"])
             record["diagnostics"] = json.loads(record["diagnostics"])
             m = record["metadata"]
-            record["pull_request"] = run_pull_request(runs.get(record["run_id"]))
+            record["pull_request"] = (runs.get(record["run_id"]) or {}).get("pull_request")
             if record["pull_request"] is None and m.get("engine_pr"):
                 record["pull_request"] = {
                     "number": m["engine_pr"],
@@ -465,10 +544,7 @@ class Queries:
         report["reasons"].extend(limits)
         unresolved_ancestry = "ancestry_unknown" in limits
         unresolved_filters = limits
-        run_dates = {
-            r["run_id"]: json.loads(r["metadata"])["created_at"]
-            for r in self.db.execute("SELECT * FROM run WHERE repository=?", (self.repository,))
-        }
+        run_dates = {run_id: run["created_at"] for run_id, run in self._runs().items()}
         failures = [o for o in occurrences if o["outcome"] in ("FAIL", "ERROR")]
         report["failed_commits"] = sorted({o["engine_sha"] for o in failures if o["engine_sha"]})
         targets = failures

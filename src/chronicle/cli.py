@@ -271,6 +271,15 @@ For agents:
         "This command writes the index without network access.",
         "reparse --json",
     )
+    command(
+        "migrate",
+        "Add the query columns to an index created by an older Chronicle",
+        "Create and backfill the run and discovery query columns.\n"
+        "Safe to repeat and safe while other Chronicle commands read the index.\n"
+        "Any writing command (sync-data, reparse) also does this on open.",
+        "migrate --json",
+        notes="Queries on an index that is not migrated still work, but parse every run.",
+    )
     evidence = command(
         "evidence",
         "Read retained evidence for one execution",
@@ -493,7 +502,7 @@ def main(argv=None):
             result.pop("bundle")
             print(json.dumps(result, indent=2))
             return 0
-        writable = args.command in ("sync-data", "reparse")
+        writable = args.command in ("sync-data", "reparse", "migrate")
         if not writable and not (args.data_dir.expanduser() / "history.sqlite3").exists():
             raise ValueError("index is not initialized; run cubrid-tcc sync-data first")
         with Index(args.data_dir, writable=writable) as index:
@@ -545,6 +554,8 @@ def main(argv=None):
                 }
             elif args.command == "reparse":
                 result = {"schema_version": 1, **index.reparse()}
+            elif args.command == "migrate":
+                result = {"schema_version": 1, **index.migration}
             elif args.command == "evidence":
                 bundle = index.bundle(args.execution)
                 if args.file:
@@ -570,7 +581,7 @@ def main(argv=None):
                     if hasattr(args, name)
                 }
                 result = queries.history(HistoryQuery(**query_args))
-            if args.json or args.command in ("evidence", "reparse"):
+            if args.json or args.command in ("evidence", "reparse", "migrate"):
                 print(json.dumps(result, indent=2))
             elif args.command in ("history", "explain"):
                 format_history(result, getattr(args, "commits", False))

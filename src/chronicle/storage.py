@@ -14,8 +14,12 @@ from pathlib import Path
 
 from .models import Bundle, ParsedExecution, testcase_repository
 from .parsing import parse
+from .provenance import run_pull_request
 
+# schema_version stays 1: the layout tables below are additive, so Chronicle
+# builds that predate them keep opening a migrated index.
 SCHEMA_VERSION = 1
+LAYOUT_VERSION = 2
 
 
 def now() -> str:
@@ -112,6 +116,58 @@ CREATE TABLE availability (
 """
 
 
+# Query columns derived from run.metadata and the discovery archives, so a
+# query never has to parse every run. All statements are idempotent.
+_LAYOUT = """
+CREATE TABLE IF NOT EXISTS run_summary (
+    repository TEXT NOT NULL, run_id INTEGER NOT NULL, metadata_digest TEXT NOT NULL,
+    created_at TEXT, updated_at TEXT NOT NULL, status TEXT, run_attempt INTEGER NOT NULL,
+    has_jobs INTEGER NOT NULL, pull_request TEXT,
+    PRIMARY KEY(repository, run_id)
+);
+CREATE TABLE IF NOT EXISTS run_shard (
+    repository TEXT NOT NULL, run_id INTEGER NOT NULL, suite TEXT NOT NULL,
+    shard TEXT NOT NULL, conclusion TEXT
+);
+CREATE INDEX IF NOT EXISTS run_shard_run ON run_shard(repository, run_id);
+CREATE TABLE IF NOT EXISTS discovery_run (
+    discovery_id INTEGER NOT NULL, run_id INTEGER NOT NULL, created_at TEXT NOT NULL,
+    run_attempt INTEGER NOT NULL, updated_at TEXT NOT NULL, status TEXT
+);
+CREATE INDEX IF NOT EXISTS discovery_run_discovery ON discovery_run(discovery_id);
+CREATE TABLE IF NOT EXISTS discovery_indexed (discovery_id INTEGER PRIMARY KEY);
+"""
+
+
+def summarize_run(metadata: dict) -> tuple[dict, list[tuple]]:
+    """Reduce one run's GitHub metadata to what queries read."""
+    shards = []
+    for job in metadata.get("jobs", []):
+        parts = job["name"].split()
+        if len(parts) == 3 and parts[0] == "shard":
+            shards.append((parts[1], parts[2], job.get("conclusion")))
+    pull_request = run_pull_request(metadata)
+    summary = {
+        "created_at": metadata.get("created_at"),
+        "updated_at": metadata.get("updated_at", ""),
+        "status": metadata.get("status"),
+        "run_attempt": metadata.get("run_attempt", 1),
+        "has_jobs": int("jobs" in metadata),
+        "pull_request": encode(pull_request).decode() if pull_request else None,
+    }
+    return summary, shards
+
+
+def summarize_discovered(run: dict) -> tuple:
+    return (
+        run["id"],
+        run["created_at"],
+        run.get("run_attempt", 1),
+        run.get("updated_at", ""),
+        run.get("status"),
+    )
+
+
 class Index:
     """One writer. Read-only callers can hold a consistent SQLite snapshot."""
 
@@ -150,6 +206,81 @@ class Index:
             self.db.execute("""CREATE INDEX IF NOT EXISTS observation_failures
                 ON observation(testcase_id,execution_id) WHERE outcome IN ('FAIL','ERROR')""")
             self.db.commit()
+            self.migration = self.migrate()
+        else:
+            self.layout = self._layout_ready()
+
+    def _layout_ready(self) -> bool:
+        have = {
+            r[0]
+            for r in self.db.execute(
+                "SELECT name FROM sqlite_master WHERE type='table' AND name IN "
+                "('run_summary','run_shard','discovery_run','discovery_indexed')"
+            )
+        }
+        return len(have) == 4
+
+    def migrate(self) -> dict:
+        """Create and backfill the query columns. Needs the writer lock, and is idempotent.
+
+        Another writer is excluded by writer.lock. Readers keep their WAL snapshot
+        and never see a partial backfill, because it commits as one transaction.
+        """
+        row = self.db.execute("SELECT value FROM meta WHERE key='layout'").fetchone()
+        if row and int(row[0]) >= LAYOUT_VERSION and self._layout_ready():
+            self.layout = True
+            return {"migrated": False, "layout": int(row[0])}
+        with self.db:
+            self.db.execute("BEGIN IMMEDIATE")
+            for statement in _LAYOUT.split(";"):
+                if statement.strip():
+                    self.db.execute(statement)
+            runs = 0
+            for r in self.db.execute("SELECT repository,run_id,metadata,metadata_digest FROM run"):
+                self._write_summary(json.loads(r["metadata"]), r["metadata_digest"])
+                runs += 1
+            discoveries = 0
+            for r in self.db.execute(
+                "SELECT id,evidence_digest FROM discovery WHERE complete=1 AND id NOT IN "
+                "(SELECT discovery_id FROM discovery_indexed)"
+            ).fetchall():
+                self._write_discovery_runs(
+                    r["id"], json.loads(self.archive.read(r["evidence_digest"]))
+                )
+                discoveries += 1
+            self.db.execute(
+                "INSERT OR REPLACE INTO meta VALUES ('layout', ?)", (str(LAYOUT_VERSION),)
+            )
+        self.layout = True
+        return {
+            "migrated": True,
+            "layout": LAYOUT_VERSION,
+            "runs": runs,
+            "discoveries": discoveries,
+        }
+
+    def _write_summary(self, metadata: dict, digest: str):
+        repository, run_id = metadata["repository"], metadata["id"]
+        summary, shards = summarize_run(metadata)
+        self.db.execute(
+            "INSERT OR REPLACE INTO run_summary VALUES (?,?,?,?,?,?,?,?,?)",
+            (repository, run_id, digest, *summary.values()),
+        )
+        self.db.execute(
+            "DELETE FROM run_shard WHERE repository=? AND run_id=?", (repository, run_id)
+        )
+        self.db.executemany(
+            "INSERT INTO run_shard VALUES (?,?,?,?,?)",
+            ((repository, run_id, *shard) for shard in shards),
+        )
+
+    def _write_discovery_runs(self, discovery_id: int, runs: list):
+        self.db.execute("DELETE FROM discovery_run WHERE discovery_id=?", (discovery_id,))
+        self.db.executemany(
+            "INSERT INTO discovery_run VALUES (?,?,?,?,?,?)",
+            ((discovery_id, *summarize_discovered(run)) for run in runs),
+        )
+        self.db.execute("INSERT OR REPLACE INTO discovery_indexed VALUES (?)", (discovery_id,))
 
     def __enter__(self):
         return self
@@ -352,16 +483,19 @@ class Index:
                     revisit_at,
                 ),
             )
+            self._write_summary(metadata, digest)
             self._advance()
         return digest
 
     def record_discovery(self, repository, since, until, runs, complete, diagnostic=""):
         digest = self.archive.put(encode(runs))
         with self.db:
-            self.db.execute(
+            cursor = self.db.execute(
                 "INSERT INTO discovery VALUES (NULL,?,?,?,?,?,?,?,?)",
                 (repository, since, until, now(), int(complete), len(runs), diagnostic, digest),
             )
+            if complete:
+                self._write_discovery_runs(cursor.lastrowid, runs)
             self._advance()
 
     def availability(self, repository, run_id, suite, location, reason):
