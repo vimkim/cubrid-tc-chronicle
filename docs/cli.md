@@ -135,7 +135,33 @@ For an agent workflow:
 6. Read retained bytes with `cubrid-tcc evidence --execution ID --file FILE` from an evidence reference.
 
 Query exit code 0 includes FAILING, UNKNOWN, and NOT_INDEXED. It means the query succeeded.
-Errors go to stderr. JSON output on stdout contains one report.
+With `--json`, every outcome writes exactly one JSON document to stdout and nothing to stderr, including errors. Without `--json`, errors and the ambiguity list are human text on stderr. Exit codes stay 0, 2, and 3.
+
+| Outcome | Exit | Document |
+|---|---|---|
+| Report | 0 | the command's report |
+| Invalid arguments | 2 | `{"schema_version":1,"error":"usage_error","message":…}` |
+| Operational or collection error | 2 | `{"schema_version":1,"error":"operational_error","message":…}` |
+| Uncollected suite in `sync-data` | 2 | `{"schema_version":1,"error":"unsupported_suite","message":…}` |
+| Ambiguous identity or occurrence | 3 | `{"schema_version":1,"error":"ambiguous_identity","message":…,"candidate_count":N,"candidates":[…]}` |
+
+`candidates` holds at most `--limit` entries (default 20) on `status`, `history`, and `explain`. `candidate_count` is the full number. Narrow the name or select a suite to reduce it.
+
+### Suites
+
+Every `--suite` accepts `sql`, `medium`, `shell`, and the CI job names `test_sql`, `test_medium`, `test_shell` as aliases. `sql_by_cci` and `test_sql_by_cci` are known but not collected. Query commands answer them with exit 0, `status` (or `history_result`) `"UNSUPPORTED_SUITE"`, and `reasons: ["suite_not_collected"]`. `sync-data` exits 2 with an `unsupported_suite` error. Any other value is a usage error.
+
+### Why nothing came back
+
+`status` and `history` carry `not_indexed_reason` and `suite_last_sync` (the latest snapshot time of the suite, or of all suites when none is selected). `not_indexed_reason` is `null` when the testcase has observations in scope. Otherwise:
+
+| Code | Meaning |
+|---|---|
+| `suite_failures_only` | In the window, every snapshot of the suite lists failures only, so passes are not recorded. Absence means only "did not fail" |
+| `never_observed` | No indexed run of the suite contains this path |
+| `observed_outside_window` | The path is indexed, but has no observation in the query window (`status` without branch, engine, PR, or variant filters; `history` with `--since` or `--until`) |
+
+`suite_failures_only` takes precedence, because it describes the evidence rather than the path.
 
 ## Collection
 

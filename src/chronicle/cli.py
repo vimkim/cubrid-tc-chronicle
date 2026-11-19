@@ -11,7 +11,7 @@ from pathlib import Path
 
 from . import __version__
 from .collection import CollectionError, Collector, GitHub, ResultStore
-from .models import SUITES, Bundle
+from .models import SUITE_ALIASES, SUITES, UNSUPPORTED_SUITES, Bundle
 from .parsing import parse
 from .query import (
     COVERAGE_FORMS,
@@ -32,9 +32,34 @@ def default_data_dir():
     )
 
 
+class UsageError(Exception):
+    pass
+
+
 class HelpParser(argparse.ArgumentParser):
+    """Under --json, a usage error is a JSON document on stdout. Otherwise text on stderr."""
+
     def error(self, message):
-        super().error(f"{message}\nRun '{self.prog} --help' for examples.")
+        message = f"{message}\nRun '{self.prog} --help' for examples."
+        if "--json" in (self.json_argv or ()):
+            raise UsageError(message.splitlines()[0])
+        super().error(message)
+
+    json_argv = None
+
+
+def suite_arg(value):
+    """Accept sql, medium, shell, their CI names, and known uncollected suites."""
+    name = SUITE_ALIASES.get(value, value)
+    if name in SUITES or name in UNSUPPORTED_SUITES:
+        return name
+    raise argparse.ArgumentTypeError(
+        f"invalid suite {value!r} (choose from {', '.join(SUITES)}; "
+        f"CI names {', '.join(SUITE_ALIASES)} also work)"
+    )
+
+
+SUITE_HELP = "sql, medium, or shell (CI names test_sql, test_medium, test_shell also work)"
 
 
 def parser():
@@ -52,7 +77,11 @@ For agents:
   Start with status NAME --json. Queries read the local index offline.
   If the index is missing or stale, collect evidence with sync-data.
   sync-data reads GitHub and the result store, then writes the local index.
-  JSON reports use stdout. Errors and collection progress use stderr.
+  With --json, every outcome (reports, errors, ambiguity) is one JSON document on stdout.
+  Without --json, errors use stderr. Collection progress always uses stderr.
+  --suite accepts sql, medium, shell and the CI names test_sql, test_medium, test_shell.
+  test_sql_by_cci is not collected: queries answer UNSUPPORTED_SUITE.
+  When a testcase is NOT_INDEXED, read not_indexed_reason and suite_last_sync.
   Exit 0: command succeeded, including FAILING, UNKNOWN, or empty query results.
   Exit 2: invalid arguments or an operational or collection error.
   Exit 3: ambiguous testcase or occurrence. Select a returned candidate.
@@ -131,9 +160,10 @@ For agents:
     )
     sync.add_argument(
         "--suite",
-        choices=SUITES,
+        type=suite_arg,
         action="append",
-        help="Collect this suite (default: all). Repeat for more",
+        metavar="SUITE",
+        help=f"Collect this suite (default: all). Repeat for more. {SUITE_HELP}",
     )
     sync.add_argument(
         "--store",
@@ -179,7 +209,9 @@ For agents:
         "For ambiguous names, use find NAME --json and select a path, suite, or variant.",
     )
     status.add_argument("case", help=case_help)
-    status.add_argument("--suite", choices=SUITES, help="Select one testcase suite")
+    status.add_argument(
+        "--suite", type=suite_arg, metavar="SUITE", help=f"Select one testcase suite: {SUITE_HELP}"
+    )
     status.add_argument("--variant", help="Recorded execution variant, or 'unknown'")
     status.add_argument("--branch", help="Recorded engine branch")
     status.add_argument("--engine", dest="engine_sha", help="Recorded engine commit SHA or prefix")
@@ -197,8 +229,8 @@ For agents:
     status.add_argument(
         "--limit",
         type=int,
-        default=5,
-        help="Maximum evidence examples per list, 1–100 (default: 5)",
+        help="Maximum evidence examples per list, 1–100 (default: 5). "
+        "Also caps ambiguity candidates (default: 20)",
     )
     find = command(
         "find",
@@ -210,7 +242,9 @@ For agents:
         notes="Use a returned path, suite, and variant with status, history, or explain.",
     )
     find.add_argument("term", help="Ticket, filename, or path fragment (search ignores case)")
-    find.add_argument("--suite", choices=SUITES, help="Select one testcase suite")
+    find.add_argument(
+        "--suite", type=suite_arg, metavar="SUITE", help=f"Select one testcase suite: {SUITE_HELP}"
+    )
     find.add_argument("--variant", help="Recorded execution variant, or 'unknown'")
     find.add_argument("--coverage", choices=COVERAGE_FORMS, default="compact", help=coverage_help)
     for name in ("history", "explain"):
@@ -256,8 +290,16 @@ For agents:
             p.add_argument(
                 "--ordinal", type=int, help="Observation ordinal from an ambiguity candidate"
             )
-        p.add_argument("--suite", choices=SUITES, help="Select one testcase suite")
+        p.add_argument(
+            "--suite",
+            type=suite_arg,
+            metavar="SUITE",
+            help=f"Select one testcase suite: {SUITE_HELP}",
+        )
         p.add_argument("--coverage", choices=COVERAGE_FORMS, default="compact", help=coverage_help)
+        p.add_argument(
+            "--limit", type=int, help="Maximum ambiguity candidates in the report (default: 20)"
+        )
         p.add_argument("--since", help=since_help)
         p.add_argument("--until", help=until_help)
         p.add_argument("--engine", dest="engine_sha", help="Recorded engine commit SHA or prefix")
@@ -285,7 +327,9 @@ For agents:
     )
     coverage.add_argument("--since", help=since_help)
     coverage.add_argument("--until", help=until_help)
-    coverage.add_argument("--suite", choices=SUITES, help="Select one testcase suite")
+    coverage.add_argument(
+        "--suite", type=suite_arg, metavar="SUITE", help=f"Select one testcase suite: {SUITE_HELP}"
+    )
     command(
         "reparse",
         "Verify and reparse retained snapshots without network access",
@@ -502,13 +546,61 @@ def format_status(report):
         )
 
 
+CANDIDATE_LIMIT = 20
+
+
+def error_document(error, message, **extra):
+    return {"schema_version": 1, "error": error, "message": message, **extra}
+
+
+def unsupported_suite_report(args):
+    """The answer of a query command for a suite that Chronicle does not collect."""
+    base = {
+        "schema_version": 1,
+        "reasons": ["suite_not_collected"],
+        "scope": {"suite": args.suite},
+    }
+    if args.command == "status":
+        return {**base, "status": "UNSUPPORTED_SUITE", "requested_case": args.case}
+    if args.command == "find":
+        return {**base, "status": "UNSUPPORTED_SUITE", "candidates": []}
+    if args.command == "coverage":
+        return {**base, "status": "UNSUPPORTED_SUITE"}
+    return {**base, "history_result": "UNSUPPORTED_SUITE", "identity": None, "target": None}
+
+
 def main(argv=None):
     root = parser()
     argv = sys.argv[1:] if argv is None else list(argv)
     if not argv:
         root.print_help()
         return 0
-    args = root.parse_args(argv)
+    HelpParser.json_argv = argv
+    try:
+        args = root.parse_args(argv)
+    except UsageError as e:
+        print(json.dumps(error_document("usage_error", str(e)), indent=2))
+        return 2
+    suites = getattr(args, "suite", None)
+    if args.command in ("sync-data", "sync"):
+        if any(suite in UNSUPPORTED_SUITES for suite in suites or ()):
+            message = "a requested suite is not collected; use sql, medium, or shell"
+            if args.json:
+                print(json.dumps(error_document("unsupported_suite", message), indent=2))
+            else:
+                print(f"cubrid-tcc: {message}", file=sys.stderr)
+            return 2
+    elif suites in UNSUPPORTED_SUITES:
+        report = unsupported_suite_report(args)
+        print(
+            json.dumps(report, indent=2)
+            if args.json
+            else f"UNSUPPORTED_SUITE: {args.suite} is not collected (suite_not_collected)"
+        )
+        return 0
+    candidate_limit = getattr(args, "limit", None) or CANDIDATE_LIMIT
+    if args.command == "status" and args.limit is None:
+        args.limit = 5
     if args.command == "sync":
         print("cubrid-tcc sync is a legacy alias; use cubrid-tcc sync-data.", file=sys.stderr)
         args.command = "sync-data"
@@ -647,22 +739,30 @@ def main(argv=None):
                     print(f"Run {failure['run_id']}: {failure['reason']}", file=sys.stderr)
             return 2 if result.get("failures") else 0
     except AmbiguousIdentity as e:
-        error = {
-            "schema_version": 1,
-            "error": "ambiguous_identity",
-            "message": str(e),
-            "candidates": e.candidates,
-        }
-        print(
-            json.dumps(error, indent=2)
-            if args.json
-            else str(e) + "\n" + "\n".join(str(c) for c in e.candidates),
-            file=sys.stderr,
+        if candidate_limit < 1:
+            candidate_limit = CANDIDATE_LIMIT
+        shown = e.candidates[:candidate_limit]
+        error = error_document(
+            "ambiguous_identity",
+            str(e),
+            candidate_count=len(e.candidates),
+            candidates=shown,
         )
+        if args.json:
+            print(json.dumps(error, indent=2))
+        else:
+            lines = [str(e)] + [str(c) for c in shown]
+            if len(shown) < len(e.candidates):
+                lines.append(
+                    f"... {len(e.candidates) - len(shown)} more; narrow the name or --suite"
+                )
+            print("\n".join(lines), file=sys.stderr)
         return 3
     except (ValueError, OverflowError, OSError, sqlite3.Error, CollectionError) as e:
-        error = {"schema_version": 1, "error": "operational_error", "message": str(e)}
-        print(json.dumps(error) if args.json else f"cubrid-tcc: {e}", file=sys.stderr)
+        if args.json:
+            print(json.dumps(error_document("operational_error", str(e)), indent=2))
+        else:
+            print(f"cubrid-tcc: {e}", file=sys.stderr)
         return 2
 
 

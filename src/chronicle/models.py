@@ -5,6 +5,10 @@ from typing import Literal
 
 PARSER_VERSION = 2
 SUITES = ("sql", "medium", "shell")
+# CI job names accepted wherever a suite is selected.
+SUITE_ALIASES = {"test_sql": "sql", "test_medium": "medium", "test_shell": "shell"}
+# Known CI suites that Chronicle does not collect.
+UNSUPPORTED_SUITES = ("sql_by_cci", "test_sql_by_cci")
 Outcome = Literal["PASS", "FAIL", "SKIP", "ERROR", "NOT_RUN"]
 
 

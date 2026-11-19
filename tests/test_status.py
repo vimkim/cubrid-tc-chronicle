@@ -249,8 +249,8 @@ class StatusTests(unittest.TestCase):
         with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
             code = main(["--data-dir", str(self.path), "status", "shared.sql", "--json"])
         self.assertEqual(code, 3)
-        self.assertEqual(out.getvalue(), "")
-        self.assertEqual(len(json.loads(err.getvalue())["candidates"]), 2)
+        self.assertEqual(err.getvalue(), "")
+        self.assertEqual(len(json.loads(out.getvalue())["candidates"]), 2)
 
     def test_collection_command_and_legacy_alias_preserve_json_and_scope(self):
         result = {"runs": 0, "failures": []}

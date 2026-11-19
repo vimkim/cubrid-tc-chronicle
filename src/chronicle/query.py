@@ -630,6 +630,24 @@ class Queries:
             unresolved_filters.add("ancestry_unknown")
         return occurrences, sorted(unresolved_filters)
 
+    def absence(self, identity, suite, coverage, windowed):
+        """Say why a testcase has no observations in scope, and when the suite was last synced."""
+        last_seen = self.db.execute(
+            "SELECT max(last_seen) FROM execution "
+            "WHERE active=1 AND repository=? AND (? IS NULL OR suite=?)",
+            (self.repository, suite, suite),
+        ).fetchone()[0]
+        if coverage["complete_results"] == 0 and coverage["partial_results"] > 0:
+            # Failure lists record no passes, so absence only means "did not fail".
+            reason = "suite_failures_only"
+        elif identity is None:
+            reason = "never_observed"
+        elif windowed:
+            reason = "observed_outside_window"
+        else:
+            reason = None
+        return {"not_indexed_reason": reason, "suite_last_sync": last_seen}
+
     def history(self, query: HistoryQuery):
         if query.coverage not in COVERAGE_FORMS:
             raise ValueError("coverage form must be compact or full")
@@ -659,6 +677,8 @@ class Queries:
             "reasons": [],
             "target_run_indexed": None,
             "suggested_sync": None,
+            "not_indexed_reason": None,
+            "suite_last_sync": None,
         }
         if query.run_id is not None:
             run_suite = query.suite or (identity or {}).get("suite")
@@ -671,11 +691,17 @@ class Queries:
             report["target_run_indexed"] = indexed
             if not indexed:
                 report["suggested_sync"] = sync_argv([query.run_id], None, run_suite)
+        windowed = bool(query.since or query.until)
         if identity is None:
             report["reasons"] = ["not_indexed"]
+            report.update(self.absence(None, query.suite, coverage, windowed))
             return report
         occurrences, limits = self._occurrences(identity, query)
         report["occurrences"] = occurrences
+        if not occurrences:
+            report.update(
+                self.absence(identity, query.suite or identity["suite"], coverage, windowed)
+            )
         report["reasons"].extend(limits)
         unresolved_ancestry = "ancestry_unknown" in limits
         unresolved_filters = limits
@@ -822,6 +848,10 @@ class Queries:
         if identity is None:
             summary["status"] = "NOT_INDEXED"
             summary["reasons"] = ["not_indexed"]
+        absence = {"not_indexed_reason": None, "suite_last_sync": None}
+        if identity is None or not occurrences:
+            unfiltered = not (query.branch or query.engine_sha or query.pr or query.variant)
+            absence = self.absence(identity, suite, coverage, unfiltered)
         if limits:
             # Unknown dates or engine references can hide a newer scoped outcome.
             summary["status"] = "UNKNOWN"
@@ -919,4 +949,5 @@ class Queries:
             },
             "coverage": shape_coverage(coverage),
             "reasons": sorted(reasons),
+            **absence,
         }
