@@ -52,7 +52,28 @@ The legacy `sync` subcommand remains available as `cubrid-tcc sync` and prints a
 
 The companion dotfiles integration registers `~/gh/cubrid-tc-chronicle` with `daily-update`.
 It checks for a clean primary `main`, fetches `origin/main`, fast-forwards, and runs `just sync`.
-Daily upkeep refreshes the installed CLI. Data collection remains an explicit command.
+Daily upkeep refreshes the installed CLI.
+
+### Schedule collection with systemd
+
+On Linux with a systemd user manager, run `just sync` from the primary checkout
+and make sure `cubrid-tcc` and an authenticated `gh` are on PATH. The timer runs
+`cubrid-tcc sync-data` once an hour using the PATH recorded at installation.
+
+```sh
+just install-timer
+systemctl --user enable --now cubrid-tcc-sync.timer
+just timer-status
+just timer-logs
+```
+
+`just install-timer` installs the unit files. The second command activates
+the schedule. To use a custom index, result store, or GitHub CLI configuration,
+put `TCC_DATA_DIR`, `TCC_STORE_URL`, or `GH_CONFIG_DIR` in
+`${XDG_CONFIG_HOME:-$HOME/.config}/cubrid-tc-chronicle/sync.env` as `NAME=value`
+entries. Use `systemctl --user disable --now cubrid-tcc-sync.timer` to disable
+future runs. Continuous scheduling across logout requires a user manager that
+stays running, such as an account with systemd linger enabled.
 
 ## Query a testcase for an agent
 

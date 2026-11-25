@@ -1,0 +1,10 @@
+# Managed by cubrid-tc-chronicle
+[Unit]
+Description=Collect CUBRID testcase evidence every hour
+
+[Timer]
+OnCalendar=hourly
+Persistent=true
+
+[Install]
+WantedBy=timers.target

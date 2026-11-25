@@ -31,6 +31,37 @@ serve-local *args:
 sync-data *args:
     uv run --locked cubrid-tcc sync-data "$@"
 
+# Install the hourly systemd user timer and its service without enabling them.
+install-timer:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    command -v cubrid-tcc >/dev/null || { echo "Run just sync and add cubrid-tcc to PATH." >&2; exit 1; }
+    command -v gh >/dev/null || { echo "Install the authenticated gh CLI and add it to PATH." >&2; exit 1; }
+    unit_dir="${XDG_CONFIG_HOME:-$HOME/.config}/systemd/user"
+    for unit in cubrid-tcc-sync.service cubrid-tcc-sync.timer; do
+        target="$unit_dir/$unit"
+        if [[ -L "$target" ]] || { [[ -e "$target" ]] && [[ "$(head -n 1 "$target")" != '# Managed by cubrid-tc-chronicle' ]]; }; then
+            echo "Refusing to replace unmanaged unit $target" >&2
+            exit 1
+        fi
+    done
+    service_path=${PATH//\\/\\\\}
+    service_path=${service_path//\"/\\\"}
+    service_path=${service_path//%/%%}
+    service=$(<systemd/cubrid-tcc-sync.service)
+    printf '%s\n' "${service//@PATH@/"$service_path"}" | install -Dm644 /dev/stdin "$unit_dir/cubrid-tcc-sync.service"
+    install -Dm644 systemd/cubrid-tcc-sync.timer "$unit_dir/cubrid-tcc-sync.timer"
+    systemctl --user daemon-reload
+    echo "Timer installed. To enable and start it, run systemctl --user enable --now cubrid-tcc-sync.timer."
+
+# Show timer registration, scheduling, and state.
+timer-status:
+    @systemctl --user show --property=LoadState,UnitFileState,ActiveState,NextElapseUSecRealtime cubrid-tcc-sync.timer
+
+# Show recent collection logs.
+timer-logs:
+    @journalctl --user -u cubrid-tcc-sync.service -n 50 --no-pager
+
 # Summarize recent verdicts, suspected flakiness, freshness, and evidence for a TC.
 status case *args:
     uv run --locked cubrid-tcc status "$@"

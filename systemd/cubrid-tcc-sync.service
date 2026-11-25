@@ -1,0 +1,9 @@
+# Managed by cubrid-tc-chronicle
+[Unit]
+Description=Collect CUBRID testcase evidence
+
+[Service]
+Type=oneshot
+Environment="PATH=@PATH@"
+EnvironmentFile=-%E/cubrid-tc-chronicle/sync.env
+ExecStart=/usr/bin/env cubrid-tcc sync-data
