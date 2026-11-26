@@ -11,6 +11,7 @@ from collections import Counter
 from pathlib import PurePosixPath
 
 from .models import (
+    LEGACY_SHELL_JUNIT,
     SHELL_JUNIT,
     SUITES,
     Bundle,
@@ -241,7 +242,10 @@ def parse(bundle: Bundle) -> ParsedExecution:
                     cases = list(suite.iter("testcase"))
                     executed = sum(c.find("skipped") is None for c in cases)
                     skipped = len(cases) - executed
-                    for key, actual in (("tests", executed), ("skipped", skipped)):
+                    # test-shell.xml counted executed cases in "tests". The renamed
+                    # writer follows JUnit and counts every case, skipped included.
+                    tests = executed if evidence == LEGACY_SHELL_JUNIT else len(cases)
+                    for key, actual in (("tests", tests), ("skipped", skipped)):
                         if suite.get(key) is None:
                             problem("counts_unavailable", f"shell JUnit: missing {key} counter")
                         elif integer(suite.get(key), f"JUnit {key}") != actual:

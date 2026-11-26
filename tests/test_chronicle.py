@@ -128,13 +128,18 @@ class ParsingTests(unittest.TestCase):
 
     def test_renamed_shell_junit_is_parsed_like_the_old_name(self):
         bundle = read_bundle(FIXTURES / "shell-failure-sanitized/bundle.json")
-        bundle.files[SHELL_JUNIT[0]] = bundle.files.pop("test-results/test-shell.xml")
+        # The renamed writer counts skipped cases in "tests", as JUnit does.
+        legacy = bundle.files.pop("test-results/test-shell.xml")
+        bundle.files[SHELL_JUNIT[0]] = legacy.replace(b'tests="2"', b'tests="3"')
         result = parse(bundle)
         self.assertEqual(
             Counter(o.outcome for o in result.observations), {"PASS": 1, "FAIL": 1, "SKIP": 1}
         )
         self.assertTrue(result.complete, result.diagnostics)
         self.assertEqual({o.evidence for o in result.observations}, {SHELL_JUNIT[0]})
+        # Each file name keeps its own counter convention.
+        bundle.files[SHELL_JUNIT[0]] = legacy
+        self.assertIn("count_mismatch", {d.reason for d in parse(bundle).diagnostics})
 
     def test_two_shell_junit_names_are_a_provenance_conflict(self):
         bundle = read_bundle(FIXTURES / "shell-failure-sanitized/bundle.json")
@@ -831,7 +836,8 @@ class CollectorTests(unittest.TestCase):
 
     def test_renamed_shell_junit_is_collected_without_a_gap(self):
         bundle = read_bundle(FIXTURES / "shell-failure-sanitized/bundle.json")
-        bundle.files[SHELL_JUNIT[0]] = bundle.files.pop("test-results/test-shell.xml")
+        legacy = bundle.files.pop("test-results/test-shell.xml")
+        bundle.files[SHELL_JUNIT[0]] = legacy.replace(b'tests="2"', b'tests="3"')
         jobs = [
             {
                 "name": "shell / shard shell 00",
