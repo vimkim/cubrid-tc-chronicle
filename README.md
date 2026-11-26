@@ -97,7 +97,7 @@ just sync-data --pr-metadata-only
 
 - **OS / Python**: Linux, **Python 3.12+**
 - **도구**: [`uv`](https://docs.astral.sh/uv/), [`just`](https://github.com/casey/just), 인증 완료된 GitHub CLI (`gh`)
-- **네트워크(수집 시)**: GitHub API 및 사내 CUBRID 결과 저장소(`http://192.168.1.48:30080`) 접근
+- **네트워크(수집 시)**: GitHub API 및 사내 CUBRID 결과 저장소(`TCC_STORE_URL`) 접근
 
 ### 설치 및 첫 수집·조회
 
@@ -143,7 +143,7 @@ just timer-logs
 
 - 커스텀 인덱스 경로나 저장소 URL, GitHub CLI 설정을 쓰려면 `${XDG_CONFIG_HOME:-$HOME/.config}/cubrid-tc-chronicle/sync.env` 파일에 `NAME=value` 형식으로 지정하세요.
   - `TCC_DATA_DIR`: 로컬 인덱스 경로 (기본값: `${XDG_DATA_HOME:-$HOME/.local/share}/cubrid-tc-chronicle`)
-  - `TCC_STORE_URL`: 사내 결과 저장소 URL (기본값: `http://192.168.1.48:30080`)
+  - `TCC_STORE_URL`: 사내 결과 저장소 URL (기본값: 내장 사내 결과 저장소 주소, 필요 시 환경변수로 재정의)
   - `GH_CONFIG_DIR`: `gh` 인증 설정 디렉토리
 - SSH 로그아웃 후에도 타이머가 계속 돌려면 계정에 systemd linger(`loginctl enable-linger $USER`)가 활성화되어 있어야 합니다.
 - 중지하려면 `systemctl --user disable --now cubrid-tcc-sync.timer`를 실행하세요.
