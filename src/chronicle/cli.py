@@ -16,6 +16,7 @@ from .parsing import parse
 from .query import (
     COVERAGE_FORMS,
     AmbiguousIdentity,
+    FailuresQuery,
     HistoryQuery,
     Queries,
     StatusQuery,
@@ -330,6 +331,31 @@ For agents:
     coverage.add_argument(
         "--suite", type=suite_arg, metavar="SUITE", help=f"Select one testcase suite: {SUITE_HELP}"
     )
+    failures = command(
+        "failures",
+        "List failed observations across runs, PRs, or recent days",
+        "Query retained FAIL and ERROR observations offline.\n"
+        "Uses the partial failure index so PR and recent-day queries finish in milliseconds.",
+        "failures --pr 8753 --latest-run --json",
+        "failures --days 7 --suite shell --json",
+        "failures --run 38868725373 --json",
+    )
+    failures.add_argument("--pr", type=int, help="Filter to retained pull request number")
+    failures.add_argument("--run", type=int, dest="run_id", help="Filter to GitHub Actions run ID")
+    failures.add_argument("--case", help="Substring or path filter on testcase path")
+    failures.add_argument(
+        "--suite", type=suite_arg, metavar="SUITE", help=f"Select one testcase suite: {SUITE_HELP}"
+    )
+    failures_window = failures.add_mutually_exclusive_group()
+    failures_window.add_argument("--days", type=int, help="Filter to failures of the last N days")
+    failures_window.add_argument("--since", help=since_help)
+    failures.add_argument("--until", help=until_help)
+    failures.add_argument(
+        "--latest-run",
+        action="store_true",
+        help="Keep only failures from each PR's latest indexed run per suite",
+    )
+    failures.add_argument("--limit", type=int, help="Maximum returned failure items")
     command(
         "reparse",
         "Verify and reparse retained snapshots without network access",
@@ -553,6 +579,25 @@ def error_document(error, message, **extra):
     return {"schema_version": 1, "error": error, "message": message, **extra}
 
 
+def format_failures(report):
+    print(f"Failures: {report['count']} item(s)")
+    if report.get("latest_runs"):
+        for suite_name, info in sorted(report["latest_runs"].items()):
+            eng = (info.get("engine_sha") or "unknown")[:12]
+            tc_sha = (info.get("testcase_sha") or "unknown")[:12]
+            tc_br = info.get("testcase_branch") or "unknown"
+            print(f"Latest {suite_name}: run {info['run_id']} engine {eng} tc {tc_br}@{tc_sha}")
+    for item in report["items"]:
+        pr = item.get("pull_request") or {}
+        pr_str = f"PR #{pr['number']}" if pr.get("number") else "no PR"
+        eng = (item.get("engine_sha") or "unknown")[:12]
+        tc_path = item["testcase"]["path"]
+        print(
+            f"  {item.get('completed_at') or 'unknown':20} {item['suite']:6} "
+            f"sh{item['shard']:2} {pr_str:8} {eng} {item['outcome']:5} {tc_path}"
+        )
+
+
 def unsupported_suite_report(args):
     """The answer of a query command for a suite that Chronicle does not collect."""
     base = {
@@ -566,6 +611,8 @@ def unsupported_suite_report(args):
         return {**base, "status": "UNSUPPORTED_SUITE", "candidates": []}
     if args.command == "coverage":
         return {**base, "status": "UNSUPPORTED_SUITE"}
+    if args.command == "failures":
+        return {**base, "status": "UNSUPPORTED_SUITE", "count": 0, "items": [], "latest_runs": {}}
     return {**base, "history_result": "UNSUPPORTED_SUITE", "identity": None, "target": None}
 
 
@@ -677,6 +724,16 @@ def main(argv=None):
                     "schema_version": 1,
                     **queries.coverage(args.since, args.until, args.suite),
                 }
+            elif args.command == "failures":
+                result = queries.failures(
+                    FailuresQuery(
+                        **{
+                            name: getattr(args, name)
+                            for name in FailuresQuery.__dataclass_fields__
+                            if hasattr(args, name)
+                        }
+                    )
+                )
             elif args.command == "reparse":
                 result = {"schema_version": 1, **index.reparse()}
             elif args.command == "migrate":
@@ -714,6 +771,8 @@ def main(argv=None):
                 format_status(result)
             elif args.command == "coverage":
                 format_coverage(result)
+            elif args.command == "failures":
+                format_failures(result)
             elif args.command == "find":
                 for c in result["candidates"]:
                     print(f"{c['suite']:6} {c['path']}")
@@ -737,7 +796,7 @@ def main(argv=None):
                 )
                 for failure in result["failures"]:
                     print(f"Run {failure['run_id']}: {failure['reason']}", file=sys.stderr)
-            return 2 if result.get("failures") else 0
+            return 2 if args.command == "sync-data" and result.get("failures") else 0
     except AmbiguousIdentity as e:
         if candidate_limit < 1:
             candidate_limit = CANDIDATE_LIMIT

@@ -122,6 +122,19 @@ class StatusQuery:
     limit: int = 5
 
 
+@dataclass(frozen=True)
+class FailuresQuery:
+    pr: int | None = None
+    run_id: int | None = None
+    case: str | None = None
+    suite: str | None = None
+    since: str | None = None
+    until: str | None = None
+    days: int | None = None
+    latest_run: bool = False
+    limit: int | None = None
+
+
 class Queries:
     def __init__(self, index: Index, repository="CUBRID/cubrid"):
         self.index = index
@@ -959,4 +972,208 @@ class Queries:
             "coverage": shape_coverage(coverage),
             "reasons": sorted(reasons),
             **absence,
+        }
+
+    def failures(self, query: FailuresQuery, *, now=None):
+        """Query failed observations quickly using the partial failures index or run index."""
+        if query.days is not None and (query.days < 1 or query.since is not None):
+            raise ValueError("--days must be positive and cannot be combined with --since")
+        if query.limit is not None and query.limit < 1:
+            raise ValueError("--limit must be positive")
+        since = (
+            timestamp(query.since)
+            if query.since
+            else timestamp(((now or datetime.now(UTC)) - timedelta(days=query.days)).isoformat())
+            if query.days is not None
+            else None
+        )
+        until = timestamp(query.until, end=True) if query.until else None
+        runs = self._runs()
+        target_run_ids: list[int] | None = None
+        if query.run_id is not None:
+            target_run_ids = [query.run_id]
+        if query.pr is not None:
+            pr_runs = [
+                rid
+                for rid, r in runs.items()
+                if (r.get("pull_request") or {}).get("number") == query.pr
+            ]
+            if target_run_ids is None:
+                target_run_ids = sorted(pr_runs)
+            else:
+                pr_set = set(pr_runs)
+                target_run_ids = [rid for rid in target_run_ids if rid in pr_set]
+
+        filters_doc = {
+            "pr": query.pr,
+            "run_id": query.run_id,
+            "case": query.case,
+            "suite": query.suite,
+            "since": since,
+            "until": until,
+            "days": query.days,
+            "latest_run": query.latest_run,
+            "limit": query.limit,
+        }
+        if target_run_ids is not None and not target_run_ids:
+            return {
+                "schema_version": 1,
+                "repository": self.repository,
+                "filters": filters_doc,
+                "latest_runs": {},
+                "count": 0,
+                "items": [],
+            }
+
+        has_partial_idx = bool(
+            self.db.execute(
+                "SELECT 1 FROM sqlite_master WHERE type='index' AND name='observation_failures'"
+            ).fetchone()
+        )
+        # When querying across runs without specific run_ids, force observation_failures partial
+        # index so SQLite scans ~7.5k failure rows instead of 60k+ executions (~15ms vs ~3s).
+        if target_run_ids is None and has_partial_idx:
+            from_clause = (
+                "FROM observation o INDEXED BY observation_failures "
+                "JOIN execution e ON e.id = o.execution_id "
+                "JOIN testcase t ON t.id = o.testcase_id"
+            )
+        else:
+            from_clause = (
+                "FROM execution e "
+                "JOIN observation o ON o.execution_id = e.id "
+                "JOIN testcase t ON t.id = o.testcase_id"
+            )
+
+        where = ["o.outcome IN ('FAIL', 'ERROR')", "e.active = 1", "e.repository = ?"]
+        params: list[object] = [self.repository]
+        if target_run_ids is not None:
+            placeholders = ",".join("?" for _ in target_run_ids)
+            where.append(f"e.run_id IN ({placeholders})")
+            params.extend(target_run_ids)
+        if query.suite:
+            where.append("e.suite = ?")
+            params.append(query.suite)
+        if since:
+            where.append("e.completed_at >= ?")
+            params.append(since)
+        if until:
+            where.append("e.completed_at <= ?")
+            params.append(until)
+        if query.case:
+            case_norm = query.case.strip()
+            if query.suite:
+                try:
+                    case_norm = canonical_path(case_norm, query.suite)
+                except ValueError:
+                    pass
+            where.append("LOWER(t.path) LIKE ?")
+            params.append(f"%{case_norm.lower()}%")
+
+        sql = (
+            "SELECT e.id AS execution_id, e.repository, e.run_id, e.attempt, e.suite, e.shard, "
+            "e.engine_sha, e.testcase_sha, e.testcase_branch, e.build_mode, e.completed_at, "
+            "e.metadata, o.ordinal, o.outcome, o.evidence, "
+            "t.repository AS tc_repository, t.suite AS tc_suite, t.path AS tc_path, "
+            "t.variant AS tc_variant "
+            f"{from_clause} WHERE {' AND '.join(where)} "
+            "ORDER BY e.completed_at DESC, e.run_id DESC, e.suite ASC, t.path ASC, o.ordinal ASC"
+        )
+        rows = self.db.execute(sql, params).fetchall()
+
+        # Determine latest active run_id per (pr, suite) for PRs involved.
+        pr_numbers = set()
+        if query.pr is not None:
+            pr_numbers.add(query.pr)
+        for row in rows:
+            pr_info = (runs.get(row["run_id"]) or {}).get("pull_request")
+            if pr_info and pr_info.get("number") is not None:
+                pr_numbers.add(pr_info["number"])
+
+        latest_by_pr_suite: dict[tuple[int, str], dict] = {}
+        if pr_numbers:
+            pr_run_ids = [
+                rid
+                for rid, r in runs.items()
+                if (r.get("pull_request") or {}).get("number") in pr_numbers
+            ]
+            if pr_run_ids:
+                ph = ",".join("?" for _ in pr_run_ids)
+                exec_rows = self.db.execute(
+                    f"SELECT run_id, suite, engine_sha, testcase_sha, "
+                    f"testcase_branch, completed_at "
+                    f"FROM execution WHERE active=1 AND repository=? AND run_id IN ({ph}) "
+                    "ORDER BY run_id DESC, completed_at DESC",
+                    [self.repository, *pr_run_ids],
+                ).fetchall()
+                for er in exec_rows:
+                    pr_num = (runs.get(er["run_id"]) or {}).get("pull_request", {}).get("number")
+                    if pr_num is None:
+                        continue
+                    key = (pr_num, er["suite"])
+                    prev = latest_by_pr_suite.get(key)
+                    if prev is None or er["run_id"] > prev["run_id"]:
+                        latest_by_pr_suite[key] = {
+                            "run_id": er["run_id"],
+                            "engine_sha": er["engine_sha"],
+                            "testcase_sha": er["testcase_sha"],
+                            "testcase_branch": er["testcase_branch"],
+                            "completed_at": er["completed_at"],
+                        }
+
+        items = []
+        for row in rows:
+            meta = json.loads(row["metadata"]) if row["metadata"] else {}
+            pr_info = (runs.get(row["run_id"]) or {}).get("pull_request")
+            pr_num = pr_info.get("number") if pr_info else None
+            latest_info = latest_by_pr_suite.get((pr_num, row["suite"])) if pr_num else None
+            is_latest = bool(latest_info and row["run_id"] == latest_info["run_id"])
+            if query.latest_run and pr_num is not None and not is_latest:
+                continue
+            engine_branch = meta.get("engine_branch")
+            if meta.get("push_head_sha") == row["engine_sha"]:
+                engine_branch = meta.get("push_branch")
+            items.append(
+                {
+                    "repository": row["repository"],
+                    "run_id": row["run_id"],
+                    "attempt": row["attempt"],
+                    "suite": row["suite"],
+                    "shard": row["shard"],
+                    "ordinal": row["ordinal"],
+                    "outcome": row["outcome"],
+                    "evidence": row["evidence"],
+                    "completed_at": row["completed_at"],
+                    "engine_sha": row["engine_sha"],
+                    "engine_branch": engine_branch,
+                    "testcase_sha": row["testcase_sha"],
+                    "testcase_branch": row["testcase_branch"],
+                    "build_mode": row["build_mode"],
+                    "execution_id": row["execution_id"],
+                    "testcase": {
+                        "repository": row["tc_repository"],
+                        "suite": row["tc_suite"],
+                        "path": row["tc_path"],
+                        "variant": row["tc_variant"],
+                    },
+                    "pull_request": pr_info,
+                    "is_latest_pr_suite_run": is_latest,
+                }
+            )
+            if query.limit is not None and len(items) >= query.limit:
+                break
+
+        latest_runs_out = {}
+        if query.pr is not None:
+            for (pr_num, suite_name), info in sorted(latest_by_pr_suite.items()):
+                if pr_num == query.pr and (query.suite is None or suite_name == query.suite):
+                    latest_runs_out[suite_name] = info
+
+        return {
+            "schema_version": 1,
+            "repository": self.repository,
+            "filters": filters_doc,
+            "latest_runs": latest_runs_out,
+            "count": len(items),
+            "items": items,
         }
