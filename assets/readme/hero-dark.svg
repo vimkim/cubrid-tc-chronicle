@@ -1,0 +1,228 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="520" viewBox="0 0 1200 520" role="img" aria-labelledby="title desc">
+  <title id="title">cubrid-tcc 아키텍처 및 오프라인 조회 구조 (다크 테마)</title>
+  <desc id="desc">CUBRID gha-ci 테스트케이스 실패 이력 수집기, SQLite WAL 및 SHA-256 압축 아카이브, 고속 오프라인 CLI와 로컬 웹 UI, 그리고 cubrid-tcr 연동 구조.</desc>
+  <defs>
+    <pattern id="dot-grid-dark" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="12" cy="12" r="1" fill="#30363d" opacity="0.4"/>
+    </pattern>
+    <linearGradient id="header-glow-dark" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1f6feb" stop-opacity="0.22"/>
+      <stop offset="50%" stop-color="#8957e5" stop-opacity="0.10"/>
+      <stop offset="100%" stop-color="#238636" stop-opacity="0.16"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Outer Frame -->
+  <rect x="1" y="1" width="1198" height="518" rx="16" fill="#0d1117" stroke="#30363d" stroke-width="1.5"/>
+  <rect x="2" y="2" width="1196" height="516" rx="15" fill="url(#dot-grid-dark)"/>
+  <path d="M 17 2 H 1183 A 15 15 0 0 1 1198 17 V 104 H 2 V 17 A 15 15 0 0 1 17 2 Z" fill="url(#header-glow-dark)"/>
+
+  <!-- Header Left: Emblem + Title + Badge + Subtitle -->
+  <g transform="translate(40, 30)">
+    <rect x="0" y="0" width="44" height="44" rx="10" fill="#161b22" stroke="#30363d" stroke-width="1.2"/>
+    <line x1="13" y1="10" x2="13" y2="34" stroke="#8b949e" stroke-width="1.8" stroke-linecap="round"/>
+    <circle cx="13" cy="12" r="3.2" fill="#0d1117" stroke="#58a6ff" stroke-width="2"/>
+    <circle cx="13" cy="22" r="3.2" fill="#0d1117" stroke="#bc8cff" stroke-width="2"/>
+    <circle cx="13" cy="32" r="3.2" fill="#0d1117" stroke="#3fb950" stroke-width="2"/>
+    <line x1="21" y1="12" x2="34" y2="12" stroke="#58a6ff" stroke-width="2" stroke-linecap="round"/>
+    <line x1="21" y1="22" x2="32" y2="22" stroke="#bc8cff" stroke-width="2" stroke-linecap="round"/>
+    <path d="M21 32 L26 36 L34 27" fill="none" stroke="#3fb950" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <text x="98" y="52" fill="#e6edf3" font-family="'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans CJK KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="24" font-weight="700" letter-spacing="-0.4">cubrid-tcc</text>
+
+  <rect x="226" y="32" width="178" height="24" rx="12" fill="#388bfd" fill-opacity="0.15" stroke="#1f6feb" stroke-width="1"/>
+  <text x="315" y="48" text-anchor="middle" fill="#58a6ff" font-family="'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans CJK KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="10.5" font-weight="700" letter-spacing="0.6">CUBRID TC CHRONICLE</text>
+
+  <text x="98" y="79" fill="#8b949e" font-family="'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans CJK KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13">CUBRID gha-ci 테스트케이스 실패 이력 수집 · 오프라인 조회 · 로컬 웹 UI</text>
+
+  <!-- Header Right: 5 CLI Command Pills -->
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace" font-size="11.5" font-weight="600">
+    <rect x="734" y="38" width="92" height="30" rx="7" fill="#388bfd" fill-opacity="0.14" stroke="#1f6feb"/>
+    <text x="780" y="57" text-anchor="middle" fill="#58a6ff">sync-data</text>
+
+    <rect x="834" y="38" width="70" height="30" rx="7" fill="#161b22" stroke="#30363d"/>
+    <text x="869" y="57" text-anchor="middle" fill="#e6edf3">status</text>
+
+    <rect x="912" y="38" width="76" height="30" rx="7" fill="#161b22" stroke="#30363d"/>
+    <text x="950" y="57" text-anchor="middle" fill="#e6edf3">history</text>
+
+    <rect x="996" y="38" width="82" height="30" rx="7" fill="#8957e5" fill-opacity="0.18" stroke="#8957e5"/>
+    <text x="1037" y="57" text-anchor="middle" fill="#bc8cff">failures</text>
+
+    <rect x="1086" y="38" width="74" height="30" rx="7" fill="#2ea043" fill-opacity="0.15" stroke="#238636"/>
+    <text x="1123" y="57" text-anchor="middle" fill="#3fb950">serve</text>
+  </g>
+
+  <line x1="40" y1="104" x2="1160" y2="104" stroke="#21262d" stroke-width="1.2"/>
+
+  <!-- Column 1: CI Evidence Collection -->
+  <rect x="40" y="122" width="336" height="252" rx="12" fill="#161b22" stroke="#30363d" stroke-width="1.2"/>
+  <circle cx="58" cy="142" r="4" fill="#58a6ff"/>
+  <text x="70" y="146" fill="#58a6ff" font-family="'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans CJK KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="700" letter-spacing="0.3">1. CI 증거 수집 (수집기)</text>
+
+  <!-- Sub-card 1A: Sources & Metadata -->
+  <rect x="54" y="158" width="308" height="96" rx="8" fill="#0d1117" stroke="#21262d" stroke-width="1"/>
+  <text x="66" y="176" fill="#e6edf3" font-family="'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans CJK KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="600">GitHub Actions + 사내 결과 저장소</text>
+  <text x="66" y="193" fill="#8b949e" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace" font-size="10">gha-ci · http://192.168.1.48:30080</text>
+
+  <g font-family="'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans CJK KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="9.5">
+    <rect x="66" y="202" width="140" height="20" rx="5" fill="#161b22" stroke="#30363d"/>
+    <text x="136" y="216" text-anchor="middle" fill="#e6edf3">build.read · Engine SHA</text>
+
+    <rect x="212" y="202" width="138" height="20" rx="5" fill="#161b22" stroke="#30363d"/>
+    <text x="281" y="216" text-anchor="middle" fill="#e6edf3">PR 번호 · 제목 · 작성자</text>
+
+    <rect x="66" y="226" width="140" height="20" rx="5" fill="#161b22" stroke="#30363d"/>
+    <text x="136" y="240" text-anchor="middle" fill="#8b949e">24h 기본 / --since·--run</text>
+
+    <rect x="212" y="226" width="138" height="20" rx="5" fill="#161b22" stroke="#30363d"/>
+    <text x="281" y="240" text-anchor="middle" fill="#8b949e">systemd 1시간 자동 수집</text>
+  </g>
+
+  <!-- Sub-card 1B: Suites -->
+  <rect x="54" y="262" width="308" height="100" rx="8" fill="#0d1117" stroke="#21262d" stroke-width="1"/>
+  <text x="66" y="280" fill="#e6edf3" font-family="'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans CJK KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="600">수집 대상 스위트</text>
+  <text x="350" y="280" text-anchor="end" fill="#8b949e" font-family="'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans CJK KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="10">기본 3종</text>
+
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace" font-size="10.5" font-weight="600">
+    <rect x="66" y="289" width="88" height="24" rx="6" fill="#388bfd" fill-opacity="0.14" stroke="#1f6feb"/>
+    <text x="110" y="305" text-anchor="middle" fill="#58a6ff">sql</text>
+
+    <rect x="162" y="289" width="92" height="24" rx="6" fill="#388bfd" fill-opacity="0.14" stroke="#1f6feb"/>
+    <text x="208" y="305" text-anchor="middle" fill="#58a6ff">medium</text>
+
+    <rect x="262" y="289" width="88" height="24" rx="6" fill="#388bfd" fill-opacity="0.14" stroke="#1f6feb"/>
+    <text x="306" y="305" text-anchor="middle" fill="#58a6ff">shell</text>
+  </g>
+
+  <!-- Excluded suite box -->
+  <rect x="66" y="320" width="284" height="33" rx="6" fill="#bb8009" fill-opacity="0.08" stroke="#9e6a03" stroke-dasharray="4 3"/>
+  <rect x="73" y="325" width="114" height="23" rx="5" fill="#bb8009" fill-opacity="0.18" stroke="#9e6a03"/>
+  <text x="130" y="340" text-anchor="middle" fill="#e3b341" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace" font-size="10" font-weight="600">test_sql_by_cci</text>
+  <text x="195" y="340" fill="#8b949e" font-family="'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans CJK KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="9.5">수집 제외 (UNSUPPORTED_SUITE)</text>
+
+  <!-- Connector 1 -> 2 -->
+  <line x1="380" y1="248" x2="404" y2="248" stroke="#58a6ff" stroke-width="2"/>
+  <polygon points="412,248 402,242 402,254" fill="#58a6ff"/>
+
+  <!-- Column 2: Local Index & Archive -->
+  <rect x="414" y="122" width="356" height="252" rx="12" fill="#161b22" stroke="#30363d" stroke-width="1.2"/>
+  <circle cx="432" cy="142" r="4" fill="#bc8cff"/>
+  <text x="444" y="146" fill="#bc8cff" font-family="'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans CJK KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="700" letter-spacing="0.3">2. 로컬 인덱스 &amp; 아카이브</text>
+
+  <!-- Sub-card 2A: SQLite WAL & Archive -->
+  <rect x="428" y="158" width="328" height="98" rx="8" fill="#0d1117" stroke="#21262d" stroke-width="1"/>
+  <text x="440" y="176" fill="#e6edf3" font-family="'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans CJK KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="600">SQLite WAL &amp; 무결성 검증 아카이브</text>
+
+  <g font-family="'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans CJK KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="10.5" fill="#8b949e">
+    <path d="M440 194 L443.5 197.5 L450 190.5" fill="none" stroke="#3fb950" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="457" y="197">run_summary · run_shard · 부분 실패 인덱스</text>
+
+    <path d="M440 213 L443.5 216.5 L450 209.5" fill="none" stroke="#3fb950" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="457" y="216">SHA-256 무결성 검증 + gzip 압축 증거 보관</text>
+
+    <path d="M440 232 L443.5 235.5 L450 228.5" fill="none" stroke="#3fb950" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="457" y="235">원자적 스냅샷 적재 · 반복 동기화 중복 방지</text>
+  </g>
+
+  <!-- Sub-card 2B: History Principles -->
+  <rect x="428" y="264" width="328" height="98" rx="8" fill="#8957e5" fill-opacity="0.08" stroke="#8957e5" stroke-opacity="0.55" stroke-width="1"/>
+  <text x="440" y="283" fill="#e6edf3" font-family="'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans CJK KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="600">이력 불변 원칙 · 부재 ≠ PASS</text>
+
+  <rect x="688" y="269" width="56" height="18" rx="9" fill="#8957e5" fill-opacity="0.22" stroke="#8957e5"/>
+  <text x="716" y="282" text-anchor="middle" fill="#bc8cff" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace" font-size="9.5" font-weight="700">parser v2</text>
+
+  <rect x="440" y="294" width="142" height="42" rx="6" fill="#0d1117" stroke="#30363d"/>
+  <text x="511" y="311" text-anchor="middle" fill="#e6edf3" font-family="'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans CJK KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="10.5" font-weight="600">과거 실패 영구 보존</text>
+  <text x="511" y="326" text-anchor="middle" fill="#8b949e" font-family="'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans CJK KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="9.5">후속 PASS에도 삭제 안 함</text>
+
+  <line x1="585" y1="315" x2="601" y2="315" stroke="#bc8cff" stroke-width="1.6"/>
+  <polygon points="607,315 599,310.5 599,319.5" fill="#bc8cff"/>
+
+  <rect x="610" y="294" width="134" height="42" rx="6" fill="#0d1117" stroke="#8957e5" stroke-opacity="0.7"/>
+  <text x="677" y="311" text-anchor="middle" fill="#bc8cff" font-family="'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans CJK KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="10.5" font-weight="600">부재 ≠ PASS 원칙</text>
+  <text x="677" y="326" text-anchor="middle" fill="#8b949e" font-family="'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans CJK KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="9.5">누락 · 순서 미상 명시</text>
+
+  <text x="440" y="353" fill="#8b949e" font-family="'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans CJK KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="10">reparse 실행 시 네트워크 없이 해시 검증 후 오프라인 재파싱</text>
+
+  <!-- Connector 2 -> 3 -->
+  <line x1="774" y1="248" x2="798" y2="248" stroke="#bc8cff" stroke-width="2"/>
+  <polygon points="806,248 796,242 796,254" fill="#bc8cff"/>
+
+  <!-- Column 3: Offline Query & Integration -->
+  <rect x="808" y="122" width="352" height="252" rx="12" fill="#161b22" stroke="#30363d" stroke-width="1.2"/>
+  <circle cx="826" cy="142" r="4" fill="#3fb950"/>
+  <text x="838" y="146" fill="#3fb950" font-family="'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans CJK KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="700" letter-spacing="0.3">3. 오프라인 조회 &amp; 연동</text>
+
+  <!-- Sub-card 3A: Offline CLI & Web UI -->
+  <rect x="822" y="158" width="324" height="102" rx="8" fill="#0d1117" stroke="#21262d" stroke-width="1"/>
+  <text x="834" y="176" fill="#e6edf3" font-family="'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans CJK KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="600">고속 오프라인 CLI &amp; 로컬 웹 UI</text>
+
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace" font-size="10" fill="#8b949e">
+    <text x="834" y="196"><tspan fill="#e6edf3">status / history / explain</tspan> <tspan fill="#58a6ff">· 오프라인</tspan></text>
+    <text x="834" y="213"><tspan fill="#e6edf3">failures</tspan> <tspan fill="#bc8cff">· 밀리초 부분 실패 인덱스</tspan></text>
+    <text x="834" y="230"><tspan fill="#e6edf3">just serve</tspan> <tspan fill="#3fb950">· LAN/VPN 토큰 쿠키 인증</tspan></text>
+    <text x="834" y="247"><tspan fill="#e6edf3">--json</tspan> <tspan fill="#8b949e">· stdout 단일 JSON 규약</tspan></text>
+  </g>
+
+  <!-- Sub-card 3B: Integration with cubrid-tcr -->
+  <rect x="822" y="268" width="324" height="94" rx="8" fill="#2ea043" fill-opacity="0.09" stroke="#238636" stroke-width="1"/>
+  <text x="834" y="287" fill="#e6edf3" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace" font-size="11.5" font-weight="700">cubrid-tcr 연동</text>
+
+  <rect x="1068" y="273" width="66" height="18" rx="9" fill="#2ea043" fill-opacity="0.22" stroke="#238636"/>
+  <text x="1101" y="286" text-anchor="middle" fill="#3fb950" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="9.5" font-weight="700">REGISTRY</text>
+
+  <g font-family="'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans CJK KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="10.5" fill="#8b949e">
+    <path d="M834 307 L837.5 310.5 L844 303.5" fill="none" stroke="#3fb950" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="851" y="310">tcc: CI 사실·발생 이력 제공 (Fact &amp; History)</text>
+
+    <path d="M834 326 L837.5 329.5 L844 322.5" fill="none" stroke="#3fb950" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="851" y="329">tcr: 시그니처 · 이슈 · Known-Issue 판정</text>
+
+    <path d="M834 345 L837.5 348.5 L844 341.5" fill="none" stroke="#3fb950" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="851" y="348">팀원 · AI 에이전트가 이력과 지식을 함께 조회</text>
+  </g>
+
+  <!-- Bottom Left Card: Independent Reporting & Guarantees -->
+  <rect x="40" y="390" width="548" height="106" rx="12" fill="#161b22" stroke="#30363d" stroke-width="1.2"/>
+  <text x="56" y="412" fill="#e6edf3" font-family="'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans CJK KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="700">독립 분리 보고 · 오프라인 밀리초 조회</text>
+  <rect x="454" y="397" width="118" height="20" rx="10" fill="#388bfd" fill-opacity="0.14" stroke="#1f6feb"/>
+  <text x="513" y="411" text-anchor="middle" fill="#58a6ff" font-family="'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans CJK KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="10" font-weight="600">외부 의존성 0개</text>
+
+  <rect x="56" y="423" width="516" height="28" rx="6" fill="#0d1117" stroke="#21262d"/>
+  <text x="68" y="441" fill="#f85149" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace" font-size="10.5" font-weight="600">FAILING | flaky: SUSPECTED | data: FRESH</text>
+  <text x="560" y="441" text-anchor="end" fill="#3fb950" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace" font-size="10.5" font-weight="700">-&gt; exit 0</text>
+
+  <text x="56" y="469" fill="#8b949e" font-family="'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans CJK KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="10.5">status · flakiness · freshness · coverage를 서로 섞지 않고 독립 보고합니다.</text>
+  <text x="56" y="484" fill="#8b949e" font-family="'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans CJK KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="10.5">조회 성공 시 FAILING · UNKNOWN · NOT_INDEXED도 종료코드 0을 반환합니다.</text>
+
+  <!-- Bottom Right Card: Exit Codes & Verified Corpus Scale -->
+  <rect x="604" y="390" width="556" height="106" rx="12" fill="#161b22" stroke="#30363d" stroke-width="1.2"/>
+  <text x="620" y="412" fill="#e6edf3" font-family="'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans CJK KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="700">종료 코드 규약 &amp; 검증 규모</text>
+  <rect x="1044" y="397" width="100" height="20" rx="10" fill="#21262d" stroke="#30363d"/>
+  <text x="1094" y="411" text-anchor="middle" fill="#8b949e" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace" font-size="10" font-weight="600">process exit</text>
+
+  <g font-family="'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans CJK KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="10.5">
+    <!-- 0 -->
+    <rect x="620" y="425" width="168" height="26" rx="6" fill="#0d1117" stroke="#238636"/>
+    <rect x="624" y="429" width="22" height="18" rx="4" fill="#2ea043" fill-opacity="0.22"/>
+    <text x="635" y="442" text-anchor="middle" fill="#3fb950" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace" font-size="11" font-weight="700">0</text>
+    <text x="654" y="442" fill="#e6edf3" font-weight="600">정상 조회 · 수집 완료</text>
+
+    <!-- 2 -->
+    <rect x="796" y="425" width="168" height="26" rx="6" fill="#0d1117" stroke="#da3633"/>
+    <rect x="800" y="429" width="22" height="18" rx="4" fill="#f85149" fill-opacity="0.20"/>
+    <text x="811" y="442" text-anchor="middle" fill="#f85149" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace" font-size="11" font-weight="700">2</text>
+    <text x="830" y="442" fill="#e6edf3">인자 · 운영/수집 오류</text>
+
+    <!-- 3 -->
+    <rect x="972" y="425" width="172" height="26" rx="6" fill="#0d1117" stroke="#9e6a03"/>
+    <rect x="976" y="429" width="22" height="18" rx="4" fill="#bb8009" fill-opacity="0.22"/>
+    <text x="987" y="442" text-anchor="middle" fill="#e3b341" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace" font-size="11" font-weight="700">3</text>
+    <text x="1006" y="442" fill="#e6edf3">모호한 TC 후보 반환</text>
+  </g>
+
+  <rect x="620" y="458" width="524" height="26" rx="6" fill="#0d1117" stroke="#21262d"/>
+  <text x="882" y="475" text-anchor="middle" fill="#8b949e" font-family="'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans CJK KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="10.5">확장 검증: <tspan fill="#e6edf3" font-weight="600">368</tspan>개 런 · <tspan fill="#e6edf3" font-weight="600">7,327</tspan>개 스냅샷 · <tspan fill="#58a6ff" font-weight="600">2,518,123</tspan>건 명시적 결과 · Python 3.12+</text>
+</svg>
