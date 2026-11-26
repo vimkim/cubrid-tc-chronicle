@@ -8,12 +8,22 @@ default:
 setup *args:
     uv sync --locked "$@"
 
-# Reinstall the user-level cubrid-tcc command from the primary main checkout (daily-update).
+# Install the user-level cubrid-tcc CLI and AI agent skill from the primary main checkout.
+install: sync
+
+# Reinstall the user-level cubrid-tcc command and skill from the primary main checkout (daily-update).
 sync:
     @test -d .git || { echo "Run just sync from the primary checkout, not a task worktree." >&2; exit 1; }
     @test "$(git branch --show-current)" = main || { echo "Run just sync from main." >&2; exit 1; }
     uv tool install --reinstall .
     @"$(uv tool dir --bin)/cubrid-tcc" --version
+    "{{just_executable()}}" install-skills
+
+# Install the bundled cubrid-tcc skill for Codex, Claude Code, and generic agents.
+install-skills:
+    install -Dm644 skills/cubrid-tcc/SKILL.md "$HOME/.agents/skills/cubrid-tcc/SKILL.md"
+    install -Dm644 skills/cubrid-tcc/SKILL.md "${CODEX_HOME:-$HOME/.codex}/skills/cubrid-tcc/SKILL.md"
+    install -Dm644 skills/cubrid-tcc/SKILL.md "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/skills/cubrid-tcc/SKILL.md"
 
 # Run any CLI command, including global options such as --data-dir.
 cubrid-tcc +args:

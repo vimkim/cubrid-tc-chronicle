@@ -105,8 +105,8 @@ just sync-data --pr-metadata-only
 # 1. 개발/실행 환경 구성
 just setup
 
-# 2. 사용자 PATH에 cubrid-tcc 설치 (반드시 기본 main 체크아웃에서 실행)
-just sync
+# 2. 사용자 PATH에 cubrid-tcc CLI 및 AI 에이전트 스킬 설치 (반드시 기본 main 체크아웃에서 실행)
+just install   # `just sync`의 별칭; 스킬만 갱신할 때는 `just install-skills`
 
 # 3. 특정 CI 런 1건 수집 (GitHub + 사내 결과 저장소 접근)
 just sync-data --run 38868725373
@@ -120,7 +120,7 @@ just explain --run 38868725373 --suite sql \
   --case sql/_36_guava/cbrd_27461/cases/cbrd_27461.sql
 ```
 
-- `just sync`는 `main` 브랜치의 기본 체크아웃에서 `uv tool install --reinstall .`를 실행해 어느 디렉토리에서나 `cubrid-tcc`를 바로 호출할 수 있게 설치합니다.
+- `just install`(`just sync` 별칭)은 `main` 브랜치의 기본 체크아웃에서 `uv tool install --reinstall .`와 `just install-skills`를 함께 실행해 `cubrid-tcc` CLI와 동봉된 AI 에이전트 스킬([`skills/cubrid-tcc/SKILL.md`](skills/cubrid-tcc/SKILL.md) → `~/.agents/skills`, `~/.codex/skills`, `~/.claude/skills`)을 한 번에 설치합니다. 스킬 파일만 다시 설치하려면 `just install-skills`를 실행하세요.
 - 과거 `tcc` 실행 파일은 **`cubrid-tcc`로 대체**되었으며 별도 `tcc` 별칭은 설치하지 않습니다. 기존 스크립트나 에이전트 지침에 `tcc` 또는 `just tcc`가 있다면 `cubrid-tcc`, `just cubrid-tcc`로 바꾸세요. (로컬 인덱스, `TCC_DATA_DIR`, `TCC_STORE_URL` 설정은 그대로 유지됩니다.)
 - `daily-update` 연동 환경에서는 clean `main` 체크아웃을 자동 pull한 뒤 `just sync`를 갱신합니다. (데이터 수집 `sync-data`는 별도 실행입니다.)
 - 레거시 `cubrid-tcc sync` 서브커맨드는 `sync-data`의 하위 호환 별칭으로 남아 있으며 stderr에 마이그레이션 안내를 출력합니다.
