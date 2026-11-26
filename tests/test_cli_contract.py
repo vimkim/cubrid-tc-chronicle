@@ -1,14 +1,16 @@
 import contextlib
 import io
 import json
+import os
 import tempfile
 import unittest
 from datetime import UTC, datetime
 from pathlib import Path
+from unittest.mock import patch
 
 from test_chronicle import CASE, run_metadata, sample
 
-from chronicle.cli import main
+from chronicle.cli import _default_store_url, main
 from chronicle.parsing import parse
 from chronicle.query import Queries, StatusQuery
 from chronicle.storage import Index
@@ -66,6 +68,34 @@ class SuiteTests(Fixture):
         code, out, err = self.cli("sync-data", "--run", "1", "--suite", "sql_by_cci")
         self.assertEqual((code, out), (2, ""))
         self.assertIn("not collected", err)
+
+    def test_sync_requires_store_url_and_reads_sync_env(self):
+        with (
+            tempfile.TemporaryDirectory() as cfg,
+            tempfile.TemporaryDirectory() as data_dir,
+        ):
+            with patch.dict(os.environ, {"XDG_CONFIG_HOME": cfg}, clear=False):
+                os.environ.pop("TCC_STORE_URL", None)
+                self.assertIsNone(_default_store_url())
+                code, out, err = main_with(Path(data_dir), "sync-data", "--run", "1", "--json")
+                self.assertEqual((code, err), (2, ""))
+                report = json.loads(out)
+                self.assertEqual(report["error"], "operational_error")
+                self.assertIn("TCC_STORE_URL", report["message"])
+
+                env_dir = Path(cfg) / "cubrid-tc-chronicle"
+                env_dir.mkdir(parents=True)
+                (env_dir / "sync.env").write_text(
+                    "# comment\nTCC_STORE_URL='https://store.example.test/'\n", encoding="utf-8"
+                )
+                self.assertEqual(_default_store_url(), "https://store.example.test/")
+
+            with patch.dict(
+                os.environ,
+                {"XDG_CONFIG_HOME": cfg, "TCC_STORE_URL": "https://override.example.test"},
+                clear=False,
+            ):
+                self.assertEqual(_default_store_url(), "https://override.example.test")
 
 
 class JsonContractTests(Fixture):

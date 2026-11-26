@@ -199,7 +199,7 @@ class Collector:
             raise ValueError("invalid GitHub repository")
         self.index = index
         self.github = github or GitHub()
-        self.store = store or ResultStore("http://192.168.1.48:30080")
+        self.store = store
         self.repository = repository
         self.suites = tuple(suites)
         self.progress = progress or (lambda _: None)
@@ -448,6 +448,11 @@ class Collector:
         ).fetchall()
 
     def sync(self, *, run_ids=(), since=None, until=None, revisit_limit=20, missing=False):
+        if self.store is None:
+            raise CollectionError(
+                "result store URL is required; pass --store, set TCC_STORE_URL, "
+                "or configure TCC_STORE_URL in ~/.config/cubrid-tc-chronicle/sync.env"
+            )
         self._reset_pr_requests()
         if until is not None and since is None:
             raise ValueError("--until requires --since")

@@ -51,7 +51,7 @@ cubrid-tcc coverage --suite sql --since 2026-10-16 --until 2026-10-17 --json
 
 ## Syncing runs (`sync-data`)
 
-`sync-data` reads GitHub (`gh` auth) and the internal result store (`$TCC_STORE_URL`):
+`sync-data` reads GitHub (`gh` auth) and the internal result store (`--store`, `$TCC_STORE_URL`, or `~/.config/cubrid-tc-chronicle/sync.env`):
 
 ```bash
 # Index one specific run and suite without revisiting queued runs (~13-40s)

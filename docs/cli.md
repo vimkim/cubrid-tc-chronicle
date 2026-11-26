@@ -27,8 +27,9 @@ The `--json` option works before or after the command.
 
 ## Install and update
 
-Run `just sync` from the primary checkout on `main`. It reinstalls `cubrid-tcc` with
-`uv tool install --editable . --reinstall` and checks the installed version.
+Run `just install` (alias for `just sync`) from the primary checkout on `main`. It reinstalls
+`cubrid-tcc` with `uv tool install --reinstall .`, checks the installed version, and runs
+`just install-skills` to install the bundled `cubrid-tcc` agent skill.
 The command then works from any directory. `just setup` installs the locked development environment.
 
 The executable is named `cubrid-tcc` (CUBRID Testcases Chronicle). Reinstalling removes the
@@ -165,7 +166,7 @@ Every `--suite` accepts `sql`, `medium`, `shell`, and the CI job names `test_sql
 
 ## Collection
 
-Run commands from the project checkout after `uv sync --locked`. GitHub reads use the existing `gh` authentication. The default internal result store is `http://192.168.1.48:30080`.
+Run commands from the project checkout after `uv sync --locked`. GitHub reads use the existing `gh` authentication. Configure the internal result store URL via `TCC_STORE_URL`, `~/.config/cubrid-tc-chronicle/sync.env`, or `sync-data --store URL`.
 
 ```sh
 uv run cubrid-tcc sync-data --run 38868725373

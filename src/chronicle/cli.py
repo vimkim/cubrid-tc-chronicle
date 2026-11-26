@@ -33,6 +33,31 @@ def default_data_dir():
     )
 
 
+def _default_store_url() -> str | None:
+    if value := os.environ.get("TCC_STORE_URL"):
+        return value
+    env_file = (
+        Path(os.environ.get("XDG_CONFIG_HOME") or Path.home() / ".config")
+        / "cubrid-tc-chronicle"
+        / "sync.env"
+    )
+    if not env_file.is_file():
+        return None
+    for raw in env_file.read_text(encoding="utf-8").splitlines():
+        line = raw.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, val = line.split("=", 1)
+        if key.strip() != "TCC_STORE_URL":
+            continue
+        val = val.strip()
+        if len(val) >= 2 and val[0] == val[-1] and val[0] in ('"', "'"):
+            val = val[1:-1]
+        if val:
+            return val
+    return None
+
+
 class UsageError(Exception):
     pass
 
@@ -168,8 +193,11 @@ For agents:
     )
     sync.add_argument(
         "--store",
-        default=os.environ.get("TCC_STORE_URL", "http://192.168.1.48:30080"),
-        help="Result store URL (default: TCC_STORE_URL or http://192.168.1.48:30080)",
+        default=None,
+        help=(
+            "Result store URL (default: TCC_STORE_URL env or "
+            "~/.config/cubrid-tc-chronicle/sync.env)"
+        ),
     )
     sync.add_argument(
         "--request-budget", type=int, default=2000, help="Maximum GitHub requests (default: 2000)"
@@ -688,10 +716,11 @@ def main(argv=None):
                 ):
                     args.since = (datetime.now(UTC) - timedelta(days=1)).isoformat()
                     args.until = datetime.now(UTC).isoformat()
+                store_url = args.store or _default_store_url()
                 collector = Collector(
                     index,
                     GitHub(args.request_budget),
-                    ResultStore(args.store),
+                    ResultStore(store_url) if store_url else None,
                     repository=args.repository,
                     suites=args.suite or SUITES,
                     progress=lambda message: print(message, file=sys.stderr),
