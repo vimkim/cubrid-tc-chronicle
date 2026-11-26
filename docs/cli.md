@@ -153,7 +153,7 @@ Every `--suite` accepts `sql`, `medium`, `shell`, and the CI job names `test_sql
 
 ### Why nothing came back
 
-`status` and `history` carry `not_indexed_reason` and `suite_last_sync` (the latest snapshot time of the suite, or of all suites when none is selected). `not_indexed_reason` is `null` when the testcase has observations in scope. Otherwise:
+`status` and `history` carry `not_indexed_reason`, `suite_last_sync`, and `suite_last_checked`. `suite_last_sync` is the newest recorded job completion time of an indexed execution in the suite, or in all suites when none is selected. `suite_last_checked` is the latest time a sync saw any of those snapshots. A revisit of an old run advances `suite_last_checked` only, so a `suite_last_sync` far behind it shows that recent runs are not being imported. `not_indexed_reason` is `null` when the testcase has observations in scope. Otherwise:
 
 | Code | Meaning |
 |---|---|
@@ -270,7 +270,7 @@ The database uses SQLite WAL. One process holds the writer lock. Queries use rea
 
 ### Query columns and migration
 
-Queries read run and discovery facts from columns, not from the GitHub JSON: `run_summary` (created and updated time, status, attempt, PR association), `run_shard` (the `shard SUITE N` jobs of each run), `discovery_run` (the runs each complete discovery listed), and `discovery_indexed` (which discoveries are filled). The `layout` row in `meta` records version 2. `schema_version` stays 1, so Chronicle builds without these columns still open the index and keep working.
+Queries read run and discovery facts from columns, not from the GitHub JSON: `run_summary` (created and updated time, status, attempt, PR association), `run_shard` (the `shard SUITE N` jobs of each run, also named `SUITE / shard SUITE N` since 2026-11-17), `discovery_run` (the runs each complete discovery listed), and `discovery_indexed` (which discoveries are filled). The `layout` row in `meta` records version 4; upgrading to layout 4 rebuilds `run_summary` and `run_shard` from the retained run JSON. `schema_version` stays 1, so Chronicle builds without these columns still open the index and keep working.
 
 An index from an older build moves to this layout with one writing step that runs once:
 

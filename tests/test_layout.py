@@ -10,7 +10,7 @@ from test_chronicle import CASE, run_metadata, sample
 from chronicle.cli import main
 from chronicle.parsing import parse
 from chronicle.query import HistoryQuery, Queries
-from chronicle.storage import Index
+from chronicle.storage import LAYOUT_VERSION, Index
 
 LAYOUT_TABLES = ("run_summary", "run_shard", "discovery_run", "discovery_indexed", "run_queue")
 
@@ -69,7 +69,25 @@ class LayoutTests(Fixture):
             [("shell", "2"), ("shell", "9")],
         )
         self.assertEqual(db.execute("SELECT count(*) FROM discovery_run").fetchone()[0], 4)
-        self.assertEqual(db.execute("SELECT value FROM meta WHERE key='layout'").fetchone()[0], "3")
+        self.assertEqual(
+            db.execute("SELECT value FROM meta WHERE key='layout'").fetchone()[0],
+            str(LAYOUT_VERSION),
+        )
+
+    def test_layout_4_rebuilds_shards_missed_by_layout_3(self):
+        db = self.index.db
+        run = json.loads(db.execute("SELECT metadata FROM run WHERE run_id=1").fetchone()[0])
+        run["jobs"].append({"name": "sql / shard sql 07", "conclusion": "failure"})
+        db.execute("UPDATE run SET metadata=? WHERE run_id=1", (json.dumps(run),))
+        db.execute("UPDATE meta SET value='3' WHERE key='layout'")
+        db.commit()
+        result = self.index.migrate()
+        self.assertEqual((result["migrated"], result["runs"]), (True, 3))
+        self.assertIn(
+            ("sql", "07", "failure"),
+            [tuple(r) for r in db.execute("SELECT suite,shard,conclusion FROM run_shard")],
+        )
+        self.assertFalse(self.index.migrate()["migrated"])
 
     def test_old_index_answers_identically_before_and_after_migrate(self):
         current = self.reports()

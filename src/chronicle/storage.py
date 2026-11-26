@@ -12,14 +12,14 @@ from dataclasses import asdict
 from datetime import UTC, datetime
 from pathlib import Path
 
-from .models import Bundle, ParsedExecution, testcase_repository
+from .models import Bundle, ParsedExecution, shard_job, testcase_repository
 from .parsing import parse
 from .provenance import run_pull_request
 
 # schema_version stays 1: the layout tables below are additive, so Chronicle
 # builds that predate them keep opening a migrated index.
 SCHEMA_VERSION = 1
-LAYOUT_VERSION = 3
+LAYOUT_VERSION = 4
 
 
 def now() -> str:
@@ -148,9 +148,9 @@ def summarize_run(metadata: dict) -> tuple[dict, list[tuple]]:
     """Reduce one run's GitHub metadata to what queries read."""
     shards = []
     for job in metadata.get("jobs", []):
-        parts = job["name"].split()
-        if len(parts) == 3 and parts[0] == "shard":
-            shards.append((parts[1], parts[2], job.get("conclusion")))
+        parsed = shard_job(job["name"])
+        if parsed:
+            shards.append((*parsed, job.get("conclusion")))
     pull_request = run_pull_request(metadata)
     summary = {
         "created_at": metadata.get("created_at"),
@@ -232,8 +232,9 @@ class Index:
         and never see a partial backfill, because it commits as one transaction.
         """
         row = self.db.execute("SELECT value FROM meta WHERE key='layout'").fetchone()
-        # Layout 2 already holds the summaries; layout 3 only adds run_queue.
-        had_summaries = bool(row and int(row[0]) >= 2)
+        # Layout 3 only added run_queue. Layout 4 rebuilds the summaries, because
+        # earlier layouts missed the reusable-workflow "SUITE / shard SUITE NN" jobs.
+        had_summaries = bool(row and int(row[0]) >= 4)
         if row and int(row[0]) >= LAYOUT_VERSION and self._layout_ready():
             self.layout = True
             return {"migrated": False, "layout": int(row[0])}

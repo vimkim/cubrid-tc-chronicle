@@ -125,7 +125,8 @@ class MissingRunTests(unittest.TestCase):
         self.index.db.execute("UPDATE meta SET value='2' WHERE key='layout'")
         self.index.db.commit()
         result = self.index.migrate()
-        self.assertEqual((result["migrated"], result["queued_runs"], result["runs"]), (True, 3, 0))
+        # Layout 4 also rebuilds the summaries of the one imported run.
+        self.assertEqual((result["migrated"], result["queued_runs"], result["runs"]), (True, 3, 1))
         self.assertEqual(self.queue(), [1, 3, 4])
         self.assertFalse(self.index.migrate()["migrated"])
 

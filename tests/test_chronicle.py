@@ -10,10 +10,18 @@ import unittest
 from collections import Counter
 from pathlib import Path
 from unittest.mock import patch
+from urllib.parse import parse_qs, urlsplit
 
 from chronicle.cli import main, read_bundle
-from chronicle.collection import CollectionError, Collector, GitHub, RequestLimitError, timestamp
-from chronicle.models import PARSER_VERSION, Bundle, Observation
+from chronicle.collection import (
+    CollectionError,
+    Collector,
+    GitHub,
+    RequestLimitError,
+    ServerError,
+    timestamp,
+)
+from chronicle.models import PARSER_VERSION, SHELL_JUNIT, Bundle, Observation, shard_job
 from chronicle.parsing import canonical_path, parse
 from chronicle.query import AmbiguousIdentity, HistoryQuery, Queries
 from chronicle.storage import Index
@@ -117,6 +125,58 @@ class ParsingTests(unittest.TestCase):
             result = parse(read_bundle(FIXTURES / name / "bundle.json"))
             self.assertEqual(Counter(o.outcome for o in result.observations), counts)
             self.assertTrue(result.complete, result.diagnostics)
+
+    def test_renamed_shell_junit_is_parsed_like_the_old_name(self):
+        bundle = read_bundle(FIXTURES / "shell-failure-sanitized/bundle.json")
+        bundle.files[SHELL_JUNIT[0]] = bundle.files.pop("test-results/test-shell.xml")
+        result = parse(bundle)
+        self.assertEqual(
+            Counter(o.outcome for o in result.observations), {"PASS": 1, "FAIL": 1, "SKIP": 1}
+        )
+        self.assertTrue(result.complete, result.diagnostics)
+        self.assertEqual({o.evidence for o in result.observations}, {SHELL_JUNIT[0]})
+
+    def test_two_shell_junit_names_are_a_provenance_conflict(self):
+        bundle = read_bundle(FIXTURES / "shell-failure-sanitized/bundle.json")
+        bundle.files[SHELL_JUNIT[0]] = bundle.files["test-results/test-shell.xml"]
+        result = parse(bundle)
+        self.assertIn("provenance_conflict", {d.reason for d in result.diagnostics})
+        self.assertEqual(len(result.observations), 3)
+
+    def test_shard_done_accepts_test_rc_and_ctp_rc(self):
+        for record, complete in [
+            ("ctp_rc=0", True),
+            ("test_rc=0", True),
+            ("test_rc=0\nctp_rc=0", True),
+            ("test_rc=1", False),
+            ("ctp_rc=1", False),
+            ("test_rc=0\nctp_rc=1", False),
+            ("", False),
+        ]:
+            with self.subTest(record=record):
+                bundle = sample()
+                bundle.files["shard.done"] = f"suite=sql\nidx=00\nassigned=1\n{record}\n".encode()
+                result = parse(bundle)
+                self.assertEqual(result.complete, complete, result.diagnostics)
+                self.assertEqual(
+                    "runner_error" in {d.reason for d in result.diagnostics}, not complete
+                )
+
+    def test_shard_job_names_from_both_workflow_layouts(self):
+        for name, expected in [
+            ("shard sql 09", ("sql", "09")),
+            ("sql / shard sql 09", ("sql", "09")),
+            ("shell / shard shell 35", ("shell", "35")),
+            ("medium / shard medium 00", ("medium", "00")),
+            ("sql_by_cci / shard sql_by_cci 00", ("sql_by_cci", "00")),
+            ("sql / shard shell 09", None),
+            ("plan", None),
+            ("build (debug)", None),
+            ("shard sql", None),
+            ("x / y / shard sql 09", None),
+        ]:
+            with self.subTest(name=name):
+                self.assertEqual(shard_job(name), expected)
 
     def test_fixture_checksums(self):
         manifest = json.loads((FIXTURES / "provenance.json").read_text())
@@ -618,7 +678,7 @@ class ReplayStore:
         if name == "failed.list":
             return (
                 ("00\t" + CASE + "\n").encode()
-                if b":nok" in self.bundle.files["summary_info"]
+                if b":nok" in self.bundle.files.get("summary_info", b"")
                 else b""
             ), None
         return (
@@ -735,6 +795,102 @@ class CollectorTests(unittest.TestCase):
         with patch("chronicle.collection.subprocess.run", return_value=response):
             with self.assertRaisesRegex(RequestLimitError, "Retry-After 120"):
                 GitHub().get("repos/CUBRID/cubrid")
+
+    def test_reusable_workflow_job_names_are_collected(self):
+        with (
+            tempfile.TemporaryDirectory() as directory,
+            Index(Path(directory), writable=True) as index,
+        ):
+            jobs = [
+                {
+                    "name": "sql / shard sql 00",
+                    "run_attempt": 1,
+                    "id": 10,
+                    "status": "completed",
+                    "conclusion": "failure",
+                    "completed_at": "2026-11-25T12:00:00Z",
+                },
+                {"name": "plan", "run_attempt": 1, "id": 1, "conclusion": "success"},
+            ]
+            collector = Collector(
+                index, ReplayGitHub(run_metadata(1), jobs), ReplayStore(sample()), suites=("sql",)
+            )
+            result = collector.sync(run_ids=[1], revisit_limit=0)
+            self.assertEqual((result["inserted_snapshots"], result["observations"]), (1, 1))
+            target = Queries(index).history(HistoryQuery(CASE))["target"]
+            self.assertEqual(target["completed_at"], "2026-11-25T12:00:00Z")
+            self.assertEqual(
+                [tuple(r) for r in index.db.execute("SELECT suite,shard FROM run_shard")],
+                [("sql", "00")],
+            )
+            self.assertIsNone(
+                index.db.execute(
+                    "SELECT reason FROM availability WHERE location='suite'"
+                ).fetchone()
+            )
+
+    def test_renamed_shell_junit_is_collected_without_a_gap(self):
+        bundle = read_bundle(FIXTURES / "shell-failure-sanitized/bundle.json")
+        bundle.files[SHELL_JUNIT[0]] = bundle.files.pop("test-results/test-shell.xml")
+        jobs = [
+            {
+                "name": "shell / shard shell 00",
+                "run_attempt": 1,
+                "id": 10,
+                "status": "completed",
+                "conclusion": "failure",
+                "completed_at": "2026-11-25T12:00:00Z",
+            }
+        ]
+        with (
+            tempfile.TemporaryDirectory() as directory,
+            Index(Path(directory), writable=True) as index,
+        ):
+            collector = Collector(
+                index, ReplayGitHub(run_metadata(1), jobs), ReplayStore(bundle), suites=("shell",)
+            )
+            result = collector.sync(run_ids=[1], revisit_limit=0)
+            self.assertEqual(result["observations"], 3)
+            locations = {
+                r[0] for r in index.db.execute("SELECT location FROM availability WHERE run_id=1")
+            }
+            self.assertNotIn("shard/00/test-results/test-shell.xml", locations)
+            self.assertNotIn("shard/00/" + SHELL_JUNIT[0], locations)
+
+    def test_job_pages_shrink_after_a_server_error(self):
+        jobs = [{"id": i} for i in range(60)]
+
+        def get(endpoint):
+            query = parse_qs(urlsplit(endpoint).query)
+            size, page = int(query["per_page"][0]), int(query["page"][0])
+            if size == 100:
+                raise ServerError("GitHub request failed (HTTP 502)")
+            return {"total_count": 60, "jobs": jobs[(page - 1) * size : page * size]}
+
+        github = GitHub()
+        with patch.object(github, "get", side_effect=get) as mocked:
+            self.assertEqual(github.pages("runs/1/attempts/2/jobs", "jobs"), jobs)
+        self.assertEqual(mocked.call_count, 3)
+
+        with patch.object(github, "get", side_effect=ServerError("HTTP 502")) as mocked:
+            with self.assertRaises(ServerError):
+                github.pages("runs/1/attempts/2/jobs", "jobs")
+        self.assertEqual(
+            [parse_qs(urlsplit(c.args[0]).query)["per_page"] for c in mocked.call_args_list],
+            [["100"], ["50"], ["25"]],
+        )
+
+    def test_server_errors_are_distinct_from_other_failures(self):
+        def response(stderr):
+            return type("Response", (), {"returncode": 1, "stderr": stderr, "stdout": b""})()
+
+        with patch("chronicle.collection.subprocess.run", return_value=response(b"gh: HTTP 502")):
+            with self.assertRaises(ServerError):
+                GitHub().get("repos/CUBRID/cubrid")
+        with patch("chronicle.collection.subprocess.run", return_value=response(b"gh: HTTP 404")):
+            with self.assertRaises(CollectionError) as caught:
+                GitHub().get("repos/CUBRID/cubrid")
+            self.assertNotIsInstance(caught.exception, ServerError)
 
     def test_duplicate_page_ids_cannot_establish_complete_discovery(self):
         with patch.object(

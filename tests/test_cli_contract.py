@@ -137,6 +137,16 @@ class AbsenceTests(Fixture):
         self.assertEqual(report["not_indexed_reason"], "observed_outside_window")
         self.assertTrue(report["suite_last_sync"])
 
+    def test_suite_last_sync_is_the_newest_completion_not_the_last_revisit(self):
+        self.ingest()
+        self.index.db.execute(
+            "UPDATE execution SET completed_at='2026-10-01T00:00:00Z',"
+            "last_seen='2026-11-26T00:00:00Z'"
+        )
+        report = self.status("never_seen.sql", suite="sql")
+        self.assertEqual(report["suite_last_sync"], "2026-10-01T00:00:00Z")
+        self.assertEqual(report["suite_last_checked"], "2026-11-26T00:00:00Z")
+
     def test_history_reports_the_reason_too(self):
         from chronicle.query import HistoryQuery
 

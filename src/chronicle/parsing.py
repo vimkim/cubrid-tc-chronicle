@@ -10,7 +10,15 @@ import xml.etree.ElementTree as ET
 from collections import Counter
 from pathlib import PurePosixPath
 
-from .models import SUITES, Bundle, Diagnostic, Observation, ParsedExecution, testcase_repository
+from .models import (
+    SHELL_JUNIT,
+    SUITES,
+    Bundle,
+    Diagnostic,
+    Observation,
+    ParsedExecution,
+    testcase_repository,
+)
 
 _LEAF = re.compile(r"^(.+):([^\s:]+)\s+([0-9]+)ms$")
 _SHA = re.compile(r"[0-9a-fA-F]{40}\Z")
@@ -125,8 +133,10 @@ def parse(bundle: Bundle) -> ParsedExecution:
         problem("incomplete_shard", "shard.done is absent or invalid")
     elif done.get("suite") != bundle.suite or done.get("idx") != bundle.shard:
         problem("provenance_conflict", "shard.done identifies another suite or shard")
-    if done.get("ctp_rc") != "0":
-        problem("runner_error", "CTP did not report successful completion")
+    # The runner wrote ctp_rc until 2026-10-18 and test_rc afterwards.
+    codes = [done[key] for key in ("test_rc", "ctp_rc") if key in done]
+    if not codes or any(code != "0" for code in codes):
+        problem("runner_error", "the test runner did not report successful completion")
 
     if bundle.suite in ("sql", "medium"):
         evidence = "summary_info"
@@ -171,7 +181,10 @@ def parse(bundle: Bundle) -> ParsedExecution:
             if not roots:
                 problem("counts_unavailable", "summary suite-root counters are absent")
     else:
-        evidence = "test-results/test-shell.xml"
+        present = [name for name in SHELL_JUNIT if name in bundle.files]
+        if len(present) > 1:
+            problem("provenance_conflict", "several shell JUnit result files are retained")
+        evidence = present[0] if present else SHELL_JUNIT[0]
         xml = bundle.files.get(evidence)
         if xml is None:
             problem("results_unavailable", "shell JUnit XML is absent")

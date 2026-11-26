@@ -631,12 +631,16 @@ class Queries:
         return occurrences, sorted(unresolved_filters)
 
     def absence(self, identity, suite, coverage, windowed):
-        """Say why a testcase has no observations in scope, and when the suite was last synced."""
-        last_seen = self.db.execute(
-            "SELECT max(last_seen) FROM execution "
+        """Say why a testcase has no observations in scope, and how fresh the suite's evidence is.
+
+        suite_last_sync is the newest recorded execution completion. A revisit of an
+        old run refreshes last_seen, so last_seen alone would hide a collection gap.
+        """
+        last_completed, last_checked = self.db.execute(
+            "SELECT max(completed_at),max(last_seen) FROM execution "
             "WHERE active=1 AND repository=? AND (? IS NULL OR suite=?)",
             (self.repository, suite, suite),
-        ).fetchone()[0]
+        ).fetchone()
         if coverage["complete_results"] == 0 and coverage["partial_results"] > 0:
             # Failure lists record no passes, so absence only means "did not fail".
             reason = "suite_failures_only"
@@ -646,7 +650,11 @@ class Queries:
             reason = "observed_outside_window"
         else:
             reason = None
-        return {"not_indexed_reason": reason, "suite_last_sync": last_seen}
+        return {
+            "not_indexed_reason": reason,
+            "suite_last_sync": last_completed,
+            "suite_last_checked": last_checked,
+        }
 
     def history(self, query: HistoryQuery):
         if query.coverage not in COVERAGE_FORMS:
@@ -679,6 +687,7 @@ class Queries:
             "suggested_sync": None,
             "not_indexed_reason": None,
             "suite_last_sync": None,
+            "suite_last_checked": None,
         }
         if query.run_id is not None:
             run_suite = query.suite or (identity or {}).get("suite")
@@ -848,7 +857,7 @@ class Queries:
         if identity is None:
             summary["status"] = "NOT_INDEXED"
             summary["reasons"] = ["not_indexed"]
-        absence = {"not_indexed_reason": None, "suite_last_sync": None}
+        absence = {"not_indexed_reason": None, "suite_last_sync": None, "suite_last_checked": None}
         if identity is None or not occurrences:
             unfiltered = not (query.branch or query.engine_sha or query.pr or query.variant)
             absence = self.absence(identity, suite, coverage, unfiltered)

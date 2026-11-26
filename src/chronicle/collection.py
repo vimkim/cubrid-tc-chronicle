@@ -9,7 +9,7 @@ import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime, timedelta
 
-from .models import SUITES, Bundle
+from .models import SHELL_JUNIT, SUITES, Bundle, shard_job
 from .parsing import parse
 from .provenance import run_pull_request
 from .storage import Index, encode, now
@@ -23,6 +23,10 @@ class CollectionError(Exception):
 
 class RequestLimitError(CollectionError):
     pass
+
+
+class ServerError(CollectionError):
+    """GitHub answered with a 5xx status."""
 
 
 def timestamp(value: str, *, end: bool = False) -> str:
@@ -70,9 +74,8 @@ class GitHub:
                 raise RequestLimitError(
                     f"GitHub rate limit reached{delay}; synchronization stopped"
                 )
-            raise CollectionError(
-                f"GitHub request failed (HTTP {status}); retry later or check access"
-            )
+            error = ServerError if status.startswith("5") else CollectionError
+            raise error(f"GitHub request failed (HTTP {status}); retry later or check access")
         try:
             _, body = re.split(rb"\r?\n\r?\n", process.stdout, maxsplit=1)
             return json.loads(body)
@@ -80,14 +83,27 @@ class GitHub:
             raise CollectionError("GitHub returned invalid JSON") from e
 
     def pages(self, endpoint, key):
+        # GitHub answers some job listings with a persistent HTTP 502 at 100 per
+        # page (seen on CUBRID rerun attempts since 2026-11), while smaller pages
+        # succeed. Restart the listing with smaller pages so offsets stay aligned.
+        size = 100
+        while True:
+            try:
+                return self._pages(endpoint, key, size)
+            except ServerError:
+                if size <= 25:
+                    raise
+                size //= 2
+
+    def _pages(self, endpoint, key, size):
         result = []
         separator = "&" if "?" in endpoint else "?"
         page = 1
         while True:
-            body = self.get(f"{endpoint}{separator}per_page=100&page={page}")
+            body = self.get(f"{endpoint}{separator}per_page={size}&page={page}")
             items = body[key]
             result.extend(items)
-            if len(items) < 100:
+            if len(items) < size:
                 if len(result) < body.get("total_count", 0):
                     raise CollectionError("GitHub pagination ended before total_count")
                 if len({item["id"] for item in result}) != len(result):
@@ -296,7 +312,7 @@ class Collector:
         run_digest = self.index.record_run(run, timestamp((datetime.now(UTC) + delay).isoformat()))
         receipts = []
         for suite in self.suites:
-            suite_jobs = [j for j in jobs if re.fullmatch(rf"shard {suite} [0-9]+", j["name"])]
+            suite_jobs = [j for j in jobs if (shard_job(j["name"]) or ("",))[0] == suite]
             if not suite_jobs:
                 # Failed gates/plan jobs cannot establish that a suite was never selected.
                 plan_jobs = [j for j in jobs if j["name"] == "plan"]
@@ -338,14 +354,12 @@ class Collector:
                     self.repository, run_id, suite, "plan/plan.tsv", "parse_unsupported"
                 )
                 planned = {}
-            job_shards = {j["name"].rsplit(" ", 1)[1] for j in suite_jobs}
+            job_shards = {shard_job(j["name"])[1] for j in suite_jobs}
             shards = sorted(set(planned) | job_shards)
             for shard in shards:
                 names = ["build.read", "tc.read", "shard.done"]
                 names += (
-                    ["test_status.data", "test-results/test-shell.xml"]
-                    if suite == "shell"
-                    else ["summary_info"]
+                    ["test_status.data", *SHELL_JUNIT] if suite == "shell" else ["summary_info"]
                 )
                 paths = [f"shard/{shard}/{n}" for n in names]
                 paths.append(f"plan/shards/{shard}.list")
@@ -364,7 +378,16 @@ class Collector:
                     )
                 stable = all(a == b for a, b in zip(fetched[:-1], checked, strict=True))
                 files, sources = {}, {}
+                # One retained JUnit name is enough. The other name is not a gap.
+                junit = {f"shard/{shard}/{n}" for n in SHELL_JUNIT}
+                has_junit = any(
+                    data is not None
+                    for path, (data, _) in zip(paths, fetched, strict=True)
+                    if path in junit
+                )
                 for path, (data, reason) in zip(paths, fetched, strict=True):
+                    if has_junit and path in junit:
+                        reason = None
                     self.index.availability(self.repository, run_id, suite, path, reason)
                     if data is None:
                         continue
@@ -383,7 +406,7 @@ class Collector:
                 matching = [
                     j
                     for j in suite_jobs
-                    if j["name"] == f"shard {suite} {shard}" and j.get("conclusion") != "skipped"
+                    if shard_job(j["name"]) == (suite, shard) and j.get("conclusion") != "skipped"
                 ]
                 metadata = {
                     "repository": self.repository,

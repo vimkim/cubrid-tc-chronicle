@@ -81,3 +81,14 @@ A future CI manifest could remove this ambiguity. No CI change is necessary to b
 ## Remaining checks before implementation acceptance
 
 Inspect samples from failed shell and medium runs, successful runs, partial reruns, canceled shards, and older workflow generations. Measure accessible history and parser agreement with aggregate counts. CircleCI and QA-portal evidence require separate format and access investigations before those histories can be declared indexed.
+
+## Format changes after the inspection
+
+Checked on **2026-11-26** against runs such as `45615415274`. Chronicle accepts both the old and the new forms.
+
+| Since | Change |
+|---|---|
+| 2026-10-18 | `shard.done` reports `test_rc` instead of `ctp_rc`. A shard succeeds only when every reported code is `0`. |
+| about 2026-11-10 | Shell shards publish `test-results/linux_shell_64bit_optdebug.xml` instead of `test-results/test-shell.xml`. |
+| 2026-11-17 | Shard jobs come from a reusable workflow and are named `SUITE / shard SUITE NN`, for example `sql / shard sql 09`, instead of `shard SUITE NN`. |
+| 2026-11 | GitHub answers some rerun-attempt job listings with a persistent HTTP 502 at 100 jobs per page. Smaller pages succeed, so Chronicle retries the listing at 50, then 25, per page. |
